@@ -1,0 +1,105 @@
+/* src/components/PromptCard.css */
+.prompt-card {
+  background-color: var(--secondary-bg);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: var(--shadow-light);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  border: 1px solid transparent;
+  display: flex;
+  flex-direction: column;
+}
+
+.prompt-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-medium);
+  border-color: var(--accent-color-light);
+}
+
+.prompt-card.selected {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 15px rgba(0, 123, 255, 0.2);
+}
+
+.prompt-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.prompt-card h3 {
+  color: var(--text-color-primary);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.prompt-category-label {
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.prompt-category-label.general {
+  background-color: #e6f7ff;
+  color: #1890ff;
+  border: 1px solid #91d5ff;
+}
+
+.prompt-category-label.interaction {
+  background-color: #fffbe6;
+  color: #faad14;
+  border: 1px solid #ffe58f;
+}
+
+.prompt-card p {
+  font-size: 0.9rem;
+  color: var(--text-color-secondary);
+  line-height: 1.5;
+  margin: 0;
+  flex-grow: 1; /* Make description take up available space */
+}
+
+.prompt-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 15px;
+  color: var(--text-color-secondary);
+  font-size: 0.8rem;
+}
+
+.prompt-card-footer .author {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+}
+
+.prompt-card-footer .author-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  margin-right: 8px;
+  background-color: #eee;
+  /* 임시 아이콘 */
+  background-image: url('../assets/person.png');
+  background-size: contain;
+}
+
+.prompt-card-footer .date-info {
+  display: flex;
+  align-items: center;
+}
+
+.prompt-card-footer .date-icon {
+  width: 10px; /* 크기 조정 (기존 14px -> 10px) */
+  height: 10px; /* 크기 조정 */
+  margin-right: 6px;
+  opacity: 0.6;
+}

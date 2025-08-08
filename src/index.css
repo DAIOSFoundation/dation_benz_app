@@ -1,0 +1,8 @@
+/* src/index.css */
+/* Minimal global styles */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevent default scrollbars from app.container */
+}

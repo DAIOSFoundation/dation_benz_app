@@ -1,0 +1,115 @@
+/* src/components/TopHeader.css */
+.top-header {
+  background-color: var(--secondary-bg);
+  box-shadow: var(--shadow-light);
+  padding: 15px 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+  min-height: 70px;
+  z-index: 50;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.playground-text {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-color-primary);
+}
+
+.llm-select-box {
+  min-width: 220px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px; /* 아이콘과 버튼 사이 간격 */
+}
+
+/* 사용자 프로필 스타일 추가 */
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: var(--secondary-bg);
+  padding: 4px 12px;
+  border-radius: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.profile-image {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--border-color);
+}
+
+.username {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-color-primary);
+}
+
+
+.icon-button:hover {
+  opacity: 1;
+}
+
+.new-chat-button, 
+.save-chat-button {
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 0 16px; /* 상하 패딩은 높이로 제어하므로 좌우 패딩만 설정 */
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+  min-width: 110px;
+  text-align: center;
+  white-space: nowrap;
+
+  /* 추가: 높이를 명시적으로 고정하고 flex로 중앙 정렬 */
+  height: 34px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.new-chat-button:active, 
+.save-chat-button:active {
+  transform: scale(0.98);
+}
+
+/* 개별 버튼 색상 및 호버 효과 */
+.new-chat-button {
+  background-color: #454545;
+}
+.new-chat-button:hover {
+  background-color: #555;
+}
+
+.save-chat-button {
+  background-color: var(--accent-color-dark);
+}
+.save-chat-button:hover {
+  background-color: var(--accent-color);
+}
+
+/* 좌측 사이드바 토글 아이콘 회전 */
+.icon-button.rotate-open {
+  transform: rotate(0deg); /* 열린 상태에서는 기본 각도 */
+}
+
+.icon-button.rotate-closed {
+  transform: rotate(180deg); /* 닫힌 상태에서는 180도 회전 */
+}

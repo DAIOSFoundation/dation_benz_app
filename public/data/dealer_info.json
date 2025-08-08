@@ -1,0 +1,30 @@
+{
+  "tables": [
+    {
+      "table_name": "Contacts",
+      "purpose": "벤츠 한국 딜러사의 주요 의사결정권자 및 헤드 매니저들의 연락처 정보를 관리합니다. 이 정보는 독일 본사와의 원활한 소통을 지원합니다.",
+      "columns": [
+        {"column_name": "contact_id", "type": "INTEGER", "is_primary_key": true, "description": "연락처 고유 ID"},
+        {"column_name": "dealership_id", "type": "INTEGER", "is_foreign_key": true, "references_table": "Dealerships", "references_column": "dealership_id", "description": "소속 딜러사 ID"},
+        {"column_name": "name", "type": "VARCHAR", "description": "담당자 이름"},
+        {"column_name": "email", "type": "VARCHAR", "description": "이메일 주소"},
+        {"column_name": "phone_number", "type": "VARCHAR", "description": "전화번호"},
+        {"column_name": "position", "type": "VARCHAR", "description": "직책 (예: General Manager, Head of Sales)"},
+        {"column_name": "department", "type": "VARCHAR", "description": "소속 부서 (예: Management, Sales)"},
+        {"column_name": "address", "type": "VARCHAR", "description": "근무지 주소 (딜러사 주소와 동일하거나 특정 사무실 주소)"}
+      ],
+      "data": [
+        {"contact_id": 1, "dealership_id": 1, "name": "Lee Dong-woo", "email": "dw.lee@hansung.co.kr", "phone_number": "+82-2-1234-5678", "position": "General Manager", "department": "Management", "address": "Seoul, South Korea"},
+        {"contact_id": 2, "dealership_id": 1, "name": "Choi So-ra", "email": "sr.choi@hansung.co.kr", "phone_number": "+82-2-1234-5679", "position": "Head of Sales", "department": "Sales", "address": "Seoul, South Korea"},
+        {"contact_id": 3, "dealership_id": 2, "name": "Park Hyun-joon", "email": "hj.park@hyosungtheclass.co.kr", "phone_number": "+82-2-2345-6789", "position": "General Manager", "department": "Management", "address": "Seoul, South Korea"},
+        {"contact_id": 4, "dealership_id": 2, "name": "Kim Ji-eun", "email": "je.kim@hyosungtheclass.co.kr", "phone_number": "+82-2-2345-6790", "position": "Head of Marketing", "department": "Marketing", "address": "Seoul, South Korea"},
+        {"contact_id": 5, "dealership_id": 3, "name": "Jung Min-ho", "email": "mh.jung@kccauto.co.kr", "phone_number": "+82-2-3456-7890", "position": "General Manager", "department": "Management", "address": "Seoul, South Korea"},
+        {"contact_id": 6, "dealership_id": 3, "name": "Han Yu-jin", "email": "yj.han@kccauto.co.kr", "phone_number": "+82-2-3456-7891", "position": "Head of Service", "department": "Service", "address": "Seoul, South Korea"},
+        {"contact_id": 7, "dealership_id": 4, "name": "Ryu Won-sik", "email": "ws.ryu@thestarmotors.co.kr", "phone_number": "+82-51-1111-2222", "position": "General Manager", "department": "Management", "address": "Busan, South Korea"},
+        {"contact_id": 8, "dealership_id": 4, "name": "Seo Eun-kyung", "email": "ek.seo@thestarmotors.co.kr", "phone_number": "+82-51-1111-2223", "position": "Head of Sales", "department": "Sales", "address": "Busan, South Korea"},
+        {"contact_id": 9, "dealership_id": 5, "name": "Kang Ji-hyeok", "email": "jh.kang@shinsegaemotors.co.kr", "phone_number": "+82-53-3333-4444", "position": "General Manager", "department": "Management", "address": "Daegu, South Korea"},
+        {"contact_id": 10, "dealership_id": 5, "name": "Moon Bo-ram", "email": "br.moon@shinsegaemotors.co.kr", "phone_number": "+82-53-3333-4445", "position": "Head of Customer Relations", "department": "Customer Relations", "address": "Daegu, South Korea"}
+      ]
+    }
+  ]
+}

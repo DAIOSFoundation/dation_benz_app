@@ -1,0 +1,103 @@
+/* src/components/InputBox.css */
+
+.custom-prompt-input-box {
+  display: flex;
+  flex-direction: column; /* 이미지가 상단에 오도록 컬럼 방향으로 변경 */
+  align-items: center; /* 중앙 정렬 */
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 15px 20px;
+  border: 1px solid var(--border-color);
+  background-color: var(--secondary-bg);
+  box-shadow: var(--shadow-medium);
+  border-radius: 12px;
+  gap: 15px; /* 이미지와 텍스트 에어리어 사이 간격 */
+  width: 100%;
+}
+
+.custom-prompt-textarea {
+  flex-grow: 1; /* 남은 공간을 모두 차지 */
+  border: none;
+  resize: none; /* 수동 크기 조절 비활성화 */
+  outline: none;
+  font-size: 1rem;
+  padding: 5px 0; /* 텍스트 에어리어 내부 패딩 */
+  max-height: 200px; /* 최대 높이 (넘치면 스크롤) */
+  overflow-y: auto;
+  width: 100%; /* 부모 너비에 맞춤 */
+}
+
+.custom-send-button {
+  background-color: transparent;
+  padding: 0;
+  width: 40px; /* 고정 너비 */
+  height: 40px; /* 고정 높이 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%; /* 원형 버튼 */
+  transition: background-color 0.2s;
+  align-self: flex-end; /* 버튼을 오른쪽 하단에 정렬 */
+}
+
+.custom-send-button:hover {
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+.custom-send-button img {
+  width: 24px;
+  height: 24px;
+}
+
+.custom-send-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* 이미지 미리보기 컨테이너 */
+.image-preview-container {
+  position: relative;
+  width: 150px; /* 썸네일 크기 고정 */
+  height: 150px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 10px; /* 텍스트 에어리어와의 간격 */
+  flex-shrink: 0; /* 줄어들지 않도록 */
+}
+
+.image-thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* 이미지가 컨테이너를 채우도록 */
+  display: block;
+}
+
+/* 이미지 제거 버튼 */
+.clear-image-button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background-color: rgba(0, 0, 0, 0.6);
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: background-color 0.2s;
+  padding: 0;
+}
+
+.clear-image-button:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.clear-image-button img {
+  width: 12px;
+  height: 12px;
+  filter: invert(1); /* 흰색으로 보이도록 */
+}

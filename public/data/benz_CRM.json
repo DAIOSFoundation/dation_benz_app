@@ -1,0 +1,81 @@
+{
+  "database_schema": {
+    "description": "벤츠 독일 본사와 한국 딜러사(한성 자동차, 효성더클래스, KCC오토 등) 간의 차량 판매, 고객 대기, 생산 및 한국 배정 현황 데이터를 실시간으로 조회하고 커뮤니케이션을 향상시키기 위한 데이터베이스 테이블 명세 및 샘플 데이터입니다.",
+    "tables": [
+      {
+        "table_name": "Dealerships",
+        "purpose": "한국 내 벤츠 딜러사들의 기본 정보를 관리합니다.",
+        "columns": [
+          {"column_name": "dealership_id", "type": "INTEGER", "is_primary_key": true, "description": "딜러사 고유 ID"},
+          {"column_name": "dealership_name", "type": "VARCHAR", "description": "딜러사 이름"},
+          {"column_name": "location", "type": "VARCHAR", "description": "딜러사 위치"},
+          {"column_name": "contact_person", "type": "VARCHAR", "description": "딜러사 담당자 이름"},
+          {"column_name": "contact_email", "type": "VARCHAR", "description": "딜러사 담당자 이메일"}
+        ],
+        "data": [
+          {"dealership_id": 1, "dealership_name": "Hansung Motors", "location": "Seoul, South Korea", "contact_person": "Kim Min-jun", "contact_email": "minjun.kim@hansung.co.kr"},
+          {"dealership_id": 2, "dealership_name": "Hyosung The Class", "location": "Seoul, South Korea", "contact_person": "Lee Seo-yeon", "contact_email": "seoyeon.lee@hyosungtheclass.co.kr"},
+          {"dealership_id": 3, "dealership_name": "KCC Auto", "location": "Seoul, South Korea", "contact_person": "Park Ji-hoon", "contact_email": "jihoon.park@kccauto.co.kr"},
+          {"dealership_id": 4, "dealership_name": "The Star Motors", "location": "Busan, South Korea", "contact_person": "Choi Eun-ji", "contact_email": "eunji.choi@thestarmotors.co.kr"},
+          {"dealership_id": 5, "dealership_name": "Shinsegae Motors", "location": "Daegu, South Korea", "contact_person": "Jung Woo-jin", "contact_email": "woojin.jung@shinsegaemotors.co.kr"}
+        ]
+      },
+      {
+        "table_name": "VehicleModels",
+        "purpose": "벤츠의 각 차량 모델에 대한 상세 정보를 관리하며, 다른 테이블들과의 관계 설정을 위한 핵심 마스터 데이터입니다.",
+        "columns": [
+          {"column_name": "model_id", "type": "INTEGER", "is_primary_key": true, "description": "차량 모델 고유 ID"},
+          {"column_name": "model_name", "type": "VARCHAR", "description": "차량 모델명 (예: E-Class (W214))"},
+          {"column_name": "segment", "type": "VARCHAR", "description": "차량 세그먼트 (예: Sedan, SUV, EV Sedan)"},
+          {"column_name": "base_price_eur", "type": "DECIMAL", "description": "유로 기준 차량 기본 가격"}
+        ],
+        "data": [
+          {"model_id": 101, "model_name": "E-Class (W214)", "segment": "Sedan", "base_price_eur": 60000},
+          {"model_id": 102, "model_name": "C-Class (W206)", "segment": "Sedan", "base_price_eur": 45000},
+          {"model_id": 103, "model_name": "GLC (X254)", "segment": "SUV", "base_price_eur": 55000},
+          {"model_id": 104, "model_name": "EQS (V297)", "segment": "EV Sedan", "base_price_eur": 110000},
+          {"model_id": 105, "model_name": "S-Class (W223)", "segment": "Luxury Sedan", "base_price_eur": 100000},
+          {"model_id": 106, "model_name": "A-Class (W177)", "segment": "Compact Sedan/Hatchback", "base_price_eur": 35000},
+          {"model_id": 107, "model_name": "GLE (V167)", "segment": "Large SUV", "base_price_eur": 70000},
+          {"model_id": 108, "model_name": "EQE (V295)", "segment": "EV Sedan", "base_price_eur": 80000}
+        ]
+      },
+      {
+        "table_name": "VehicleSales",
+        "purpose": "각 딜러사에서 발생한 차량 판매 데이터를 기록합니다.",
+        "columns": [
+          {"column_name": "sale_id", "type": "INTEGER", "is_primary_key": true, "description": "판매 고유 ID"},
+          {"column_name": "dealership_id", "type": "INTEGER", "is_foreign_key": true, "references_table": "Dealerships", "references_column": "dealership_id", "description": "판매가 발생한 딜러사 ID"},
+          {"column_name": "model_id", "type": "INTEGER", "is_foreign_key": true, "references_table": "VehicleModels", "references_column": "model_id", "description": "판매된 차량 모델 ID"},
+          {"column_name": "sale_date", "type": "DATE", "description": "판매 일자"},
+          {"column_name": "price_krw", "type": "DECIMAL", "description": "판매 가격 (한화)"},
+          {"column_name": "vin", "type": "VARCHAR", "is_unique": true, "description": "차량 식별 번호 (VIN)"}
+        ],
+        "data": [
+          {"sale_id": 1, "dealership_id": 1, "model_id": 101, "sale_date": "2025-07-20", "price_krw": 85000000, "vin": "VIN001HANSUNG"},
+          {"sale_id": 2, "dealership_id": 1, "model_id": 102, "sale_date": "2025-07-22", "price_krw": 65000000, "vin": "VIN002HANSUNG"},
+          {"sale_id": 3, "dealership_id": 1, "model_id": 103, "sale_date": "2025-07-25", "price_krw": 78000000, "vin": "VIN003HANSUNG"},
+          {"sale_id": 4, "dealership_id": 2, "model_id": 104, "sale_date": "2025-07-18", "price_krw": 160000000, "vin": "VIN001HYOSUNG"},
+          {"sale_id": 5, "dealership_id": 2, "model_id": 105, "sale_date": "2025-07-21", "price_krw": 145000000, "vin": "VIN002HYOSUNG"},
+          {"sale_id": 6, "dealership_id": 3, "model_id": 101, "sale_date": "2025-07-19", "price_krw": 86000000, "vin": "VIN001KCC"},
+          {"sale_id": 7, "dealership_id": 3, "model_id": 103, "sale_date": "2025-07-23", "price_krw": 79000000, "vin": "VIN002KCC"},
+          {"sale_id": 8, "dealership_id": 3, "model_id": 102, "sale_date": "2025-07-26", "price_krw": 66000000, "vin": "VIN003KCC"},
+          {"sale_id": 9, "dealership_id": 1, "model_id": 106, "sale_date": "2025-07-28", "price_krw": 50000000, "vin": "VIN004HANSUNG"},
+          {"sale_id": 10, "dealership_id": 2, "model_id": 107, "sale_date": "2025-07-24", "price_krw": 105000000, "vin": "VIN003HYOSUNG"},
+          {"sale_id": 11, "dealership_id": 3, "model_id": 108, "sale_date": "2025-07-29", "price_krw": 120000000, "vin": "VIN004KCC"},
+          {"sale_id": 12, "dealership_id": 1, "model_id": 101, "sale_date": "2025-08-01", "price_krw": 85500000, "vin": "VIN005HANSUNG"},
+          {"sale_id": 13, "dealership_id": 2, "model_id": 104, "sale_date": "2025-08-02", "price_krw": 162000000, "vin": "VIN004HYOSUNG"},
+          {"sale_id": 14, "dealership_id": 3, "model_id": 103, "sale_date": "2025-08-03", "price_krw": 79500000, "vin": "VIN005KCC"},
+          {"sale_id": 15, "dealership_id": 4, "model_id": 102, "sale_date": "2025-07-20", "price_krw": 67000000, "vin": "VIN001THESTAR"},
+          {"sale_id": 16, "dealership_id": 4, "model_id": 107, "sale_date": "2025-07-25", "price_krw": 106000000, "vin": "VIN002THESTAR"},
+          {"sale_id": 17, "dealership_id": 5, "model_id": 106, "sale_date": "2025-07-21", "price_krw": 51000000, "vin": "VIN001SHINSEGAE"},
+          {"sale_id": 18, "dealership_id": 5, "model_id": 105, "sale_date": "2025-07-26", "price_krw": 147000000, "vin": "VIN002SHINSEGAE"}
+        ]
+      },
+      {
+        "table_name": "CustomerWaitlist",
+        "purpose": "특정 차량 모델을 구매 대기 중인 고객들의 정보를 관리합니다.",
+        "columns": [
+          {"column_name": "waitlist_id", "type": "INTEGER", "is_primary_key": true, "description": "구매 대기 고유 ID"},
+          {"column_name": "dealership_id", "type": "INTEGER", "is_foreign_key": true, "references_table": "Dealerships", "references_column": "dealership_id", "description": "고객이 대기 신청을 한 딜러사 ID"},
+          {"column_name": "customer_name", "typ

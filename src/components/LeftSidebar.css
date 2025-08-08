@@ -1,0 +1,114 @@
+/* src/components/LeftSidebar.css */
+.left-sidebar {
+  background-color: var(--secondary-bg);
+  box-shadow: var(--shadow-medium);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  z-index: 100;
+  transition: width 0.3s ease, padding 0.3s ease;
+  overflow: hidden;
+  flex-shrink: 0;
+  width: 260px; /* 기본적으로 열린 상태로 시작 */
+}
+
+.left-sidebar.closed {
+  width: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.left-sidebar.open {
+  width: 260px;
+  padding-left: 15px; /* 좌측 사이드바 전체 패딩 유지 */
+  padding-right: 15px; /* 우측 사이드바 전체 패딩 유지 */
+  padding-top: 12px; /* 상단 여백을 25px -> 12px로 조정 */
+}
+
+/* Main Menu */
+.main-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-color-secondary);
+  font-weight: 500;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.menu-item:hover {
+  background-color: var(--primary-bg);
+  color: var(--text-color-primary);
+}
+
+.menu-item img {
+  width: 20px;
+  height: 20px;
+  opacity: 0.8;
+}
+
+.menu-item.selected {
+  background-color: var(--primary-bg);
+  color: var(--text-color-primary);
+  font-weight: 600;
+  border-left: 4px solid var(--accent-color); /* <--- 기존 border-left 유지 */
+  padding-left: 11px; /* 4px 테두리만큼 안쪽 패딩 조절 */
+}
+
+.menu-item.selected img {
+  opacity: 1;
+}
+
+
+/* Chat History Section */
+.chat-history-section {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-color-light);
+  cursor: pointer;
+}
+
+.chat-history-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.chat-history-item {
+  padding: 10px 12px;
+  border-radius: 6px;
+  background-color: var(--primary-bg);
+  color: var(--text-color-secondary);
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.chat-history-item:hover {
+  background-color: #e9e9e9;
+}

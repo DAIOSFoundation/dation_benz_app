@@ -1,0 +1,68 @@
+{
+  "name": "dation_app",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "main": "main.cjs",
+  "author": "Your Name <your.email@example.com>",
+  "description": "Dation MK Agent Desktop Application",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "electron:dev": "vite build && electron .",
+    "electron:build": "vite build && electron-builder"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-markdown": "^10.1.0",
+    "rehype-raw": "^7.0.0",
+    "remark-gfm": "^4.0.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.25.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@vitejs/plugin-react": "^4.4.1",
+    "electron": "^31.0.2",
+    "electron-builder": "^24.13.3",
+    "eslint": "^9.25.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.19",
+    "globals": "^16.0.0",
+    "vite": "^5.3.0"
+  },
+  "build": {
+    "appId": "com.dation.mkagent",
+    "productName": "Dation MK Agent",
+    "files": [
+      "dist/**/*",
+      "main.cjs",
+      "preload.cjs",
+      "package.json",
+      "public/**/*"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "mac": {
+      "hardenedRuntime": false,
+      "target": ["dmg", "zip"],
+      "icon": "public/dation_logo.icns",
+      "identity": null
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "public/dation_logo.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "dmg": {}
+  }
+}

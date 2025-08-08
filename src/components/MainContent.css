@@ -1,0 +1,328 @@
+/* src/components/MainContent.css */
+
+/* main-content-container의 padding 유지 */
+.main-content-container {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* 섹션 사이 간격 */
+  overflow-y: auto; /* 전체 콘텐츠 영역 스크롤 가능 */
+  padding: 25px 30px 50px; /* 메인 컨테이너 자체의 여백 유지 */
+}
+
+/* Welcome Section - 개별 카드 스타일 적용 */
+.welcome-section {
+  text-align: center;
+  width: 100%; /* 부모의 너비를 100% 채움 */
+  max-width: 600px; /* 최대 너비는 600px */
+  margin: 0 auto; /* 중앙 정렬 */
+  padding: 40px 30px; /* 큰 패딩 */
+  background-color: var(--secondary-bg); /* 흰색 배경 */
+  border-radius: 8px; /* 둥근 모서리 */
+  box-shadow: var(--shadow-light); /* 은은한 그림자 */
+}
+
+.welcome-section h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: var(--text-color-primary);
+}
+
+.welcome-section p {
+  font-size: 1rem;
+  color: var(--text-color-secondary);
+  margin-bottom: 20px; /* 버튼과의 간격 */
+}
+
+/* Welcome Section 내 버튼 컨테이너 */
+.welcome-actions {
+  display: flex;
+  justify-content: center; /* 버튼들을 중앙 정렬 */
+  gap: 15px; /* 버튼들 사이 간격 */
+  margin-top: 20px; /* 상단 여백 */
+}
+
+.save-chat-button { /* <-- 여기에 옅은 녹색 계열 스타일 적용 */
+  background-color: #A5D6A7; /* 옅은 녹색 (Material Design Light Green 200) */
+  color: #333333; /* 텍스트 색상을 어둡게 하여 대비 강조 */
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.save-chat-button:hover {
+  background-color: #81C784; /* 호버 시 약간 진한 녹색 (Light Green 400) */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+
+/* Chat Messages Display - 높이 자동 조정, 자체 스크롤 제거 */
+.chat-messages-display {
+  flex-grow: 0;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 1200px;
+  min-height: 600px;
+  margin: 0 auto;
+  
+  background-color: var(--secondary-bg);
+  border-radius: 8px;
+  box-shadow: var(--shadow-light);
+  padding: 20px;
+}
+
+.no-messages {
+  text-align: center;
+  color: var(--text-color-light);
+  font-style: italic;
+  padding: 50px 0;
+}
+
+.chat-message {
+  display: flex;
+}
+
+.chat-message.user {
+  justify-content: flex-end;
+}
+
+.chat-message.model {
+  justify-content: flex-start;
+}
+
+.message-bubble {
+  max-width: 70%;
+  padding: 12px 18px;
+  border-radius: 20px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.chat-message.user .message-bubble {
+  background-color: #454545;
+  color: white;
+  border-bottom-right-radius: 5px;
+}
+
+.chat-message.model .message-bubble {
+  background-color: var(--secondary-bg);
+  color: var(--text-color-primary);
+  border: 1px solid var(--border-color);
+  border-bottom-left-radius: 5px;
+}
+
+/* --- 추가된 부분: Markdown 렌더링을 위한 기본 스타일 --- */
+.message-bubble p {
+  margin-bottom: 0.5em;
+}
+
+.message-bubble pre {
+  background-color: #f4f4f4;
+  padding: 1em;
+  border-radius: 5px;
+  overflow-x: auto;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+  font-size: 0.85em;
+  line-height: 1.4;
+  margin: 1em 0;
+}
+
+.message-bubble code {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+  font-size: 0.9em;
+  background-color: rgba(27,31,35,.05);
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+}
+
+.message-bubble pre code {
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
+}
+
+.message-bubble h1, .message-bubble h2, .message-bubble h3, .message-bubble h4, .message-bubble h5, .message-bubble h6 {
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+  font-weight: 600;
+  color: var(--text-color-primary);
+}
+
+.message-bubble ul, .message-bubble ol {
+  margin-left: 20px;
+  padding-left: 0;
+  margin-bottom: 0.5em;
+}
+
+.message-bubble li {
+  margin-bottom: 0.2em;
+}
+
+.message-bubble blockquote {
+  border-left: 4px solid var(--border-color);
+  padding-left: 1em;
+  color: var(--text-color-secondary);
+  margin: 1em 0;
+  font-style: italic;
+}
+
+.message-bubble table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+}
+
+.message-bubble th, .message-bubble td {
+  border: 1px solid var(--border-color);
+  padding: 8px;
+  text-align: left;
+}
+
+.message-bubble th {
+  background-color: #f0f0f0;
+}
+
+/* Loading state for model message */
+.chat-message.model.loading .message-bubble {
+  background-color: #f0f0f0;
+  border-color: #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 20px;
+}
+
+/* 점 애니메이션 컨테이너 */
+.loading-dots {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 100%;
+}
+
+/* 개별 점 스타일 */
+.loading-dots span {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  background-color: #888;
+  border-radius: 50%;
+  animation: dot-bounce 1s infinite ease-in-out;
+}
+
+/* 각 점마다 애니메이션 시작 시점 다르게 설정 */
+.loading-dots span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.loading-dots span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+/* 점이 위아래로 움직이는 애니메이션 키프레임 */
+@keyframes dot-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+/* Prompt Input Box - 고정 너비였던 것을 유연하게 변경 */
+.prompt-input-box {
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 15px 20px;
+  border: 1px solid var(--border-color);
+  background-color: var(--secondary-bg);
+  box-shadow: var(--shadow-medium);
+  border-radius: 12px;
+  gap: 15px;
+}
+
+.prompt-textarea {
+  flex-grow: 1;
+  border: none;
+  resize: none;
+  outline: none;
+  font-size: 1rem;
+  padding: 5px 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.send-button {
+  background-color: transparent;
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.send-button:hover {
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+.send-button img {
+  width: 24px;
+  height: 24px;
+}
+
+.send-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Prompts Section - 고정 너비였던 것을 유연하게 변경 */
+.prompts-section {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-top: 30px;
+}
+
+.prompts-section h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: var(--text-color-primary);
+}
+
+.prompts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+/* 채팅 메시지 내 이미지 썸네일 스타일 */
+.message-image-container {
+  margin-bottom: 10px; /* 이미지와 텍스트 사이 간격 */
+  max-width: 100%; /* 부모 버블 너비에 맞춤 */
+}
+
+.message-image-thumbnail {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px; /* 이미지도 둥근 모서리 */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  display: block; /* 이미지 하단 공백 제거 */
+}

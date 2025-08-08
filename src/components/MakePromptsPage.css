@@ -1,0 +1,284 @@
+/* src/components/MakePromptsPage.css */
+
+.make-prompts-page-container {
+  display: flex;
+  height: 100%; /* 부모 (main-content-area) 높이를 채움 */
+  background-color: var(--primary-bg);
+  overflow: hidden; /* 자식 요소들의 스크롤 관리를 위임 */
+}
+
+/* 좌측 패널 (폴더 목록) */
+.makeprompts-left-panel {
+  width: 280px; /* 고정 너비 */
+  background-color: var(--secondary-bg);
+  box-shadow: var(--shadow-light);
+  display: flex;
+  flex-direction: column;
+  padding: 20px 15px;
+  border-right: 1px solid var(--border-color);
+  overflow-y: auto; /* 내용이 많으면 스크롤 */
+  flex-shrink: 0; /* 줄어들지 않도록 */
+}
+
+.makeprompts-folder-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex-grow: 1; /* 남은 공간을 채움 */
+  margin-bottom: 20px; /* Add new 버튼과의 간격 */
+}
+
+.makeprompts-folder-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 15px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-color-primary);
+  font-weight: 500;
+  transition: background-color 0.2s, border-left 0.2s;
+}
+
+.makeprompts-folder-item:hover {
+  background-color: var(--primary-bg);
+}
+
+.makeprompts-folder-item.selected {
+  background-color: var(--primary-bg);
+  font-weight: 600;
+  border-left: 4px solid var(--accent-color);
+  padding-left: 11px; /* border 만큼 패딩 조정 */
+}
+
+.makeprompts-folder-item img {
+  width: 20px;
+  height: 20px;
+  opacity: 0.8;
+}
+
+.makeprompts-folder-item.selected img {
+  opacity: 1;
+}
+
+.makeprompts-add-new-btn {
+  background-color: var(--accent-color);
+  color: white;
+  padding: 10px 15px;
+  border-radius: 6px;
+  font-weight: 600;
+  text-align: center;
+  transition: background-color 0.2s;
+}
+
+.makeprompts-add-new-btn:hover {
+  background-color: #0056b3;
+}
+
+/* 우측 패널 (프롬프트 목록 및 상세/폼) */
+.makeprompts-right-panel {
+  flex-grow: 1; /* 남은 공간을 모두 차지 */
+  display: flex;
+  flex-direction: column;
+  padding: 25px 30px; /* 전체 페이지 패딩 */
+  overflow-y: auto; /* 내용이 많으면 스크롤 */
+}
+
+/* 우측 상단 프롬프트 목록 섹션 (가운데 정렬) */
+.makeprompts-prompt-list-section {
+    max-width: 1200px; /* 메인 컨텐츠 영역과 동일한 최대 너비 */
+    width: 100%;
+    margin: 0 auto; /* 중앙 정렬 */
+    margin-bottom: 40px; /* 하단 상세 섹션과의 간격 */
+}
+
+.makeprompts-list-divider {
+  border-bottom: 1px solid var(--border-color);
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.makeprompts-prompt-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* 반응형 그리드 */
+  gap: 20px;
+}
+
+/* 개별 프롬프트 카드 */
+.makeprompts-prompt-card {
+  background-color: var(--secondary-bg);
+  border-radius: 8px;
+  box-shadow: var(--shadow-light);
+  padding: 15px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  border: 1px solid transparent; /* 기본 투명 테두리 */
+}
+
+.makeprompts-prompt-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-medium);
+}
+
+.makeprompts-prompt-card.selected {
+  border-color: var(--accent-color); /* 선택 시 강조 테두리 */
+  box-shadow: var(--shadow-medium);
+}
+
+.makeprompts-prompt-card h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--text-color-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.makeprompts-prompt-card p {
+  font-size: 0.85rem;
+  color: var(--text-color-secondary);
+  line-height: 1.4;
+  height: 3em; /* 텍스트 3줄로 제한 */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 10px;
+}
+
+.makeprompts-prompt-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.8rem;
+  color: var(--text-color-light);
+}
+
+.makeprompts-prompt-card-meta img {
+  width: 16px;
+  height: 16px;
+  opacity: 0.7;
+}
+
+
+/* 프롬프트 상세 내용/폼 섹션 */
+.makeprompts-details-section,
+.makeprompts-form-section {
+  max-width: 1200px; /* 메인 컨텐츠 영역과 동일한 최대 너비 */
+  width: 100%;
+  margin: 0 auto; /* 중앙 정렬 */
+  padding: 20px;
+  background-color: var(--secondary-bg);
+  border-radius: 8px;
+  box-shadow: var(--shadow-light);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.makeprompts-details-section h2,
+.makeprompts-form-section h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-color-primary);
+  margin-bottom: 10px;
+}
+
+.makeprompts-details-meta {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 0.9rem;
+  color: var(--text-color-secondary);
+  margin-bottom: 20px;
+}
+
+.makeprompts-details-meta img {
+  width: 18px;
+  height: 18px;
+  opacity: 0.8;
+}
+
+.makeprompts-content-display {
+    background-color: var(--primary-bg);
+    padding: 15px;
+    border-radius: 6px;
+    font-family: monospace; /* 프롬프트 내용은 고정폭 폰트가 좋을 수 있음 */
+    white-space: pre-wrap; /* 공백과 줄바꿈 유지 */
+    word-wrap: break-word; /* 긴 단어 줄바꿈 */
+    color: var(--text-color-primary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+/* 폼 그룹 및 입력 필드 스타일 (InteractionPage와 유사하게) */
+.makeprompts-form-section .form-group,
+.makeprompts-details-section .form-group {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+.makeprompts-form-section label,
+.makeprompts-details-section label {
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--text-color-primary);
+}
+
+.makeprompts-form-section input[type="text"],
+.makeprompts-form-section textarea,
+.makeprompts-details-section input[type="text"],
+.makeprompts-details-section textarea {
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+}
+
+.makeprompts-form-section input[type="text"]:focus,
+.makeprompts-form-section textarea:focus,
+.makeprompts-details-section input[type="text"]:focus,
+.makeprompts-details-section textarea:focus {
+    border-color: var(--accent-color);
+}
+
+.makeprompts-form-section textarea,
+.makeprompts-details-section textarea {
+    resize: vertical;
+    min-height: 100px; /* 프롬프트 내용은 더 높게 */
+}
+
+.makeprompts-save-button {
+  background-color: var(--accent-color);
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: background-color 0.2s;
+  align-self: flex-start; /* 왼쪽 정렬 */
+  margin-top: 10px;
+}
+
+.makeprompts-save-button:hover {
+  background-color: #0056b3;
+}
+
+
+/* 빈 상태 메시지 */
+.makeprompts-empty-folder-message,
+.makeprompts-empty-state-message {
+    text-align: center;
+    color: var(--text-color-secondary);
+    font-style: italic;
+    padding: 50px 0;
+    max-width: 800px;
+    margin: 0 auto;
+}

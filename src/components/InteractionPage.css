@@ -1,0 +1,485 @@
+/* src/components/InteractionPage.css */
+
+.interaction-page-container {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  padding-bottom: 20px;
+  overflow-y: auto;
+}
+
+/* InteractionPage의 메인 콘텐츠 wrapper: 이제 이 요소가 중앙 정렬 및 최대 너비 제어 */
+.interaction-main-content-wrapper {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    /* justify-content: center; <--- 수직 중앙 정렬 (내용이 적을 때) - 필요시 활성화 */
+    align-items: center; /* 수평 중앙 정렬을 위해 이 요소를 중앙에 정렬 */
+    width: 100%; /* 부모의 100% 너비 차지 */
+    /* max-width: 1200px; <--- 이 부분을 제거하거나 100%로 변경하여 최대 화면 너비를 사용 */
+    /* max-width: 100%; (이것은 기본값이므로 제거와 동일한 효과) */
+    margin: 0 auto; /* <--- 이 부분이 전체 콘텐츠를 중앙 정렬하는 핵심 */
+    padding: 25px 30px 0; /* 좌우 여백을 여기서 추가 */
+    position: relative; /* Added for localized overlay */
+}
+
+/* 기존 로딩/에러 스타일 */
+.interaction-loading, .interaction-error {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+  color: var(--text-color-secondary);
+}
+
+.interaction-error {
+  color: #d9534f;
+  font-weight: 500;
+}
+
+/* Modified for local loading */
+.step-overlay-loading {
+    position: absolute; /* Changed from fixed */
+    top: 0;
+    left: 0;
+    width: 100%; /* Changed from 100vw */
+    height: 100%; /* Changed from 100vh */
+    background-color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    color: var(--accent-color);
+    z-index: 1000;
+    /* pointer-events: none; - Removed to block interaction during loading */
+}
+
+/* LLM 알림 메시지 스타일 */
+.llm-notification-wrapper {
+  /* max-width: 800px; <--- 이 부분을 제거하거나 100%로 변경하여 부모(interaction-main-content-wrapper)의 너비를 사용 */
+  width: 100%; /* 부모(interaction-main-content-wrapper)의 100% 너비 차지 */
+  margin: 20px auto;
+  margin-bottom: 50px;
+  padding: 15px 20px;
+  background-color: #e6f7ff;
+  border: 1px solid #91d5ff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  color: #1890ff;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.llm-notification-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+
+.llm-notification-message {
+  margin: 0;
+  flex-grow: 1;
+  font-weight: 500;
+}
+
+/* InteractionPage 내 대화 기록 영역 */
+.interaction-chat-history-display {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  /* max-width: 1200px; <--- 이 부분을 제거하거나 100%로 변경 */
+  width: 100%;
+  margin: 0 auto;
+  padding: 10px 0;
+}
+
+/* InteractionPage 내 동적 UI 영역 (step-content) */
+.interaction-dynamic-content {
+  flex-shrink: 0;
+  width: 100%;
+  margin: 20px auto;
+  /* wrapper가 실제 콘텐츠를 담으므로 여기서는 여백을 제거합니다. */
+  padding: 0;
+}
+
+/* .step-content는 이제 .dynamic-app-wrapper로 대체됩니다. */
+/* 기존 .step-content 스타일은 충돌을 막기 위해 리셋합니다. */
+.step-content {
+  background-color: transparent;
+  box-shadow: none;
+  padding: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  border-radius: 0;
+}
+
+/* NEW: 모든 동적 콘텐츠를 위한 통일된 wrapper */
+.dynamic-app-wrapper {
+  background-color: var(--secondary-bg);
+  border-radius: 8px;
+  box-shadow: var(--shadow-light);
+  padding: 24px; /* 일관된 내부 여백 */
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* 자식 요소(버튼 등)를 좌측 정렬 */
+  gap: 16px; /* 제목, 설명, 콘텐츠 간의 일관된 간격 */
+}
+
+.dynamic-app-wrapper > h2,
+.dynamic-app-wrapper > p {
+    width: 100%;
+    margin: 0; /* 불필요한 마진 제거 */
+}
+
+.dynamic-app-wrapper > h2 {
+  margin-bottom: 8px; /* 제목 아래 간격 */
+}
+.dynamic-app-wrapper > p {
+  margin-bottom: 16px; /* 설명 아래 간격 */
+}
+
+
+/* SOP No. 표시를 위한 스타일 */
+.sop-no-display {
+    background-color: var(--primary-bg);
+    padding: 10px 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    font-size: 1rem;
+    color: var(--text-color-primary);
+    width: 100%;
+}
+
+.sop-no-display strong {
+    color: var(--accent-color);
+    font-weight: 600;
+}
+
+/* iframe 컨테이너 스타일 */
+.iframe-container {
+  width: 100%;
+  height: 900px; /* iframe의 높이를 600px -> 900px로 늘림 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+  margin-top: 0; /* wrapper가 간격을 제어하므로 제거 */
+}
+
+.iframe-container iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+
+/* 테이블을 감싸는 div에 스크롤 적용 */
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  /* wrapper가 여백을 제어하므로 여기서는 제거 */
+  /* padding-left: 24px; */
+  /* padding-right: 24px; */
+  box-sizing: border-box;
+}
+
+/* wrapper 내부의 테이블 여백 리셋 */
+.dynamic-app-wrapper .table-wrapper {
+  padding-left: 0;
+  padding-right: 0;
+  margin: 0; /* 마진도 리셋 */
+}
+
+
+/* InteractionPage의 테이블 스타일 */
+.styled-table {
+  width: 100%;
+  min-width: 900px;
+  table-layout: auto;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 0.9em;
+  font-family: 'Inter', sans-serif;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  /* overflow: hidden; <--- 이 부분을 제거하여 테이블 내용이 너비를 넘어갈 수 있도록 함 */
+  /* word-break: break-all; <--- 텍스트가 셀 너비를 초과할 때 강제로 줄바꿈 */
+}
+
+.styled-table thead tr {
+  background-color: #F0F0F0;
+  color: var(--text-color-primary);
+  text-align: left;
+}
+
+.styled-table th,
+.styled-table td {
+  white-space: normal;
+  text-align: left;
+  padding: 14px 10px;
+  font-size: 1rem;
+  border: 1px solid var(--border-color);
+  /* word-wrap: break-word; <--- white-space: nowrap;과 상충되므로 제거 */
+  /* overflow: hidden; <--- 넘치는 내용 숨기기 (필요시) */
+  /* text-overflow: ellipsis; <--- 넘치는 내용에 ... 표시 (필요시) */
+}
+
+.styled-table th {
+  background: #f5f5f5;
+  font-weight: 600;
+}
+.styled-table thead tr:first-child th {
+  background: #fff;
+  font-size: 1.05rem;
+  border-bottom: none;
+}
+
+.styled-table tbody tr {
+  border-bottom: 1px solid #dddddd;
+}
+
+.styled-table tbody tr:nth-of-type(even) {
+  background-color: var(--primary-bg);
+}
+
+/* 폼 스타일 */
+.interaction-form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  padding: 20px;
+  background-color: var(--secondary-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: var(--shadow-light);
+}
+
+/* wrapper 내부의 폼 스타일 리셋 */
+.dynamic-app-wrapper .interaction-form {
+  margin: 0;
+  padding: 0;
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+
+.interaction-form .form-group {
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.interaction-form label {
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--text-color-primary);
+}
+
+.interaction-form input[type="text"],
+.interaction-form input[type="date"],
+.interaction-form textarea {
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+}
+
+.interaction-form input[type="text"]:focus,
+.interaction-form input[type="date"]:focus,
+.interaction-form textarea:focus {
+  border-color: var(--accent-color);
+}
+
+.interaction-form textarea {
+  resize: vertical;
+  min-height: 50px;
+}
+
+.interaction-form input[type="file"] {
+  padding: 8px 0;
+  width: 100%;
+}
+
+.interaction-form .file-preview {
+    font-size: 0.8em;
+    color: var(--text-color-secondary);
+    margin-top: 5px;
+    background-color: var(--primary-bg);
+    padding: 5px 10px;
+    border-radius: 4px;
+    border: 1px dashed var(--border-color);
+    word-break: break-all;
+    width: 100%;
+}
+
+.interaction-form button[type="submit"] {
+  background-color: var(--accent-color);
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: background-color 0.2s;
+  align-self: flex-start;
+  margin-top: 10px;
+}
+
+.interaction-form button[type="submit"]:hover {
+  background-color: #0056b3;
+}
+
+/* Next 버튼 스타일 */
+.next-btn {
+  background-color: var(--accent-color);
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: background-color 0.2s;
+  margin-top: 20px;
+  align-self: flex-start;
+}
+
+.step-content button:hover {
+  background-color: #0056b3;
+}
+
+.error-message {
+  color: #dc3545;
+  font-weight: 500;
+  margin-top: 10px;
+}
+
+/* NEW: No Data Message */
+.no-data-message {
+  color: var(--text-color-secondary);
+  font-style: italic;
+  margin-top: 10px;
+  width: 100%; /* Add this to ensure it takes full width */
+  text-align: center; /* Center the text */
+}
+
+
+/* InputBox 스타일 (InteractionPage 하단) */
+.interaction-page-container .custom-prompt-input-box {
+    width: 100%;
+    max-width: 1200px; /* <--- 이 부분도 100%로 변경하거나 제거하여 화면 너비를 최대한 활용 */
+    margin-top: 20px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Recipient Search Input */
+.recipient-search-container {
+  position: relative;
+  width: 100%;
+}
+
+.recipient-search-container input[type="text"] {
+  width: 100%;
+  padding-right: 30px; /* 로딩 스피너 공간 확보 */
+}
+
+.recipient-search-container .search-loading {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.9em;
+  color: var(--text-color-secondary);
+}
+
+.search-results-list {
+  position: absolute;
+  top: 100%; /* input 아래에 위치 */
+  left: 0;
+  right: 0;
+  background-color: var(--primary-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 10;
+  list-style: none; /* 기본 리스트 스타일 제거 */
+  padding: 0;
+  margin-top: 5px;
+}
+
+.search-results-list li {
+  padding: 10px 15px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+  font-size: 0.9rem;
+  color: var(--text-color-primary);
+}
+
+.search-results-list li:last-child {
+  border-bottom: none;
+}
+
+.search-results-list li:hover {
+  background-color: #f0f0f0;
+}
+
+.no-results-message {
+  font-size: 0.85rem;
+  color: var(--text-color-secondary);
+  margin-top: 10px;
+  padding-left: 5px;
+}
+
+.selected-recipient-display {
+  font-size: 0.95rem;
+  color: var(--accent-color);
+  margin-top: 10px;
+  padding: 8px 10px;
+  background-color: #e6f7ff;
+  border: 1px solid #91d5ff;
+  border-radius: 5px;
+}
+
+/* SOP 입력폼 개선 */
+.sop-form-row {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 16px;
+}
+.sop-form-row input {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 12px;
+  font-size: 1rem;
+}
+.sop-form-row button {
+  min-width: 80px;
+  padding: 12px 0;
+  font-size: 1rem;
+}

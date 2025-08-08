@@ -1,0 +1,276 @@
+/* src/components/RightSidebar.css */
+.right-sidebar {
+  width: 0; /* 기본적으로 닫힌 상태 (너비 0) */
+  background-color: var(--secondary-bg);
+  box-shadow: var(--shadow-medium);
+  display: flex;
+  flex-direction: column;
+  padding: 0; /* padding은 sidebar-header와 sidebar-content에서 관리 */
+  height: 100vh; /* 앱 컨테이너의 높이를 따라감 */
+  z-index: 100; /* 콘텐츠 위로 올라오도록 (필요 시) */
+  transition: width 0.3s ease; /* 너비 애니메이션을 위한 트랜지션 */
+  overflow: hidden; /* 내용이 넘치면 숨김 */
+  flex-shrink: 0; /* 이 요소는 줄어들지 않음 */
+}
+
+.right-sidebar.open {
+  width: 300px; /* 열렸을 때 너비 설정 */
+}
+
+/* 새로 추가된 사이드바 헤더 스타일 (이전과 동일) */
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.sidebar-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-color-primary);
+}
+
+.sidebar-content {
+  flex-grow: 1;
+  padding: 20px;
+  color: var(--text-color-primary);
+  overflow-y: auto;
+  display: flex; /* 내부 아이템 정렬을 위해 flex 사용 */
+  flex-direction: column; /* 세로로 쌓이도록 */
+}
+
+.sidebar-content h3 {
+  margin-bottom: 15px;
+  font-size: 1.2rem;
+}
+
+.sidebar-content p {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--text-color-secondary);
+}
+
+/* API 호출 로그 리스트 스타일 */
+.api-call-log-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.no-logs-message {
+  text-align: center;
+  color: var(--text-color-secondary);
+  font-style: italic;
+  padding: 20px 0;
+}
+
+/* Base style for all log items */
+.api-call-log-item {
+  padding: 10px 15px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  display: flex;
+  flex-direction: column; /* 변경: 세로 정렬 */
+  align-items: flex-start;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+  /* 애니메이션 */
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+  animation: fade-in-right 0.4s ease-out forwards;
+}
+
+/* NEW: 로그 헤더 (타임스탬프 + 타입) */
+.log-header {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 5px; /* 헤더와 메시지 사이 간격 */
+  width: 100%;
+}
+
+/* NEW: 화살표 아이콘 */
+.log-arrow {
+  font-weight: bold;
+  margin-right: 8px;
+  font-size: 1em;
+  line-height: 1.2;
+  flex-shrink: 0;
+}
+
+/* LLM type (새로 추가) */
+.api-call-log-item.llm {
+  background-color: #ffe6e6; /* Light red for background */
+  border: 1px solid #ff9999;
+  color: #cc0000; /* Darker red for text */
+}
+.api-call-log-item.llm .log-arrow, /* NEW */
+.api-call-log-item.llm .log-timestamp,
+.api-call-log-item.llm .log-type {
+  color: #cc0000; /* Apply text color to specific elements */
+}
+
+/* NEW: LLM 로딩 애니메이션 */
+.api-call-log-item.llm .loading-dots {
+  display: inline-block; /* 점들이 한 줄에 표시되도록 */
+  margin-left: 5px;
+  font-size: 1em;
+  line-height: 1; /* 텍스트와 정렬되도록 */
+}
+
+.api-call-log-item.llm .loading-dots span {
+  opacity: 0;
+  animation: dot-blink 1.4s infinite steps(1, start);
+}
+
+.api-call-log-item.llm .loading-dots span:nth-child(1) {
+  animation-delay: 0s;
+}
+.api-call-log-item.llm .loading-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.api-call-log-item.llm .loading-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes dot-blink {
+  0%, 80%, 100% { opacity: 0; }
+  40% { opacity: 1; }
+}
+
+
+/* LLM (Gemma) type */
+.api-call-log-item.gemma {
+  background-color: #e0faff; /* Lighter version of #7af5fa for background */
+  border: 1px solid #7af5fa;
+  color: #00838f; /* Darker shade for text */
+}
+.api-call-log-item.gemma .log-arrow, /* NEW */
+.api-call-log-item.gemma .log-timestamp,
+.api-call-log-item.gemma .log-type {
+  color: #00838f; /* Apply text color to specific elements */
+}
+
+/* Data type */
+.api-call-log-item.data {
+  background-color: #e6ffe6; /* Light green for background */
+  border: 1px solid green;
+  color: #2e8b57; /* Darker green for text */
+}
+.api-call-log-item.data .log-arrow, /* NEW */
+.api-call-log-item.data .log-timestamp,
+.api-call-log-item.data .log-type {
+  color: #2e8b57; /* Apply text color to specific elements */
+}
+
+/* API type */
+.api-call-log-item.api {
+  background-color: #333; /* Dark gray for background (blackish) */
+  border: 1px solid #555; /* Slightly lighter dark gray border */
+  color: #ffffff; /* White text for contrast */
+}
+.api-call-log-item.api .log-arrow, /* NEW */
+.api-call-log-item.api .log-timestamp,
+.api-call-log-item.api .log-type {
+  color: #ffffff; /* Apply white color to specific elements */
+}
+
+/* Source type (새로 추가) */
+.api-call-log-item.source {
+  background-color: #fffac8; /* Light yellow background */
+  border: 1px solid #ffe81f; /* Brighter yellow border */
+  color: #5c4b00; /* Darker text for contrast */
+  padding: 5px 15px; /* Half thinner */
+  border-radius: 8px; /* More standard rounded corners */
+  font-size: 0.8rem; /* Slightly smaller font */
+  flex-direction: column; /* 다시 세로 정렬 */
+  justify-content: flex-start; /* Left align content */
+  align-items: flex-start; /* Top align content vertically */
+}
+
+/* NEW: Source 타입의 log-header 내부 요소 조정 */
+.api-call-log-item.source .log-header { 
+  display: flex; /* 헤더 다시 보이게 */
+  justify-content: flex-start;
+  align-items: baseline;
+  margin-bottom: 3px; /* 헤더와 메시지 사이 간격 줄임 */
+}
+
+.api-call-log-item.source .log-arrow, 
+.api-call-log-item.source .log-timestamp,
+.api-call-log-item.source .log-type { /* log-type도 이제 숨김 */
+  display: none; 
+}
+
+.api-call-log-item.source .log-similarity {
+  font-weight: bold;
+  color: #5c4b00; /* Source 타입 텍스트 색상 적용 */
+  margin-right: 8px; /* 유사도와 출처 정보 사이 간격 */
+}
+
+.api-call-log-item.source .log-source-metadata { /* NEW: Source metadata 스타일 */
+  font-size: 0.75rem; /* 작게 표시 */
+  opacity: 0.8; /* 약간 흐리게 */
+  /* margin-left: 5px; 기존 인라인 스타일 대신 CSS로 관리 */
+}
+
+.api-call-log-item.source .source-link { /* NEW */
+  color: #5c4b00; /* Darker text for contrast, same as parent */
+  text-decoration: underline; /* Underline to indicate link */
+  cursor: pointer;
+}
+
+.api-call-log-item.source .source-link:hover { /* NEW */
+  color: #007bff; /* A standard blue for hover effect */
+}
+
+
+/* 기존 log-type span에서 동적 클래스 제거 (이미 li에서 타입 클래스 처리) */
+/*
+.log-type.gemini {
+  color: #1a73e8;
+}
+
+.log-type.api {
+  color: #d9534f;
+}
+*/
+
+.log-message {
+  flex-grow: 1; /* 남은 공간 차지 (세로 정렬이므로 의미가 다름) */
+  word-break: break-word; /* 긴 메시지 줄바꿈 */
+  padding-left: calc(1em + 8px); /* NEW: 화살표와 타임스탬프 너비만큼 들여쓰기 */
+}
+
+.api-call-log-item.source .log-message { /* NEW: Source 타입은 들여쓰기 없음 */
+  padding-left: 0;
+}
+
+/* NEW: Fading-out animation */
+.api-call-log-item.fading-out {
+  opacity: 0;
+  transform: scale(0.9); /* Add a subtle shrink effect for clearer transition */
+  /* 기존 animation을 무효화하여 transition이 작동하도록 함 */
+  animation: none;
+}
+
+.api-call-log-item.category {
+  background-color: #8B0000;
+  color: #fff;
+  font-weight: bold;
+}
+
+
+@keyframes fade-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
