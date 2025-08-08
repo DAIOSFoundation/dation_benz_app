@@ -6,66 +6,69 @@ import PromptItemCard from './PromptItemCard';
 import PromptForm from './PromptForm';
 import CalendarIcon from '../assets/cal icon.png'; // 기존 달력 아이콘 사용
 import PersonIcon from '../assets/person.png'; // 인물 아이콘 사용
+import { useLanguage } from '../contexts/LanguageContext';
 
 function MakePromptsPage() {
+  const { t } = useLanguage();
   // 자동차 업계 프롬프트 데이터
   const [promptFolders, setPromptFolders] = useState([
-    { id: 'f1', name: '딜러 관리', prompts: ['p1', 'p2'] },
-    { id: 'f2', name: '차량 관리', prompts: ['p3', 'p4'] },
-    { id: 'f3', name: '판매 분석', prompts: ['p5', 'p6', 'p7'] },
-    { id: 'f4', name: '이메일 통신', prompts: ['p8'] },
+    { id: 'f1', name: t('dealerManagement'), prompts: ['p1', 'p2'] },
+    { id: 'f2', name: t('vehicleManagement'), prompts: ['p3', 'p4'] },
+    { id: 'f3', name: t('salesAnalysis'), prompts: ['p5', 'p6', 'p7'] },
+    { id: 'f4', name: t('emailCommunication'), prompts: ['p8'] },
   ]);
 
-  const [allPrompts, setAllPrompts] = useState([
+  // 프롬프트 데이터를 useMemo로 관리하여 언어 변경 시 동적으로 업데이트
+  const allPrompts = useMemo(() => [
     {
-      id: 'p1', folderId: 'f1', title: '딜러 정보 조회', date: 'Dec 15, 2024', author: 'You',
-      content: '한국 내 벤츠 딜러사들의 기본 정보를 조회합니다. [[insert prompt:딜러명]]을 입력해주세요.',
-      promptTitle: '딜러 정보 조회',
-      promptDescription: '딜러사 연락처 및 조직 정보 조회'
+      id: 'p1', folderId: 'f1', title: t('dealerInfoLookup'), date: 'Dec 15, 2024', author: 'You',
+      content: t('dealerInfoLookupDesc'),
+      promptTitle: t('dealerInfoLookupTitle'),
+      promptDescription: t('dealerInfoLookupDetail')
     },
     {
-      id: 'p2', folderId: 'f1', title: '딜러 연락처 관리', date: 'Dec 15, 2024', author: 'You',
-      content: '딜러사 담당자 연락처 정보를 관리합니다. [[insert prompt:담당자명]]을 입력해주세요.',
-      promptTitle: '연락처 관리',
-      promptDescription: '딜러사 담당자 연락처 정보 관리'
+      id: 'p2', folderId: 'f1', title: t('dealerContactManagement'), date: 'Dec 15, 2024', author: 'You',
+      content: t('dealerContactManagementDesc'),
+      promptTitle: t('dealerContactManagementTitle'),
+      promptDescription: t('dealerContactManagementDetail')
     },
     {
-      id: 'p3', folderId: 'f2', title: '차량 모델 정보', date: 'Dec 15, 2024', author: 'You',
-      content: '벤츠 차량 모델의 상세 정보를 조회합니다. [[insert prompt:모델명]]을 입력해주세요.',
-      promptTitle: '차량 모델 조회',
-      promptDescription: 'E-Class, C-Class, GLC, EQS, S-Class 등 차량 모델 정보'
+      id: 'p3', folderId: 'f2', title: t('vehicleModelInfo'), date: 'Dec 15, 2024', author: 'You',
+      content: t('vehicleModelInfoDesc'),
+      promptTitle: t('vehicleModelInfoTitle'),
+      promptDescription: t('vehicleModelInfoDetail')
     },
     {
-      id: 'p4', folderId: 'f2', title: 'VIN 추적', date: 'Dec 15, 2024', author: 'You',
-      content: '차량 식별 번호(VIN)를 통한 차량 이력 추적입니다. [[insert prompt:VIN번호]]를 입력해주세요.',
-      promptTitle: 'VIN 추적',
-      promptDescription: '차량 식별 번호를 통한 차량 이력 관리'
+      id: 'p4', folderId: 'f2', title: t('vinTracking'), date: 'Dec 15, 2024', author: 'You',
+      content: t('vinTrackingDesc'),
+      promptTitle: t('vinTrackingTitle'),
+      promptDescription: t('vinTrackingDetail')
     },
     {
-      id: 'p5', folderId: 'f3', title: '월별 판매 분석', date: 'Dec 15, 2024', author: 'You',
-      content: '특정 월의 한국 내 총 판매 대수와 판매 금액을 분석합니다. [[insert prompt:월/년도]]를 입력해주세요.',
-      promptTitle: '월별 판매 분석',
-      promptDescription: '7월 한국 내 총 판매 대수와 판매 금액 분석'
+      id: 'p5', folderId: 'f3', title: t('monthlySalesAnalysis'), date: 'Dec 15, 2024', author: 'You',
+      content: t('monthlySalesAnalysisDesc'),
+      promptTitle: t('monthlySalesAnalysisTitle'),
+      promptDescription: t('monthlySalesAnalysisDetail')
     },
     {
-      id: 'p6', folderId: 'f3', title: '딜러별 세그먼트 판매', date: 'Dec 15, 2024', author: 'You',
-      content: '특정 딜러의 특정 세그먼트 차량 판매 현황을 분석합니다. [[insert prompt:딜러명/세그먼트/월]]을 입력해주세요.',
-      promptTitle: '딜러별 세그먼트 판매',
-      promptDescription: '효성더클래스 7월 세단 판매 분석'
+      id: 'p6', folderId: 'f3', title: t('dealerSegmentSales'), date: 'Dec 15, 2024', author: 'You',
+      content: t('dealerSegmentSalesDesc'),
+      promptTitle: t('dealerSegmentSalesTitle'),
+      promptDescription: t('dealerSegmentSalesDetail')
     },
     {
-      id: 'p7', folderId: 'f3', title: '딜러별 배정 현황', date: 'Dec 15, 2024', author: 'You',
-      content: '특정 딜러의 특정 월 SUV 배정 현황을 분석합니다. [[insert prompt:딜러명/월]]을 입력해주세요.',
-      promptTitle: '배정 현황 분석',
-      promptDescription: '한성자동차 8월 SUV 배정 현황'
+      id: 'p7', folderId: 'f3', title: t('dealerAllocationStatus'), date: 'Dec 15, 2024', author: 'You',
+      content: t('dealerAllocationStatusDesc'),
+      promptTitle: t('dealerAllocationStatusTitle'),
+      promptDescription: t('dealerAllocationStatusDetail')
     },
     {
-      id: 'p8', folderId: 'f4', title: '이메일 전송', date: 'Dec 15, 2024', author: 'You',
-      content: '딜러사 담당자에게 이메일을 전송합니다. 원문과 한국어 번역을 함께 제공합니다. [[insert prompt:수신자/이메일내용]]을 입력해주세요.',
-      promptTitle: '이메일 전송',
-      promptDescription: 'Gemini 번역 기능이 포함된 이메일 전송'
+      id: 'p8', folderId: 'f4', title: t('emailSending'), date: 'Dec 15, 2024', author: 'You',
+      content: t('emailSendingDesc'),
+      promptTitle: t('emailSendingTitle'),
+      promptDescription: t('emailSendingDetail')
     },
-  ]);
+  ], [t]);
 
   const [selectedFolderId, setSelectedFolderId] = useState('f1'); // 기본 선택 폴더
   const [selectedPromptId, setSelectedPromptId] = useState(null); // 현재 선택된 프롬프트

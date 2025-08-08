@@ -81,12 +81,117 @@ const recipientData = [
   }
 ];
 
-// 고정 레이아웃 데이터 (자동차 업계 워크플로우)
+// 고정 레이아웃 데이터 (자동차 업계 워크플로우) - 다국어 지원을 위해 함수로 변경
+// 다국어 지원을 위한 고정 레이아웃 데이터 함수
+const getFixedLayoutData = (t) => [
+  {
+    "process_name": t('dealerInformationLookup'),
+    "step_id": 0,
+    "step_name": "Dealer List Lookup",
+    "description": t('dealerInformationLookupDesc'),
+    "question": ["딜러 정보", "딜러사 정보", "한성자동차", "효성더클래스", "KCC오토", "연락처", "담당자"],
+    "recipients": ["김민준", "이서연", "박지훈", "최은지", "정우진"],
+    "template": "딜러 정보 조회 요청",
+    "answer": [t('dealerInformationLookupDesc')]
+  },
+  {
+    "process_name": t('vehicleSalesStatus'),
+    "step_id": 1,
+    "step_name": "Sales Performance Lookup",
+    "description": t('vehicleSalesStatusDesc'),
+    "question": ["판매 실적", "판매 현황", "매출", "판매 통계", "E-Class", "C-Class", "GLC"],
+    "recipients": ["김민준", "이서연", "박지훈", "최은지", "정우진"],
+    "template": "판매 실적 조회 요청",
+    "api": {
+      "url": "/api/sales_analysis",
+      "method": "GET"
+    },
+    "answer": [t('vehicleSalesStatusDesc')]
+  },
+  {
+    "process_name": t('productionAllocationStatus'),
+    "step_id": 2,
+    "step_name": "Production Status Lookup",
+    "description": t('productionAllocationStatusDesc'),
+    "question": ["생산 현황", "배정 계획", "생산 일정", "한국 배정", "E-Class 생산", "GLC 생산"],
+    "recipients": ["강지혁", "문보람", "윤서준"],
+    "template": "생산 배정 현황 조회 요청"
+  },
+  {
+    "process_name": t('customerWaitlistManagement'),
+    "step_id": 3,
+    "step_name": "Waitlist Customer Lookup",
+    "description": t('customerWaitlistManagementDesc'),
+    "question": ["고객 대기", "대기 명단", "구매 대기", "대기 순번", "EQS 대기", "S-Class 대기"],
+    "recipients": ["김민준", "이서연", "박지훈", "최은지", "정우진"],
+    "template": "고객 대기 현황 조회 요청"
+  },
+  {
+    "process_name": t('monthlySalesAnalysis'),
+    "step_id": 4,
+    "step_name": "July Sales Status Analysis",
+    "description": t('monthlySalesAnalysisDesc'),
+    "question": ["7월 판매", "총 판매 대수", "판매 금액", "한국 내 판매"],
+    "api": {
+      "url": "/api/sales_analysis",
+      "method": "GET"
+    },
+    "answer": [t('monthlySalesAnalysisDesc')]
+  },
+  {
+    "process_name": t('dealerSegmentSales'),
+    "step_id": 5,
+    "step_name": "Hyosung The Class Sedan Sales Analysis",
+    "description": t('dealerSegmentSalesDesc'),
+    "question": ["효성더클래스 세단", "딜러별 세그먼트", "세단 판매"],
+    "api": {
+      "url": "/api/dealership_sales",
+      "method": "GET"
+    },
+    "answer": [t('dealerSegmentSalesDesc')]
+  },
+  {
+    "process_name": t('dealerAllocationStatus'),
+    "step_id": 6,
+    "step_name": "Hansung Motors SUV Allocation Analysis",
+    "description": t('dealerAllocationStatusDesc'),
+    "question": ["한성자동차 SUV", "8월 배정", "SUV 배정 수량"],
+    "api": {
+      "url": "/api/allocation_analysis",
+      "method": "GET"
+    },
+    "answer": [t('dealerAllocationStatusDesc')]
+  },
+  {
+    "process_name": t('emailSending'),
+    "step_id": 7,
+    "step_name": "Email Sending",
+    "description": t('emailSendingDesc'),
+    "question": ["이메일 전송", "담당자", "초대 이메일", "보고서 작성"],
+    "api": {
+      "url": "/api/send_email",
+      "method": "POST",
+      "parameters": [
+        {
+          "name": "recipient_email",
+          "type": "searchable_recipient"
+        },
+        {
+          "name": "description",
+          "type": "description"
+        }
+      ]
+    },
+    "answer": [t('emailSendingDesc')]
+  }
+];
+
+// 기존 호환성을 위한 고정 레이아웃 데이터 (한국어 기본값)
 const fixedLayoutData = [
   {
     "process_name": "딜러 정보 조회",
     "step_id": 0,
-    "step_name": "딜러 목록 조회",
+    "step_name": "Dealer List Lookup",
     "description": "한국 내 벤츠 딜러사들의 기본 정보를 조회합니다.",
     "question": ["딜러 정보", "딜러사 정보", "한성자동차", "효성더클래스", "KCC오토", "연락처", "담당자"],
     "recipients": ["김민준", "이서연", "박지훈", "최은지", "정우진"],
@@ -96,17 +201,21 @@ const fixedLayoutData = [
   {
     "process_name": "차량 판매 현황",
     "step_id": 1,
-    "step_name": "판매 실적 조회",
+    "step_name": "Sales Performance Lookup",
     "description": "딜러별 차량 판매 실적을 조회합니다.",
     "question": ["판매 실적", "판매 현황", "매출", "판매 통계", "E-Class", "C-Class", "GLC"],
     "recipients": ["김민준", "이서연", "박지훈", "최은지", "정우진"],
     "template": "판매 실적 조회 요청",
+    "api": {
+      "url": "/api/sales_analysis",
+      "method": "GET"
+    },
     "answer": ["딜러별 차량 판매 실적을 조회합니다."]
   },
   {
     "process_name": "생산 배정 현황",
     "step_id": 2,
-    "step_name": "생산 현황 조회",
+    "step_name": "Production Status Lookup",
     "description": "독일 본사의 차량 생산 현황과 한국 배정 계획을 조회합니다.",
     "question": ["생산 현황", "배정 계획", "생산 일정", "한국 배정", "E-Class 생산", "GLC 생산"],
     "recipients": ["강지혁", "문보람", "윤서준"],
@@ -115,7 +224,7 @@ const fixedLayoutData = [
   {
     "process_name": "고객 대기 관리",
     "step_id": 3,
-    "step_name": "대기 고객 조회",
+    "step_name": "Waitlist Customer Lookup",
     "description": "특정 차량 모델을 구매 대기 중인 고객들의 정보를 조회합니다.",
     "question": ["고객 대기", "대기 명단", "구매 대기", "대기 순번", "EQS 대기", "S-Class 대기"],
     "recipients": ["김민준", "이서연", "박지훈", "최은지", "정우진"],
@@ -124,7 +233,7 @@ const fixedLayoutData = [
   {
     "process_name": "월별 판매 분석",
     "step_id": 4,
-    "step_name": "7월 판매 현황 분석",
+    "step_name": "July Sales Status Analysis",
     "description": "7월 한국 내 총 판매 대수와 판매 금액을 분석합니다.",
     "question": ["7월 판매", "총 판매 대수", "판매 금액", "한국 내 판매"],
     "api": {
@@ -136,7 +245,7 @@ const fixedLayoutData = [
   {
     "process_name": "딜러별 세그먼트 판매",
     "step_id": 5,
-    "step_name": "효성더클래스 세단 판매 분석",
+    "step_name": "Hyosung The Class Sedan Sales Analysis",
     "description": "효성더클래스를 통해 7월에 주문된 세단의 총 수를 분석합니다.",
     "question": ["효성더클래스 세단", "딜러별 세그먼트", "세단 판매"],
     "api": {
@@ -148,7 +257,7 @@ const fixedLayoutData = [
   {
     "process_name": "딜러별 배정 현황",
     "step_id": 6,
-    "step_name": "한성자동차 SUV 배정 분석",
+    "step_name": "Hansung Motors SUV Allocation Analysis",
     "description": "한성자동차에 8월에 배정될 SUV의 총 수량을 분석합니다.",
     "question": ["한성자동차 SUV", "8월 배정", "SUV 배정 수량"],
     "api": {
@@ -160,7 +269,7 @@ const fixedLayoutData = [
   {
     "process_name": "이메일 전송",
     "step_id": 7,
-    "step_name": "이메일 전송",
+    "step_name": "Email Sending",
     "description": "이메일 전송 폼을 통해 원하는 수신자에게 이메일을 전송할 수 있습니다.",
     "question": ["이메일 전송", "담당자", "초대 이메일", "보고서 작성"],
     "api": {
@@ -654,4 +763,4 @@ const mockApi = {
   }
 };
 
-export { mockApi, fixedLayoutData, recipientData };
+export { mockApi, fixedLayoutData, getFixedLayoutData, recipientData };

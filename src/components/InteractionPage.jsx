@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import './InteractionPage.css';
 import { mockApi, fixedLayoutData } from '../api/mockApi';
+import { useLanguage } from '../contexts/LanguageContext';
 
 import InputBox from './InputBox';
+import LoadingAnimation from './LoadingAnimation';
 import LightbulbIcon from '../assets/lightbulb.png';
 import { getGeminiIntent, translateToKorean } from '../utils/geminiApi';
 
 // NEW PROP: onLlmExplanationChange, clearSourceLogs
 function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExplanationChange, currentOperator }) {
+  const { t } = useLanguage();
   const [layoutData, setLayoutData] = useState([]);
   const [currentStepIndex, setCurrentStepIndex] = useState(null);
   const [currentStepContent, setCurrentStepContent] = useState(null);
@@ -15,7 +18,15 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
   const [error, setError] = useState(null);
 
   // Interaction 페이지 최초 로딩 시 표시될 알림 메시지로 llmExplanation을 초기화합니다.
-  const [llmExplanation, setLlmExplanation] = useState("안녕하세요. Benz Global Management Agent가 업무를 도와 드립니다.");
+  const [llmExplanation, setLlmExplanation] = useState(t('welcomeMessage'));
+
+  // 언어 변경 시 환영 메시지 업데이트
+  useEffect(() => {
+    const newWelcomeMessage = t('welcomeMessage');
+    console.log('Welcome message updated to:', newWelcomeMessage);
+    setLlmExplanation(newWelcomeMessage);
+    onLlmExplanationChange(newWelcomeMessage); // 부모 컴포넌트에도 알림
+  }, [t, onLlmExplanationChange]);
   const [interactionChatHistory, setInteractionChatHistory] = useState([]);
   const [interactionInput, setInteractionInput] = useState('');
   const [isSendingInteraction, setIsSendingInteraction] = useState(false);
@@ -28,45 +39,49 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
   // 1. lastUserInput 상태 추가
   const [lastUserInput, setLastUserInput] = useState('');
 
-  // 자동차 업계 워크플로우 데이터의 question들을 Gemini가 이해할 수 있는 매핑으로 변환
+  // Gemini AI가 의도 분류를 위한 간단하고 명확한 키워드 정의
   const geminiIntentKeywords = useMemo(() => {
     const keywords = {};
     
-    // 딜러 관리 워크플로우
-    const dealerWorkflow = [
-      { process_name: "딜러 정보 조회", step_id: 0, question: ["딜러 정보", "딜러사 정보", "한성자동차", "효성더클래스", "KCC오토", "연락처", "담당자"] },
-      { process_name: "딜러 연락처 관리", step_id: 1, question: ["연락처", "이메일", "전화번호", "담당자 정보"] },
-      { process_name: "딜러 성과 분석", step_id: 2, question: ["성과", "실적", "판매 통계", "딜러별 성과"] }
-    ];
-    
-    // 차량 관리 워크플로우
-    const vehicleWorkflow = [
-      { process_name: "차량 모델 정보", step_id: 0, question: ["차량 모델", "E-Class", "C-Class", "GLC", "EQS", "S-Class", "사양", "가격"] },
-      { process_name: "차량 재고 관리", step_id: 1, question: ["재고", "재고 현황", "차량 재고", "배정 현황"] },
-      { process_name: "VIN 추적", step_id: 2, question: ["VIN", "차량 식별", "차량 이력", "VIN 추적"] }
-    ];
-    
-    // 판매 현황 워크플로우
-    const salesWorkflow = [
-      { process_name: "판매 실적 조회", step_id: 0, question: ["판매 실적", "판매 현황", "매출", "판매 통계", "7월 판매", "총 판매 대수", "판매 금액"] },
-      { process_name: "고객 대기 관리", step_id: 1, question: ["고객 대기", "대기 명단", "구매 대기", "대기 순번"] },
-      { process_name: "생산 배정 현황", step_id: 2, question: ["생산 현황", "배정 계획", "생산 일정", "한국 배정", "8월 배정", "SUV 배정"] }
-    ];
-
-    // 새로운 분석 워크플로우
-    const analysisWorkflow = [
-      { process_name: "월별 판매 분석", step_id: 4, question: ["7월 판매", "총 판매 대수", "판매 금액", "한국 내 판매"] },
-      { process_name: "딜러별 세그먼트 판매", step_id: 5, question: ["효성더클래스 세단", "딜러별 세그먼트", "세단 판매"] },
-      { process_name: "딜러별 배정 현황", step_id: 6, question: ["한성자동차 SUV", "8월 배정", "SUV 배정 수량"] },
-      { process_name: "이메일 전송", step_id: 7, question: ["이메일 전송", "담당자", "초대 이메일", "보고서 작성"] }
-    ];
-    
-    // 모든 워크플로우 통합
-    [...dealerWorkflow, ...vehicleWorkflow, ...salesWorkflow, ...analysisWorkflow].forEach(step => {
-      if (step.question && step.question.length > 0) {
-        const intentKey = `AUTOMOTIVE_${step.process_name.replace(/ /g, '_').toUpperCase()}_${step.step_id}`;
-        keywords[intentKey] = step.question;
+    // 각 워크플로우별로 핵심 키워드만 정의
+    const workflows = [
+      { 
+        intent: "AUTOMOTIVE_DEALER_INFO_LOOKUP_0", 
+        keywords: ["딜러 정보", "딜러사 정보", "dealer information", "딜러 목록", "dealer list"] 
+      },
+      { 
+        intent: "AUTOMOTIVE_VEHICLE_SALES_STATUS_1", 
+        keywords: ["판매 실적", "판매 현황", "sales volume", "sales amount", "total sales", "매출", "판매 통계"] 
+      },
+      { 
+        intent: "AUTOMOTIVE_PRODUCTION_ALLOCATION_STATUS_2", 
+        keywords: ["생산 현황", "배정 계획", "production allocation", "배정 현황", "allocation status"] 
+      },
+      { 
+        intent: "AUTOMOTIVE_CUSTOMER_WAITLIST_MANAGEMENT_3", 
+        keywords: ["고객 대기", "대기 명단", "waitlist", "구매 대기", "customer waitlist"] 
+      },
+      { 
+        intent: "AUTOMOTIVE_MONTHLY_SALES_ANALYSIS_4", 
+        keywords: ["월별 판매", "monthly sales", "7월 판매", "July sales", "총 판매 대수", "total sales volume"] 
+      },
+      { 
+        intent: "AUTOMOTIVE_DEALER_SEGMENT_SALES_5", 
+        keywords: ["딜러별 세그먼트", "dealer segment", "효성더클래스", "Hyosung The Class", "세단", "sedan", "딜러별 판매"] 
+      },
+      { 
+        intent: "AUTOMOTIVE_DEALER_ALLOCATION_STATUS_6", 
+        keywords: ["딜러별 배정", "dealer allocation", "한성자동차", "Hansung Motors", "SUV 배정", "SUV allocation"] 
+      },
+      { 
+        intent: "AUTOMOTIVE_EMAIL_SENDING_7", 
+        keywords: ["이메일 전송", "email sending", "이메일", "email", "초대 이메일", "invitation email"] 
       }
+    ];
+    
+    // 키워드 매핑 생성
+    workflows.forEach(workflow => {
+      keywords[workflow.intent] = workflow.keywords;
     });
     
     return keywords;
@@ -109,8 +124,8 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
   useEffect(() => {
     interactionInputRef.current?.focus();
     // 컴포넌트 마운트 시 초기 LLM 설명 메시지를 부모 컴포넌트로 전달하여 App.jsx의 lastLlmExplanation 상태를 업데이트합니다.
-    onLlmExplanationChange("안녕하세요. Banya Agent 이 업무를 도와 드립니다.");
-  }, []);
+    onLlmExplanationChange(t('welcomeMessage'));
+  }, [onLlmExplanationChange, t]);
 
   useEffect(() => {
     chatDisplayRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
@@ -219,20 +234,20 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
       if (data.totalAmount !== undefined) {
         return (
           <div className="analysis-result">
-            <h3>📊 {data.month}월 {data.year}년 판매 분석 결과</h3>
+            <h3>📊 {data.month}월 {data.year}년 {t('salesAnalysisResult')}</h3>
             <div className="analysis-summary">
               <div className="analysis-item">
-                <span className="label">총 판매 대수:</span>
-                <span className="value">{data.totalQuantity}대</span>
+                <span className="label">{t('totalSalesVolume')}:</span>
+                <span className="value">{data.totalQuantity}{t('units')}</span>
               </div>
               <div className="analysis-item">
-                <span className="label">총 판매 금액:</span>
-                <span className="value">{data.totalAmount.toLocaleString()}원</span>
+                <span className="label">{t('totalSalesAmount')}:</span>
+                <span className="value">{data.totalAmount.toLocaleString()}{t('won')}</span>
               </div>
             </div>
             {data.sales && data.sales.length > 0 && (
               <div className="sales-details">
-                <h4>상세 판매 내역</h4>
+                <h4>{t('detailedSalesHistory')}</h4>
                 <TableRenderer data={data.sales} header={Object.keys(data.sales[0])} />
               </div>
             )}
@@ -244,16 +259,16 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
       if (data.totalQuantity !== undefined && data.segment === 'SUV') {
         return (
           <div className="analysis-result">
-            <h3>🚗 {data.dealership} {data.month}월 {data.year}년 SUV 배정 현황</h3>
+            <h3>🚗 {data.dealership} {data.month}월 {data.year}년 {t('suvAllocationStatus')}</h3>
             <div className="analysis-summary">
               <div className="analysis-item">
-                <span className="label">총 SUV 배정 수량:</span>
-                <span className="value">{data.totalQuantity}대</span>
+                <span className="label">{t('totalSuvAllocation')}:</span>
+                <span className="value">{data.totalQuantity}{t('units')}</span>
               </div>
             </div>
             {data.allocations && data.allocations.length > 0 && (
               <div className="allocation-details">
-                <h4>배정 상세 내역</h4>
+                <h4>{t('allocationDetails')}</h4>
                 <TableRenderer data={data.allocations} header={Object.keys(data.allocations[0])} />
               </div>
             )}
@@ -266,33 +281,33 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
     if (data.dealership && data.segment && data.totalQuantity !== undefined) {
       return (
         <div className="analysis-result">
-          <h3>🏢 {data.dealership} {data.month}월 {data.year}년 {data.segment} 판매 현황</h3>
+          <h3>🏢 {data.dealership} {data.month}월 {data.year}년 {data.segment} {t('dealerSegmentSalesStatus')}</h3>
           <div className="analysis-summary">
             <div className="analysis-item">
-              <span className="label">총 {data.segment} 판매 대수:</span>
-              <span className="value">{data.totalQuantity}대</span>
+              <span className="label">{t('totalSegmentSales', { segment: data.segment })}:</span>
+              <span className="value">{data.totalQuantity}{t('units')}</span>
             </div>
             <div className="analysis-item">
-              <span className="label">총 판매 금액:</span>
-              <span className="value">{data.totalAmount.toLocaleString()}원</span>
+              <span className="label">{t('totalSalesAmount')}:</span>
+              <span className="value">{data.totalAmount.toLocaleString()}{t('won')}</span>
             </div>
           </div>
           {data.sales && data.sales.length > 0 ? (
             <div className="sales-details">
-              <h4>상세 판매 내역</h4>
+              <h4>{t('detailedSalesHistory')}</h4>
               <TableRenderer data={data.sales} header={Object.keys(data.sales[0])} />
             </div>
           ) : (
             <div className="no-data-message">
-              <p>해당 기간에 {data.segment} 판매 내역이 없습니다.</p>
+              <p>{t('noSalesHistory', { segment: data.segment })}</p>
             </div>
           )}
         </div>
       );
     }
 
-    return <p className="no-data-message">분석 결과를 표시할 수 없습니다.</p>;
-  }, []);
+    return <p className="no-data-message">{t('cannotDisplayResult')}</p>;
+  }, [t]);
 
   const fetchAndRenderStep = useCallback(async (step, extractedEntities = {}) => {
     setIsLoadingStep(true);
@@ -347,17 +362,19 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
                 break;
               case 'dealership_sales': 
                 // 딜러별 세그먼트 판매 - 추출된 엔티티 사용
-                const dealershipName = extractedEntities?.dealership || '효성더클래스';
+                const dealershipName = extractedEntities?.dealer || 'Hyosung The Class';
                 const segmentMonth = extractedEntities?.month || 7;
                 const segmentYear = extractedEntities?.year || 2025;
                 const segment = extractedEntities?.segment || 'Sedan';
+                console.log('Dealership sales API call with:', { dealershipName, segmentMonth, segmentYear, segment, extractedEntities });
                 apiResponse = await mockApi.getDealershipSalesBySegment(dealershipName, segmentMonth, segmentYear, segment); 
                 break;
               case 'allocation_analysis': 
                 // 딜러별 배정 현황 - 추출된 엔티티 사용
-                const allocationDealership = extractedEntities?.dealership || '한성자동차';
+                const allocationDealership = extractedEntities?.dealer || '한성자동차';
                 const allocationMonth = extractedEntities?.month || 8;
                 const allocationYear = extractedEntities?.year || 2025;
+                console.log('Allocation analysis API call with:', { allocationDealership, allocationMonth, allocationYear, extractedEntities });
                 apiResponse = await mockApi.getAllocationByDealership(allocationDealership, allocationMonth, allocationYear); 
                 break;
               case 'send_email': 
@@ -380,9 +397,9 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
                 contentToRender = renderAnalysisResult(apiResponse.data);
             } else {
                 console.log('No data found, showing no-data message');
-                contentToRender = <p className="no-data-message">조회된 데이터가 없습니다.</p>;
+                contentToRender = <p className="no-data-message">{t('noDataMessage')}</p>;
                 if (patientName) {
-                    contentToRender = <p className="no-data-message">'{patientName}' 환자 관련 데이터를 찾을 수 없습니다.</p>;
+                    contentToRender = <p className="no-data-message">{t('patientDataNotFound', { patientName })}</p>;
                 }
             }
           } else if (method === 'POST') {
@@ -393,14 +410,14 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
                 onFormSubmit={async (formData) => {
                   setIsLoadingStep(true);
                   try {
-                    addApiCallLog('API', 'Agent 가 파악한 API 를 호출합니다.');
+                    addApiCallLog('API', t('banyaAgentWorking'));
                     let json;
                     // 이메일 전송 처리
                     if (step.api.url === '/api/send_email') {
                       // 사용자의 원본 질문에서 이메일 내용 추출
                       const originalQuestion = lastUserInput || '';
                       let emailContent = '';
-                      let emailSubject = '벤츠 신차 출시 행사 초대';
+                      let emailSubject = t('emailSubject');
                       
                       // 원본 질문에서 이메일 내용 추출 시도
                       if (originalQuestion.includes('다음 이메일을') || originalQuestion.includes('이메일을')) {
@@ -410,7 +427,7 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
                           const originalContent = emailMatch[1].trim();
                           try {
                             const translatedContent = await translateToKorean(originalContent);
-                            emailContent = `=== 원문 ===\n${originalContent}\n\n=== 한국어 번역 ===\n${translatedContent}`;
+                            emailContent = `=== ${t('originalText')} ===\n${originalContent}\n\n=== ${t('koreanTranslation')} ===\n${translatedContent}`;
                           } catch (error) {
                             console.error('Translation error:', error);
                             emailContent = originalContent;
@@ -419,7 +436,7 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
                           // 전체 질문을 이메일 내용으로 사용
                           try {
                             const translatedQuestion = await translateToKorean(originalQuestion);
-                            emailContent = `=== 원문 ===\n${originalQuestion}\n\n=== 한국어 번역 ===\n${translatedQuestion}`;
+                            emailContent = `=== ${t('originalText')} ===\n${originalQuestion}\n\n=== ${t('koreanTranslation')} ===\n${translatedQuestion}`;
                           } catch (error) {
                             console.error('Translation error:', error);
                             emailContent = originalQuestion;
@@ -427,7 +444,7 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
                         }
                       } else {
                         // 기본 이메일 내용
-                        const defaultContent = "다음 달 11일 독일 본사에서 개최되는 신차 세계 최초 출시 행사에 한국 자동차 전문 기자단과 VIP 여러분을 초대할 예정입니다. 아래 링크를 참고하여 보고서를 작성해 주시기 바랍니다.";
+                        const defaultContent = t('defaultEmailContent');
                         emailContent = defaultContent;
                       }
                       
@@ -435,13 +452,13 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
                     } else {
                       json = await mockApi.postSend(formData);
                     }
-                    setInteractionChatHistory((prev) => [...prev, { role: 'model', content: `POST 요청 완료: ${json.message || '응답 메시지 없음'}` }]);
+                    setInteractionChatHistory((prev) => [...prev, { role: 'model', content: `${t('postRequestComplete')}: ${json.message || t('noResponseMessage')}` }]);
                     const nextStepConfig = step.next_step && step.next_step.length > 0 ? step.next_step[0] : null;
                     if (nextStepConfig && nextStepConfig.step_id !== null) {
                       const nextIdx = layoutData.findIndex(s => s.step_id === nextStepConfig.step_id);
                       if (nextIdx !== -1) { setCurrentStepIndex(nextIdx); }
-                      else { setError(`다음 스텝 ID ${nextStepConfig.step_id}를 layoutData에서 찾을 수 없습니다.`); handleWorkflowComplete("워크플로우가 예상치 못하게 종료되었습니다."); }
-                    } else { handleWorkflowComplete("워크플로우가 성공적으로 완료되었습니다."); }
+                      else { setError(`다음 스텝 ID ${nextStepConfig.step_id}를 layoutData에서 찾을 수 없습니다.`); handleWorkflowComplete(t('workflowUnexpectedEnd')); }
+                    } else { handleWorkflowComplete(t('workflowComplete')); }
                   } catch (err) {
                     addApiCallLog('API', `POST 데이터 전송 실패: ${err.message}`);
                     setError(`Error sending POST request: ${err.message}`);
@@ -504,7 +521,7 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
     if (!isIframe) {
       setIsLoadingStep(false);
     }
-  }, [layoutData, handleWorkflowComplete, renderData, addApiCallLog]);
+  }, [layoutData, handleWorkflowComplete, renderData, addApiCallLog, t, lastUserInput]);
 
 
   useEffect(() => {
@@ -539,7 +556,7 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
     window.lastUserInput = userQuery;
 
     try {
-        addApiCallLog('LLM', 'Banya Agent LLM 이 업무 절차를 분석 중입니다.'); // getLayout api 대신 LLM 시작 메시지
+        addApiCallLog('LLM', t('banyaAgentAnalyzing')); // getLayout api 대신 LLM 시작 메시지
         // getGeminiIntent 호출 변경: 객체 반환을 기대
         const { matched_intent: matchedIntentKey, extracted_entities: extractedEntities } = await getGeminiIntent(userQuery, geminiIntentKeywords);
         console.log("Matched Intent Key from Gemini:", matchedIntentKey);
@@ -559,9 +576,9 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
                 selectedLayoutData = fixedLayoutData;
                 initialStep = fixedLayoutData.find(s => s.step_id === stepIdFromIntent);
                 if (initialStep) {
-                    llmResponseExplanation = initialStep.answer?.[0] || initialStep.description || "워크플로우를 시작합니다.";
+                    llmResponseExplanation = initialStep.answer?.[0] || initialStep.description || t('workflowStart');
                 } else {
-                    llmResponseExplanation = "죄송합니다. LLM이 요청을 이해했지만, 해당 워크플로우 스텝을 찾을 수 없습니다.";
+                    llmResponseExplanation = t('workflowNotFound');
                 }
             }
             // 병원용 워크플로우 처리
@@ -573,18 +590,18 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
                 } else {
                     initialStep = fixedLayoutData.find(s => s.step_id === stepIdFromIntent);
                     if (initialStep) {
-                        llmResponseExplanation = initialStep.answer?.[0] || initialStep.description || "워크플로우를 시작합니다.";
-                        // 환자 이름이 추출되었다면 설명에 추가
-                        if (extractedEntities?.patient_name) {
-                            llmResponseExplanation = `'${extractedEntities.patient_name}' 환자 ${initialStep.process_name}을(를) 조회합니다.`;
-                        }
-                    } else {
-                        llmResponseExplanation = "죄송합니다. LLM이 요청을 이해했지만, 해당 워크플로우 스텝을 찾을 수 없습니다.";
+                                            llmResponseExplanation = initialStep.answer?.[0] || initialStep.description || t('workflowStart');
+                    // 환자 이름이 추출되었다면 설명에 추가
+                    if (extractedEntities?.patient_name) {
+                        llmResponseExplanation = `'${extractedEntities.patient_name}' 환자 ${initialStep.process_name}을(를) 조회합니다.`;
                     }
+                } else {
+                    llmResponseExplanation = t('workflowNotFound');
+                }
                 }
             }
         } else {
-            llmResponseExplanation = "죄송합니다. 요청하신 내용을 이해하지 못했습니다. 다른 방식으로 질문해 주시겠어요.";
+            llmResponseExplanation = t('sorryNotUnderstood');
         }
 
         // 선택된 LLM 모델명을 explanation에 추가
@@ -612,8 +629,8 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
       console.error("Error processing intent or LLM API:", err);
       addApiCallLog('Gemma', `LLM 의도 분석 실패: ${err.message}`);
       setError(`LLM 응답 오류: ${err.message}`);
-      setLlmExplanation('죄송합니다. LLM 응답 처리 중 문제가 발생했습니다.');
-      onLlmExplanationChange('죄송합니다. LLM 응답 처리 중 문제가 발생했습니다.'); // NEW: 오류 시 상위 컴포넌트로 전달
+      setLlmExplanation(t('llmResponseError'));
+      onLlmExplanationChange(t('llmResponseError')); // NEW: 오류 시 상위 컴포넌트로 전달
     } finally {
       setIsSendingInteraction(false);
       // interactionInputRef.current?.focus(); // 이 포커스 호출은 이제 새로운 useEffect에서 처리됩니다.
@@ -628,7 +645,9 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
         {/* Localized loading indicator within the main content area */}
         {(isLoadingStep || isSendingInteraction) && (
             <div className="step-overlay-loading"> {/* Using step-overlay-loading for local overlay */}
-                {isSendingInteraction ? 'LLM 응답 대기 중...' : '로딩 중...'}
+                <LoadingAnimation 
+                    message={isSendingInteraction ? t('llmResponseWaiting') : t('loading')} 
+                />
             </div>
         )}
 
@@ -674,7 +693,7 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
         onChange={(e) => setInteractionInput(e.target.value)}
         onSend={handleInteractionInputSend}
         isLoading={isSendingInteraction || isLoadingStep}
-        placeholder="원하는 Task를 말씀해 보세요."
+        placeholder={t('placeholder')}
         inputRef={interactionInputRef}
       />
     </div>

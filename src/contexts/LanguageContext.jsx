@@ -30,6 +30,7 @@ export const LanguageProvider = ({ children }) => {
 
   const changeLanguage = (languageCode) => {
     if (languages[languageCode]) {
+      console.log('Language changed to:', languageCode);
       setCurrentLanguage(languageCode);
       setTranslations(languages[languageCode].translations);
       localStorage.setItem('language', languageCode);

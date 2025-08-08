@@ -4,9 +4,11 @@ import './LeftSidebar.css';
 import MessageIcon from '../assets/Message.png';
 import ElementsIcon from '../assets/elements.png';
 import ReactIcon from '../assets/React.png';
+import { useLanguage } from '../contexts/LanguageContext';
 
 // savedSessions, onLoadSession, selectedSavedSessionId prop을 받습니다.
 function LeftSidebar({ isOpen, savedSessions, onLoadSession, selectedSavedSessionId, selectedMenu, setSelectedMenu }) {
+  const { t } = useLanguage();
   return (
     <div className={`left-sidebar ${isOpen ? 'open' : 'closed'}`}>
       <nav className="main-menu">
@@ -28,7 +30,7 @@ function LeftSidebar({ isOpen, savedSessions, onLoadSession, selectedSavedSessio
 
       <div className="chat-history-section">
         <div className="chat-history-header">
-          <span>대화 기록</span>
+          <span>{t('chatHistory')}</span>
           <span className="dropdown-arrow">▼</span>
         </div>
         <ul className="chat-history-list">
@@ -45,7 +47,7 @@ function LeftSidebar({ isOpen, savedSessions, onLoadSession, selectedSavedSessio
               </li>
             ))
           ) : (
-            <li className="chat-history-item no-sessions">저장된 대화가 없습니다.</li> // 저장된 세션이 없을 때 메시지
+            <li className="chat-history-item no-sessions">{t('noSavedChats')}</li> // 저장된 세션이 없을 때 메시지
           )}
         </ul>
       </div>

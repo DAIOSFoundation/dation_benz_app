@@ -34,23 +34,55 @@ async function fileToGenerativePart(file) {
 }
 
 /**
- * Gemini API를 호출하여 사용자 입력과 제공된 의도 매핑을 기반으로 가장 유사한 의도를 식별합니다.
- * 또한, 특정 의도와 관련된 엔티티(예: 환자 이름)를 추출합니다.
+ * Gemini API를 호출하여 사용자 입력을 분석하여 의도를 분류하고 관련 엔티티를 추출합니다.
  * @param {string} userMessage - 사용자의 입력 메시지
- * @param {Object} intentMapping - 의도 키와 해당 질문 목록을 포함하는 객체 (예: {"AUTOMOTIVE_DEALER_INFO_0": ["딜러 정보 조회"]})
+ * @param {Object} intentMapping - 의도 키와 해당 질문 목록을 포함하는 객체
  * @returns {Promise<{matched_intent: string, extracted_entities?: Object}>} - 식별된 의도 키와 추출된 엔티티 객체
  */
 export const getGeminiIntent = async (userMessage, intentMapping) => {
-    const intentString = JSON.stringify(intentMapping, null, 2); // 프롬프트에 JSON 형태로 삽입
+    const intentString = JSON.stringify(intentMapping, null, 2);
 
-    const prompt = `주어진 사용자 메시지: '${userMessage}'.
-    가능한 의도의 리스트와 관련된 키워드와 문장들 :
-    ${intentString}
-    제공된 리스트 중에서 의미적으로 가장 유사한 의도를 가진 리스트로 부터 매칭된 것을 선택.
-    만약 사용자 메시지에 환자 이름이 포함되어 있고, 해당 환자 정보나 예약 내역 조회와 관련된 의도라면, 환자 이름을 'patient_name' 키로 추출.
-    JSON object 포맷으로만 응답 : { "matched_intent": "INTENT_KEY", "extracted_entities": { "patient_name": "환자이름" } }
-    만약 적합한 의도가 매칭되지 않으면, 응답은 : { "matched_intent": "NONE" } 으로 출력.
-    한국어로만 응답할것`;
+    const prompt = `당신은 자동차 업계 관리 시스템의 의도 분류 전문가입니다. 
+사용자의 질문을 분석하여 가장 적합한 업무 의도를 분류하고, 관련 정보를 추출해주세요.
+
+사용자 메시지: "${userMessage}"
+
+가능한 업무 의도 목록:
+${intentString}
+
+분석 지침:
+1. 사용자 메시지의 의미를 정확히 파악하여 가장 적합한 의도를 선택하세요.
+2. 자동차 업계 관련 용어를 이해하고 매칭하세요 (예: 딜러명, 차량 모델, 세그먼트 등).
+3. 다음 엔티티들을 추출하세요:
+   - dealer: 딜러명 (예: "Hyosung The Class", "한성자동차", "효성더클래스")
+   - month: 월 (숫자, 예: 7, 8)
+   - year: 년도 (숫자, 예: 2025)
+   - segment: 차량 세그먼트 (예: "Sedan", "SUV", "세단")
+   - model: 차량 모델명 (예: "E-Class", "GLC")
+   - patient_name: 환자명 (병원 시스템용)
+
+4. 영어와 한국어 모두 지원하세요.
+
+JSON 형식으로만 응답하세요:
+{
+  "matched_intent": "INTENT_KEY",
+  "extracted_entities": {
+    "dealer": "딜러명",
+    "month": 숫자,
+    "year": 숫자,
+    "segment": "세그먼트",
+    "model": "모델명",
+    "patient_name": "환자명"
+  }
+}
+
+적합한 의도가 없으면: {"matched_intent": "NONE", "extracted_entities": {}}
+
+예시:
+- "What were the total sales volume and sales amount in Korea for July?" 
+  → {"matched_intent": "AUTOMOTIVE_VEHICLE_SALES_STATUS_1", "extracted_entities": {"month": 7, "year": 2025}}
+- "효성더클래스에서 7월에 주문한 세단 수량은?" 
+  → {"matched_intent": "AUTOMOTIVE_DEALER_SEGMENT_SALES_5", "extracted_entities": {"dealer": "효성더클래스", "month": 7, "year": 2025, "segment": "Sedan"}}`;
 
     try {
         const result = await model.generateContent(prompt);

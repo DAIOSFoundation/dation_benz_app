@@ -1,0 +1,129 @@
+.language-toggle {
+  position: relative;
+  display: inline-block;
+}
+
+.language-toggle-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  transition: all 0.2s ease;
+  min-width: 120px;
+  justify-content: space-between;
+}
+
+.language-toggle-button:hover {
+  background: #f8f9fa;
+  border-color: #007bff;
+}
+
+.language-toggle-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.language-icon {
+  font-size: 16px;
+}
+
+.current-language {
+  font-weight: 500;
+  flex: 1;
+  text-align: center;
+}
+
+.dropdown-arrow {
+  font-size: 10px;
+  transition: transform 0.2s ease;
+  color: #666;
+}
+
+.dropdown-arrow.open {
+  transform: rotate(180deg);
+}
+
+.language-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  min-width: 120px;
+  margin-top: 4px;
+  overflow: hidden;
+}
+
+.language-option {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  transition: background-color 0.2s ease;
+}
+
+.language-option:hover {
+  background: #f8f9fa;
+}
+
+.language-option.active {
+  background: #007bff;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.language-option:not(:last-child) {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* 애니메이션 효과 */
+.language-dropdown {
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .language-toggle-button {
+    min-width: 100px;
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+  
+  .current-language {
+    font-size: 12px;
+  }
+  
+  .language-dropdown {
+    min-width: 100px;
+  }
+  
+  .language-option {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+}

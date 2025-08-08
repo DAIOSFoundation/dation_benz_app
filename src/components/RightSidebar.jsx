@@ -3,11 +3,13 @@ import React, { useMemo } from 'react';
 import './RightSidebar.css';
 import SidebarRightIcon from '../assets/Sidebar Right.png'; // 닫기 아이콘 임포트
 import { calculateSimilarity } from '../utils/textSimilarity'; // NEW
+import { useLanguage } from '../contexts/LanguageContext';
 
 // toggleSidebar prop을 추가
 // selectedMenu prop을 추가
 // lastLlmOutput prop을 추가
 function RightSidebar({ isOpen, toggleSidebar, apiCallLogs, selectedMenu, lastLlmOutput }) { // NEW: lastLlmOutput prop
+  const { t } = useLanguage();
   const processedLogs = useMemo(() => {
     const sourceLogs = []; // Source 타입 로그를 별도로 수집
     const filteredNonSourceLogs = []; // Non-Source 타입 로그를 필터링하여 저장
@@ -76,18 +78,18 @@ function RightSidebar({ isOpen, toggleSidebar, apiCallLogs, selectedMenu, lastLl
     <div className={`right-sidebar ${isOpen ? 'open' : 'closed'}`}>
       {/* 새로운 사이드바 헤더 추가 */}
       <div className="sidebar-header">
-        <h3>Benz Global Status</h3> {/* 벤츠 글로벌 관리 시스템 상태 */}
+        <h3>{t('benzGlobalStatus')}</h3> {/* 벤츠 글로벌 관리 시스템 상태 */}
         <img
           src={SidebarRightIcon}
-          alt="Close Sidebar"
+          alt={t('closeSidebar')}
           className="icon-button" /* App.css에 정의된 icon-button 스타일 재활용 */
           onClick={toggleSidebar} /* 클릭 시 사이드바 닫기 */
-          title="Close Right Sidebar"
+          title={t('closeSidebar')}
         />
       </div>
       <div className="sidebar-content">
         {processedLogs.length === 0 ? (
-          <p className="no-logs-message">벤츠 글로벌 시스템 동작 내역이 없습니다.</p>
+          <p className="no-logs-message">{t('noSystemLogs')}</p>
         ) : (
           <ul className="api-call-log-list">
             {processedLogs.map((log, index) => (

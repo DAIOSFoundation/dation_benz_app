@@ -3,10 +3,12 @@ import React, { useRef, useEffect } from 'react';
 import './InputBox.css';
 import PromptBoxIcon from '../assets/Prompt Box.png';
 import CloseIcon from '../assets/close.png'; // 닫기 아이콘 추가
+import { useLanguage } from '../contexts/LanguageContext';
 
 // inputRef prop을 추가
 // pastedImage, onPasteImage, onClearImage prop 추가
 function InputBox({ value, onChange, onSend, isLoading, placeholder, inputRef, pastedImage, onPasteImage, onClearImage }) {
+  const { t } = useLanguage();
     const textareaRef = useRef(null);
 
     useEffect(() => {
@@ -49,9 +51,10 @@ function InputBox({ value, onChange, onSend, isLoading, placeholder, inputRef, p
                     </button>
                 </div>
             )}
+            
             <textarea
                 ref={textareaRef}
-                placeholder={isLoading ? "응답을 기다리는 중..." : placeholder || "메시지를 입력하세요..."}
+                placeholder={isLoading ? t('waitingForResponse') : placeholder || t('placeholder')}
                 value={value}
                 onChange={onChange}
                 onKeyDown={handleKeyDown}
@@ -60,6 +63,7 @@ function InputBox({ value, onChange, onSend, isLoading, placeholder, inputRef, p
                 className="custom-prompt-textarea"
                 disabled={isLoading}
             ></textarea>
+            
             <button onClick={onSend} className="custom-send-button" disabled={isLoading || (value.trim() === '' && !pastedImage)}>
                 <img src={PromptBoxIcon} alt="Send" />
             </button>

@@ -16,6 +16,9 @@
   align-items: center;
   gap: 15px;
   flex: 1;
+  min-width: 200px; /* 최소 너비 설정 */
+  margin-right: 0; /* 우측 마진 제거하여 간격 최소화 */
+  justify-content: flex-start; /* 좌측 정렬 */
 }
 
 .playground-text {
@@ -24,13 +27,20 @@
   color: var(--text-color-primary);
 }
 
+/* header-center는 더 이상 사용하지 않음 - 현재 위치 컴포넌트가 header-left로 이동됨 */
+/*
 .header-center {
   display: flex;
   align-items: center;
-  justify-content: center;
-  flex: 2;
+  justify-content: flex-start !important;
+  flex: 0 1 auto;
   min-width: 0;
+  padding-left: 0 !important;
+  padding-right: 10px;
+  margin-left: 0 !important;
+  width: auto;
 }
+*/
 
 .current-dealer-info {
   display: flex;
@@ -40,8 +50,15 @@
   padding: 8px 16px;
   border-radius: 8px;
   border: 1px solid var(--border-color);
-  width: 100%;
-  max-width: 600px;
+  width: auto; /* 자동 너비로 변경 */
+  max-width: 800px; /* 더 넓게 확장 */
+  min-width: 300px; /* 최소 너비 설정 */
+  margin-left: 0 !important; /* 강제 좌측 정렬 */
+  margin-right: 0 !important; /* 우측 마진 제거 */
+  position: relative; /* 위치 조정을 위한 상대 위치 설정 */
+  left: 0 !important; /* 강제 좌측 끝에 위치 */
+  transform: translateX(0) !important; /* 강제로 X축 이동 없음 */
+  flex-shrink: 0; /* 축소 방지 */
 }
 
 .dealer-label {
@@ -58,6 +75,8 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  min-width: 0; /* flex 아이템이 축소될 수 있도록 */
+  max-width: 100%; /* 최대 너비 제한 */
 }
 
 .date-info {
@@ -71,9 +90,11 @@
 .header-right {
   display: flex;
   align-items: center;
-  gap: 16px; /* 아이콘과 버튼 사이 간격 */
+  gap: 12px; /* 아이콘과 버튼 사이 간격 */
   flex: 1;
   justify-content: flex-end;
+  min-width: 200px; /* 최소 너비 설정 */
+  margin-left: auto; /* 좌측 마진을 자동으로 설정하여 우측 정렬 */
 }
 
 /* 사용자 프로필 스타일 추가 */
@@ -155,4 +176,48 @@
 
 .icon-button.rotate-closed {
   transform: rotate(0deg);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1200px) {
+  .current-dealer-info {
+    max-width: 600px;
+    margin-left: 0 !important;
+    left: 0 !important;
+  }
+  
+  .header-center {
+    flex: 2;
+    justify-content: flex-start !important;
+    padding-left: 0 !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .current-dealer-info {
+    max-width: 400px;
+    min-width: 250px;
+    margin-left: 0 !important;
+    left: 0 !important;
+  }
+  
+  .header-center {
+    flex: 1;
+    padding-left: 0 !important;
+    padding-right: 5px;
+    justify-content: flex-start !important;
+  }
+  
+  .header-left,
+  .header-right {
+    min-width: 150px;
+  }
+  
+  .dealer-name {
+    font-size: 0.9rem;
+  }
+  
+  .dealer-label {
+    font-size: 0.8rem;
+  }
 }
