@@ -285,8 +285,6 @@ function App() {
 
       <div className="main-content-area">
         <TopHeader
-          selectedLLM={selectedLLM}
-          setSelectedLLM={setSelectedLLM}
           toggleRightSidebar={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
           isRightSidebarOpen={isRightSidebarOpen}
           toggleLeftSidebar={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)}
@@ -296,7 +294,6 @@ function App() {
           onDeployApp={handleDeployApp} // NEW PROP
           onSaveChat={handleSaveChat}
           chatHistory={chatHistory}
-          currentOperator={currentOperator}
         />
         {selectedMenu === 'General' && (
           <>

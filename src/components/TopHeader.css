@@ -24,10 +24,6 @@
   color: var(--text-color-primary);
 }
 
-.llm-select-box {
-  min-width: 220px;
-}
-
 .header-center {
   display: flex;
   align-items: center;

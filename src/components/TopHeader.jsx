@@ -6,12 +6,7 @@ import SidebarRightIcon from '../assets/Sidebar Right.png';
 import TonyProfileIcon from '../assets/tony_ilsan.png';
 
 // NEW PROPS: isInteractionPage, onDeployApp, onSaveChat, chatHistory
-function TopHeader({ selectedLLM, setSelectedLLM, toggleRightSidebar, isRightSidebarOpen, toggleLeftSidebar, isLeftSidebarOpen, onNewChat, isInteractionPage, onDeployApp, onSaveChat, chatHistory }) {
-  const llmModels = [
-    'Banya Gemma 27B Tuned',
-    'Banya Code 8B Tuned',
-  ];
-
+function TopHeader({ toggleRightSidebar, isRightSidebarOpen, toggleLeftSidebar, isLeftSidebarOpen, onNewChat, isInteractionPage, onDeployApp, onSaveChat, chatHistory }) {
   // 현재 날짜 표시
   const currentDate = new Date().toLocaleDateString('ko-KR', {
     year: 'numeric',
@@ -30,15 +25,6 @@ function TopHeader({ selectedLLM, setSelectedLLM, toggleRightSidebar, isRightSid
           title="Toggle Left Sidebar"
         />
         <span className="playground-text">Benz Global Management</span>
-        <select
-          value={selectedLLM}
-          onChange={(e) => setSelectedLLM(e.target.value)}
-          className="llm-select-box"
-        >
-          {llmModels.map((model) => (
-            <option key={model} value={model}>{model}</option>
-          ))}
-        </select>
       </div>
 
       <div className="header-center">
