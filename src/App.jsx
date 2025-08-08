@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import './App.css';
 import LeftSidebar from './components/LeftSidebar';
 import TopHeader from './components/TopHeader';
-import MainContent from './components/MainContent';
+
 import RightSidebar from './components/RightSidebar';
 import InteractionPage from './components/InteractionPage';
 import MakePromptsPage from './components/MakePromptsPage';
@@ -27,9 +27,8 @@ function App() {
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(true);
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(true); // General 페이지에서 기본적으로 열려있도록 true로 변경
   const [selectedLLM, setSelectedLLM] = useState('Banya Gemma 27B Tuned');
-  const [chatHistory, setChatHistory] = useState([]); // MainContent의 현재 대화 내용
-  const [currentPromptInput, setCurrentPromptInput] = useState('');
-  const [selectedMenu, setSelectedMenu] = useState('Dealer Management');
+
+  const [selectedMenu, setSelectedMenu] = useState('Interaction');
   const [savedChatSessions, setSavedChatSessions] = useState([]); // <-- 저장된 챗 세션 목록
   const [selectedSavedSessionId, setSelectedSavedSessionId] = useState(null); // <-- 현재 로드된 저장 세션 ID
   const [apiCallLogs, setApiCallLogs] = useState([]); // 새로운 상태: API 호출 로그
@@ -109,103 +108,15 @@ function App() {
     setLastLlmOutput(output);
   }, []);
 
-  // --- 챗 세션 저장 함수 ---
-  const handleSaveChat = async (currentChatHistoryToSave) => {
-    // console.log('App: Attempting to save chat session.');
-    if (currentChatHistoryToSave.length === 0) {
-      alert("현재 대화 내용이 없습니다. 저장할 내용이 없습니다.");
-      return;
-    }
-    const newSession = {
-      id: `session-${Date.now()}`,
-      timestamp: new Date().toLocaleString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-      messages: currentChatHistoryToSave, // 현재 MainContent의 chatHistory 통째로 저장
-    };
-
-    const response = await mockApi.saveChatSession(newSession); // <-- 이 부분
-    if (response.success) {
-      setSavedChatSessions(prev => [newSession, ...prev]); // 최신 세션이 맨 위로 오도록 unshift
-      alert(response.message);
-      setSelectedSavedSessionId(newSession.id); // 저장된 세션이 선택되도록
-    } else {
-      alert("대화 저장 실패: " + response.message);
-    }
-  };
-
-  // --- 저장된 챗 세션 불러오기 함수 ---
-  const handleLoadChatSession = (sessionToLoad) => {
-    // console.log('App: Loading chat session:', sessionToLoad.id);
-    setChatHistory(sessionToLoad.messages); // MainContent의 chatHistory를 선택된 세션으로 업데이트
-    setCurrentPromptInput(''); // 입력창도 초기화
-    setSelectedSavedSessionId(sessionToLoad.id); // 선택된 세션 ID 업데이트
-    setSelectedMenu('General'); // General 페이지로 이동
-    clearSourceLogs(); // 새 세션 로드 시 출처 로그 초기화
-    setLastLlmOutput(''); // NEW: 새 세션 로드 시 LLM 출력 초기화
-    alert(`대화 불러오기 완료: ${sessionToLoad.timestamp}`);
-  };
-
-  // --- 새 채팅 시작 함수 ---
-  const handleNewChat = () => {
-    // console.log('App: Starting new chat.');
-    if (chatHistory.length > 0 && !confirm("현재 대화 내용을 저장하지 않으면 사라집니다. 새 채팅을 시작하시겠습니까?")) {
-      return; // 사용자가 취소하면 아무것도 하지 않음
-    }
-    setChatHistory([]); // 현재 대화 내용 초기화
-    setCurrentPromptInput(''); // 입력창도 초기화
-    setSelectedSavedSessionId(null); // 선택된 저장 세션 해제
-    setSelectedMenu('General'); // General 페이지로 이동 (확실히 General로 이동)
-    setLastLlmOutput(''); // NEW: 새 채팅 시작 시 LLM 출력 초기화
-    clearSourceLogs(); // 새 채팅 시작 시 출처 로그 초기화
-  };
-
-  // --- Deploy App 함수 ---
-  const handleDeployApp = useCallback(() => {
-    // console.log('App: Deploying app.');
-    const appContent = lastLlmOutput // lastLlmExplanation 대신 lastLlmOutput 사용
-      ? `<p><strong>LLM Agent Process:</strong> ${lastLlmOutput}</p><p>This application is now deployed!</p><p>Further interactive elements would appear here in a real deployment.</p>`
-      : `<p>No specific application content to deploy yet. Please interact with the LLM first.</p>`;
-
-    // Electron 환경에서 window.electronAPI를 통해 메인 프로세스에 새 윈도우 생성을 요청
-    if (window.electronAPI) {
-      window.electronAPI.openDeployWindow(appContent, new Date().toLocaleString());
-    } else {
-      // 웹 브라우저 환경을 위한 폴백 (Electron 앱에서는 이 경로가 실행되지 않음)
-      const newWindow = window.open('', '_blank', 'width=800,height=600');
-      if (!newWindow) {
-        alert('팝업 차단이 활성화되어 있습니다. 팝업을 허용해주세요.');
-        return;
-      }
-
-      newWindow.document.write(`
-        <html>
-          <head>
-            <title>Deployed App</title>
-            <style>
-              body { font-family: 'Inter', sans-serif; margin: 20px; background-color: #f0f2f5; color: #333; }
-              h1 { color: #007bff; }
-              p { line-height: 1.6; }
-              strong { color: #0056b3; }
-            </style>
-          </head>
-          <body>
-            <h1>App Deployment Simulation</h1>
-            ${appContent}
-            <p>Deployment Time: ${new Date().toLocaleString()}</p>
-          </body>
-        </html>
-      `);
-      newWindow.document.close();
-    }
-  }, [lastLlmOutput]);
 
 
-  // 메뉴 선택 핸들러: 딜러 관리 메뉴 선택 시 RightSidebar를 엽니다.
+
+
+
+  // 메뉴 선택 핸들러: Interaction과 Prompt Setting 메뉴 처리
   const handleMenuSelect = (menuName) => {
     // console.log('App: Menu selected:', menuName); // Debug: 메뉴 선택 확인
     setSelectedMenu(menuName);
-    if (menuName === 'Dealer Management' || menuName === 'Vehicle Management' || menuName === 'Sales Analytics') { // 딜러 관련 페이지에서 사이드바 열림
-      setIsRightSidebarOpen(true);
-    }
     // 메뉴 변경 시 Source 로그 초기화
     clearSourceLogs();
     setLastLlmOutput(''); // NEW: 메뉴 변경 시 LLM 출력 초기화
@@ -231,15 +142,7 @@ function App() {
       author: 'System',
       date: getRandomDate(),
     },
-    {
-      id: 'production-status',
-      title: '생산 및 배정 현황',
-      description: '독일 본사의 차량 생산 현황과 한국 배정 계획을 확인할 수 있습니다.',
-      example: 'E-Class 생산 현황 보여줘\n한국 배정 계획 조회\nGLC 생산 일정 확인',
-      category: 'Production Status',
-      author: 'System',
-      date: getRandomDate(),
-    },
+
     {
       id: 'customer-waitlist',
       title: '고객 대기 명단',
@@ -262,7 +165,7 @@ function App() {
       id: 'communication-hub',
       title: '본사-딜러 커뮤니케이션',
       description: '독일 본사와 한국 딜러 간의 실시간 소통을 지원합니다.',
-      example: '본사에 생산 일정 문의\n딜러별 판매 실적 보고서 전송\n차량 배정 요청서 작성',
+      example: '딜러별 판매 실적 보고서 전송\n차량 배정 요청서 작성\n딜러 정보 업데이트',
       category: 'Communication Hub',
       author: 'System',
       date: getRandomDate(),
@@ -277,7 +180,6 @@ function App() {
       <LeftSidebar
         isOpen={isLeftSidebarOpen}
         savedSessions={savedChatSessions}
-        onLoadSession={handleLoadChatSession}
         selectedSavedSessionId={selectedSavedSessionId}
         selectedMenu={selectedMenu}
         setSelectedMenu={handleMenuSelect}
@@ -289,29 +191,9 @@ function App() {
           isRightSidebarOpen={isRightSidebarOpen}
           toggleLeftSidebar={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)}
           isLeftSidebarOpen={isLeftSidebarOpen}
-          onNewChat={handleNewChat}
-          isInteractionPage={selectedMenu === 'Production Status'} // NEW PROP
-          onDeployApp={handleDeployApp} // NEW PROP
-          onSaveChat={handleSaveChat}
-          chatHistory={chatHistory}
+          isInteractionPage={selectedMenu === 'Interaction'} // Interaction 페이지일 때
         />
-        {selectedMenu === 'General' && (
-          <>
-            {/* {console.log('App: MainContent component selected for rendering.')} */}
-            <MainContent
-              chatHistory={chatHistory}
-              setChatHistory={setChatHistory}
-              currentPromptInput={currentPromptInput}
-              setCurrentPromptInput={setCurrentPromptInput}
-              promptsTemplates={promptsTemplates}
-              handleSaveChat={handleSaveChat}
-              addApiCallLog={addApiCallLog} // addApiCallLog prop 추가
-              clearSourceLogs={clearSourceLogs} // clearSourceLogs prop 추가
-              // updateApiCallLog={updateApiCallLog} // REMOVED: LLM 카드 자동 사라짐 로직으로 인해 필요 없음
-              setLastLlmOutput={handleLlmOutputChange} // NEW: LLM 출력 설정 함수 전달
-            />
-          </>
-        )}
+
         {selectedMenu === 'Interaction' && (
           <>
             {/* {console.log('App: InteractionPage component selected for rendering.')} */}
@@ -324,7 +206,7 @@ function App() {
             />
           </>
         )}
-        {selectedMenu === 'Make Prompt' && (
+        {selectedMenu === 'Prompt Setting' && (
           <>
             {/* {console.log('App: MakePromptsPage component selected for rendering.')} */}
             <MakePromptsPage />

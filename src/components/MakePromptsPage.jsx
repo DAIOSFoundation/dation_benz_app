@@ -8,31 +8,62 @@ import CalendarIcon from '../assets/cal icon.png'; // 기존 달력 아이콘 �
 import PersonIcon from '../assets/person.png'; // 인물 아이콘 사용
 
 function MakePromptsPage() {
-  // Mock 데이터
+  // 자동차 업계 프롬프트 데이터
   const [promptFolders, setPromptFolders] = useState([
-    { id: 'f1', name: '제조 지식 에이전트', prompts: ['p1', 'p2'] },
-    { id: 'f2', name: '전자 상거래 에이전트', prompts: ['p3'] },
-    { id: 'f3', name: 'F&B 트렌드 분석 에이전트', prompts: [] },
+    { id: 'f1', name: '딜러 관리', prompts: ['p1', 'p2'] },
+    { id: 'f2', name: '차량 관리', prompts: ['p3', 'p4'] },
+    { id: 'f3', name: '판매 분석', prompts: ['p5', 'p6', 'p7'] },
+    { id: 'f4', name: '이메일 통신', prompts: ['p8'] },
   ]);
 
   const [allPrompts, setAllPrompts] = useState([
     {
-      id: 'p1', folderId: 'f1', title: '그릴리 제품 군의 원재료 구성', date: 'Jan 24, 2024', author: 'You',
-      content: '그릴리 햄을 제조하기 위한 원재료를 Bill of Materials 로 정리하는 프롬프트입니다. 재료 검사 절차를 확인하시려면 [[insert prompt:SOP 관련 질문]]을 해주세요.',
-      promptTitle: '그릴리 BOM 프롬프트',
-      promptDescription: '그릴리 햄 BOM 관련 정보를 요청하는 프롬프트'
+      id: 'p1', folderId: 'f1', title: '딜러 정보 조회', date: 'Dec 15, 2024', author: 'You',
+      content: '한국 내 벤츠 딜러사들의 기본 정보를 조회합니다. [[insert prompt:딜러명]]을 입력해주세요.',
+      promptTitle: '딜러 정보 조회',
+      promptDescription: '딜러사 연락처 및 조직 정보 조회'
     },
     {
-      id: 'p2', folderId: 'f1', title: 'SOP 데이터 전송 가이드', date: 'Jan 23, 2024', author: 'Admin',
-      content: '변경된 SOP 데이터를 백엔드에 전송하는 절차를 안내합니다. [[insert prompt:JSON 파일 업로드]]를 통해 데이터를 제출해주세요.',
-      promptTitle: 'SOP 전송 프롬프트',
-      promptDescription: 'SOP 데이터 전송 절차 안내 프롬프트'
+      id: 'p2', folderId: 'f1', title: '딜러 연락처 관리', date: 'Dec 15, 2024', author: 'You',
+      content: '딜러사 담당자 연락처 정보를 관리합니다. [[insert prompt:담당자명]]을 입력해주세요.',
+      promptTitle: '연락처 관리',
+      promptDescription: '딜러사 담당자 연락처 정보 관리'
     },
     {
-      id: 'p3', folderId: 'f2', title: '주문 내역 조회 프롬프트', date: 'Feb 1, 2024', author: 'You',
-      content: '최근 주문 내역을 조회하는 프롬프트입니다. [[insert prompt:주문 번호]]를 입력해주세요.',
-      promptTitle: '주문 조회',
-      promptDescription: '사용자의 주문 내역을 검색하는 프롬프트'
+      id: 'p3', folderId: 'f2', title: '차량 모델 정보', date: 'Dec 15, 2024', author: 'You',
+      content: '벤츠 차량 모델의 상세 정보를 조회합니다. [[insert prompt:모델명]]을 입력해주세요.',
+      promptTitle: '차량 모델 조회',
+      promptDescription: 'E-Class, C-Class, GLC, EQS, S-Class 등 차량 모델 정보'
+    },
+    {
+      id: 'p4', folderId: 'f2', title: 'VIN 추적', date: 'Dec 15, 2024', author: 'You',
+      content: '차량 식별 번호(VIN)를 통한 차량 이력 추적입니다. [[insert prompt:VIN번호]]를 입력해주세요.',
+      promptTitle: 'VIN 추적',
+      promptDescription: '차량 식별 번호를 통한 차량 이력 관리'
+    },
+    {
+      id: 'p5', folderId: 'f3', title: '월별 판매 분석', date: 'Dec 15, 2024', author: 'You',
+      content: '특정 월의 한국 내 총 판매 대수와 판매 금액을 분석합니다. [[insert prompt:월/년도]]를 입력해주세요.',
+      promptTitle: '월별 판매 분석',
+      promptDescription: '7월 한국 내 총 판매 대수와 판매 금액 분석'
+    },
+    {
+      id: 'p6', folderId: 'f3', title: '딜러별 세그먼트 판매', date: 'Dec 15, 2024', author: 'You',
+      content: '특정 딜러의 특정 세그먼트 차량 판매 현황을 분석합니다. [[insert prompt:딜러명/세그먼트/월]]을 입력해주세요.',
+      promptTitle: '딜러별 세그먼트 판매',
+      promptDescription: '효성더클래스 7월 세단 판매 분석'
+    },
+    {
+      id: 'p7', folderId: 'f3', title: '딜러별 배정 현황', date: 'Dec 15, 2024', author: 'You',
+      content: '특정 딜러의 특정 월 SUV 배정 현황을 분석합니다. [[insert prompt:딜러명/월]]을 입력해주세요.',
+      promptTitle: '배정 현황 분석',
+      promptDescription: '한성자동차 8월 SUV 배정 현황'
+    },
+    {
+      id: 'p8', folderId: 'f4', title: '이메일 전송', date: 'Dec 15, 2024', author: 'You',
+      content: '딜러사 담당자에게 이메일을 전송합니다. 원문과 한국어 번역을 함께 제공합니다. [[insert prompt:수신자/이메일내용]]을 입력해주세요.',
+      promptTitle: '이메일 전송',
+      promptDescription: 'Gemini 번역 기능이 포함된 이메일 전송'
     },
   ]);
 

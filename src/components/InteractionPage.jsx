@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import './InteractionPage.css';
 import { mockApi, fixedLayoutData } from '../api/mockApi';
-import { manufacturingMockApi, manufacturingLayoutData, manufacturingRecipientData } from '../api/manufacturingMockApi';
+
 import InputBox from './InputBox';
 import LightbulbIcon from '../assets/lightbulb.png';
-import { getGeminiIntent } from '../utils/geminiApi';
+import { getGeminiIntent, translateToKorean } from '../utils/geminiApi';
 
 // NEW PROP: onLlmExplanationChange, clearSourceLogs
 function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExplanationChange, currentOperator }) {
@@ -48,13 +48,21 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
     
     // 판매 현황 워크플로우
     const salesWorkflow = [
-      { process_name: "판매 실적 조회", step_id: 0, question: ["판매 실적", "판매 현황", "매출", "판매 통계"] },
+      { process_name: "판매 실적 조회", step_id: 0, question: ["판매 실적", "판매 현황", "매출", "판매 통계", "7월 판매", "총 판매 대수", "판매 금액"] },
       { process_name: "고객 대기 관리", step_id: 1, question: ["고객 대기", "대기 명단", "구매 대기", "대기 순번"] },
-      { process_name: "생산 배정 현황", step_id: 2, question: ["생산 현황", "배정 계획", "생산 일정", "한국 배정"] }
+      { process_name: "생산 배정 현황", step_id: 2, question: ["생산 현황", "배정 계획", "생산 일정", "한국 배정", "8월 배정", "SUV 배정"] }
+    ];
+
+    // 새로운 분석 워크플로우
+    const analysisWorkflow = [
+      { process_name: "월별 판매 분석", step_id: 4, question: ["7월 판매", "총 판매 대수", "판매 금액", "한국 내 판매"] },
+      { process_name: "딜러별 세그먼트 판매", step_id: 5, question: ["효성더클래스 세단", "딜러별 세그먼트", "세단 판매"] },
+      { process_name: "딜러별 배정 현황", step_id: 6, question: ["한성자동차 SUV", "8월 배정", "SUV 배정 수량"] },
+      { process_name: "이메일 전송", step_id: 7, question: ["이메일 전송", "담당자", "초대 이메일", "보고서 작성"] }
     ];
     
     // 모든 워크플로우 통합
-    [...dealerWorkflow, ...vehicleWorkflow, ...salesWorkflow].forEach(step => {
+    [...dealerWorkflow, ...vehicleWorkflow, ...salesWorkflow, ...analysisWorkflow].forEach(step => {
       if (step.question && step.question.length > 0) {
         const intentKey = `AUTOMOTIVE_${step.process_name.replace(/ /g, '_').toUpperCase()}_${step.step_id}`;
         keywords[intentKey] = step.question;
@@ -63,6 +71,8 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
     
     return keywords;
   }, []);
+
+
 
   // ID-Name 매핑 데이터를 위한 useMemo (자동차 업계)
   const idToNameMaps = useMemo(() => {
@@ -94,76 +104,7 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
     };
   }, []); // 의존성 배열 비워두어 컴포넌트 마운트 시 한 번만 계산
 
-  // 차량 생산 및 배정 파라미터 데이터 (명령어 딕셔너리)
-  const controlParameters = [
-      { equipment: '생산 라인 1', parameter: '일일 생산 목표', unit: '대', min: 50, max: 200 },
-      { equipment: '생산 라인 1', parameter: '품질 검사 기준', unit: '%', min: 95, max: 100 },
-      { equipment: '배정 시스템', parameter: '한국 배정 우선순위', unit: '순위', min: 1, max: 10 },
-      { equipment: '배정 시스템', parameter: '배정 차량 수량', unit: '대', min: 10, max: 100 },
-      { equipment: '품질 관리', parameter: '검사 완료율', unit: '%', min: 90, max: 100 },
-      { equipment: '품질 관리', parameter: '불량률 허용치', unit: '%', min: 0, max: 5 },
-      { equipment: '운송 시스템', parameter: '배송 일정 조정', unit: '일', min: 1, max: 30 },
-      { equipment: '운송 시스템', parameter: '운송 우선순위', unit: '순위', min: 1, max: 5 },
-  ];
 
-  // 입력문에서 장비/파라미터/값/사유 추출 함수 (데이터 딕셔너리 기반으로 개선)
-  function extractManualOverrideParams(input) {
-      // 1. Extract numerical value and reason from the input.
-      const valueMatches = input.match(/([0-9]+(\.[0-9]+)?)/g);
-      const value = valueMatches ? parseFloat(valueMatches[valueMatches.length - 1]) : null;
-
-      const reasonMatch = input.match(/(?:이유|사유)[는: ]+([^\.]+)[\. ]?/);
-      const reason = reasonMatch ? reasonMatch[1].trim() : null;
-
-      if (value === null) {
-          return { equipment: null, parameter: null, value: null, reason };
-      }
-
-      // 2. Find the best matching parameter from the dictionary based on a scoring system.
-      let bestMatch = null;
-      let maxScore = -1;
-
-      controlParameters.forEach(p => {
-          // Rule: The value must be within the valid range for the parameter.
-          if (value < p.min || value > p.max) {
-              return; // Skip this parameter if the value is out of bounds.
-          }
-          
-          let currentScore = 0;
-
-          // Rule: The equipment name must be present in the input.
-          if (!input.includes(p.equipment)) {
-              return; // Skip if the equipment isn't mentioned.
-          }
-          currentScore += 10; // Give a high score for matching the equipment.
-
-          // Rule: Score based on how many parameter keywords are present.
-          const parameterKeywords = p.parameter.replace(/[()]/g, ' ').split(' ').filter(k => k);
-          parameterKeywords.forEach(keyword => {
-              if (input.includes(keyword)) {
-                  currentScore++;
-              }
-          });
-
-          // Update the best match if the current parameter has a higher score.
-          if (currentScore > maxScore) {
-              maxScore = currentScore;
-              bestMatch = p;
-          }
-      });
-
-      if (bestMatch) {
-          return {
-              equipment: bestMatch.equipment,
-              parameter: bestMatch.parameter,
-              value: String(value),
-              reason,
-          };
-      }
-
-      // Return null if no suitable match is found.
-      return { equipment: null, parameter: null, value: null, reason };
-  }
 
   useEffect(() => {
     interactionInputRef.current?.focus();
@@ -195,30 +136,13 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
   }, [onLlmExplanationChange]);
 
 
-  const renderSopData = useCallback((data) => {
-    // This render function is kept but will likely not be used for hospital data unless formatted similarly
-    if (!Array.isArray(data) || data.length < 2) return null;
 
-    const sopNoRow = data[0];
-    const headerRow = data[1];
-    const dataRows = data.slice(2);
-
-    return (
-      <div>
-        <div className="sop-no-display">
-          <span>{sopNoRow[0]}: </span>
-          <strong>{sopNoRow[1]}</strong>
-        </div>
-        <TableRenderer data={dataRows} header={headerRow} />
-      </div>
-    );
-  }, []);
 
 
   const renderData = useCallback((data) => {
     if (!Array.isArray(data) || data.length === 0) return null;
 
-    // 2차원 배열인지 확인 (BOM, SOP 데이터)
+    // 2차원 배열인지 확인
     const is2DArray = Array.isArray(data[0]) && data[0].length > 0;
     
     if (is2DArray) {
@@ -226,7 +150,7 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
       return <TableRenderer data={data} header={null} />;
     }
 
-    const { patientIdToName, productIdToName, leadIdToName, hospitalRecipientEmailToName, manufacturingRecipientEmailToName } = idToNameMaps;
+    const { patientIdToName, productIdToName, leadIdToName, hospitalRecipientEmailToName } = idToNameMaps;
 
     // 원본 데이터의 첫 번째 객체에서 헤더를 먼저 추출
     let originalHeader = typeof data[0] === 'object' && data[0] !== null ? Object.keys(data[0]) : [];
@@ -249,11 +173,9 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
           }
           // 추가적인 ID-Name 매핑이 필요하다면 여기에 else if 추가
         } else if (key === 'recipient_email') {
-            // 병원용과 제조용 수신자 모두 확인
+            // 병원용 수신자 확인
             if (hospitalRecipientEmailToName.has(newRow[key])) {
                 newRow['recipient_name'] = hospitalRecipientEmailToName.get(newRow[key]);
-            } else if (manufacturingRecipientEmailToName.has(newRow[key])) {
-                newRow['recipient_name'] = manufacturingRecipientEmailToName.get(newRow[key]);
             }
         }
       }
@@ -290,6 +212,87 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
     return <TableRenderer data={transformedData} header={finalHeader} />;
   }, [idToNameMaps]);
 
+  // 분석 결과 렌더링 함수
+  const renderAnalysisResult = useCallback((data) => {
+    if (data.month && data.year && data.totalQuantity !== undefined) {
+      // 판매 분석 결과
+      if (data.totalAmount !== undefined) {
+        return (
+          <div className="analysis-result">
+            <h3>📊 {data.month}월 {data.year}년 판매 분석 결과</h3>
+            <div className="analysis-summary">
+              <div className="analysis-item">
+                <span className="label">총 판매 대수:</span>
+                <span className="value">{data.totalQuantity}대</span>
+              </div>
+              <div className="analysis-item">
+                <span className="label">총 판매 금액:</span>
+                <span className="value">{data.totalAmount.toLocaleString()}원</span>
+              </div>
+            </div>
+            {data.sales && data.sales.length > 0 && (
+              <div className="sales-details">
+                <h4>상세 판매 내역</h4>
+                <TableRenderer data={data.sales} header={Object.keys(data.sales[0])} />
+              </div>
+            )}
+          </div>
+        );
+      }
+      
+      // 배정 분석 결과
+      if (data.totalQuantity !== undefined && data.segment === 'SUV') {
+        return (
+          <div className="analysis-result">
+            <h3>🚗 {data.dealership} {data.month}월 {data.year}년 SUV 배정 현황</h3>
+            <div className="analysis-summary">
+              <div className="analysis-item">
+                <span className="label">총 SUV 배정 수량:</span>
+                <span className="value">{data.totalQuantity}대</span>
+              </div>
+            </div>
+            {data.allocations && data.allocations.length > 0 && (
+              <div className="allocation-details">
+                <h4>배정 상세 내역</h4>
+                <TableRenderer data={data.allocations} header={Object.keys(data.allocations[0])} />
+              </div>
+            )}
+          </div>
+        );
+      }
+    }
+    
+    // 딜러별 세그먼트 판매 결과
+    if (data.dealership && data.segment && data.totalQuantity !== undefined) {
+      return (
+        <div className="analysis-result">
+          <h3>🏢 {data.dealership} {data.month}월 {data.year}년 {data.segment} 판매 현황</h3>
+          <div className="analysis-summary">
+            <div className="analysis-item">
+              <span className="label">총 {data.segment} 판매 대수:</span>
+              <span className="value">{data.totalQuantity}대</span>
+            </div>
+            <div className="analysis-item">
+              <span className="label">총 판매 금액:</span>
+              <span className="value">{data.totalAmount.toLocaleString()}원</span>
+            </div>
+          </div>
+          {data.sales && data.sales.length > 0 ? (
+            <div className="sales-details">
+              <h4>상세 판매 내역</h4>
+              <TableRenderer data={data.sales} header={Object.keys(data.sales[0])} />
+            </div>
+          ) : (
+            <div className="no-data-message">
+              <p>해당 기간에 {data.segment} 판매 내역이 없습니다.</p>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    return <p className="no-data-message">분석 결과를 표시할 수 없습니다.</p>;
+  }, []);
 
   const fetchAndRenderStep = useCallback(async (step, extractedEntities = {}) => {
     setIsLoadingStep(true);
@@ -298,57 +301,7 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
     let contentToRender = null;
     let isIframe = false;
 
-    // Special handling for step 750: Manual Equipment Control URL generation
-    if (step.step_id === 750) {
-      const parameterlessKeywords = ['장비 제어', '수동 제어', '장비 제어 현황'];
-      let fullUrl = null;
-
-      if (parameterlessKeywords.includes(lastUserInput.trim())) {
-        fullUrl = "http://localhost:3000/manual-override";
-      } else if (lastUserInput) {
-        const params = extractManualOverrideParams(lastUserInput);
-        if (params.equipment && params.parameter && params.value) {
-          const baseUrl = "http://localhost:3000/manual-override";
-          const urlParams = new URLSearchParams({
-            equipment: params.equipment,
-            parameter: params.parameter,
-            value: params.value,
-            reason: params.reason || '',
-            operator: currentOperator || ''
-          });
-          fullUrl = `${baseUrl}?${urlParams.toString()}`;
-        }
-      }
-
-      if (fullUrl) {
-          isIframe = true;
-          contentToRender = (
-            <div className="iframe-container">
-              <iframe
-                src={fullUrl}
-                title={step.process_name}
-                width="100%"
-                height="100%"
-                style={{ border: 'none' }}
-                onLoad={() => { setIsLoadingStep(false); addApiCallLog('External Content', `외부 웹 페이지 (${fullUrl}) 로드 완료.`); }}
-                onError={() => { setError(`외부 웹 페이지 로드 실패: ${fullUrl}`); setIsLoadingStep(false); addApiCallLog('External Content', `외부 웹 페이지 (${fullUrl}) 로드 실패.`); }}
-              ></iframe>
-            </div>
-          );
-      } else {
-        const errorMessage = '장비 제어 명령을 위한 파라미터(장비, 항목, 값)를 찾을 수 없거나, 명령어가 올바르지 않습니다. "장비 제어" 또는 "압출기 1 온도 250도로 설정"과 같이 입력해주세요.';
-        setError(errorMessage);
-        setIsLoadingStep(false);
-        setCurrentStepContent(
-          <div className="dynamic-app-wrapper">
-              <h2>{step.process_name}</h2>
-              <p>{step.description}</p>
-              <p className="error-message">{errorMessage}</p>
-          </div>
-        );
-        return;
-      }
-    } else if (step.api && step.api.url) {
+ if (step.api && step.api.url) {
       const urlPath = step.api.url;
       const method = step.api.method;
 
@@ -385,22 +338,48 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
               case 'products': apiResponse = await mockApi.getProducts(); break;
               case 'surveys': apiResponse = await mockApi.getSurveys(); break;
               case 'leads': apiResponse = await mockApi.getLeads(); break;
-              case 'bom': apiResponse = await manufacturingMockApi.getBom(); break;
-              case 'sop': apiResponse = await manufacturingMockApi.getSop(); break;
-              case 'callback':
-                if (step.step_id === 701) { 
-                  apiResponse = await manufacturingMockApi.getCallback();
-                } else {
-                  apiResponse = await mockApi.getCallback();
-                }
-                addApiCallLog('API', '콜백 수신 완료.');
+              case 'callback': apiResponse = await mockApi.getCallback(); addApiCallLog('API', '콜백 수신 완료.'); break;
+              case 'sales_analysis': 
+                // 월별 판매 분석 - 기본값 7월 2025년
+                const salesMonth = extractedEntities?.month || 7;
+                const salesYear = extractedEntities?.year || 2025;
+                apiResponse = await mockApi.getSalesAnalysis(salesMonth, salesYear); 
+                break;
+              case 'dealership_sales': 
+                // 딜러별 세그먼트 판매 - 추출된 엔티티 사용
+                const dealershipName = extractedEntities?.dealership || '효성더클래스';
+                const segmentMonth = extractedEntities?.month || 7;
+                const segmentYear = extractedEntities?.year || 2025;
+                const segment = extractedEntities?.segment || 'Sedan';
+                apiResponse = await mockApi.getDealershipSalesBySegment(dealershipName, segmentMonth, segmentYear, segment); 
+                break;
+              case 'allocation_analysis': 
+                // 딜러별 배정 현황 - 추출된 엔티티 사용
+                const allocationDealership = extractedEntities?.dealership || '한성자동차';
+                const allocationMonth = extractedEntities?.month || 8;
+                const allocationYear = extractedEntities?.year || 2025;
+                apiResponse = await mockApi.getAllocationByDealership(allocationDealership, allocationMonth, allocationYear); 
+                break;
+              case 'send_email': 
+                // 이메일 전송은 POST로 처리되므로 여기서는 처리하지 않음
+                apiResponse = { success: true, data: [], message: '이메일 전송은 POST 요청으로 처리됩니다.' }; 
                 break;
               default: throw new Error(`Unsupported GET API: ${urlPath}`);
             }
             
+            // 디버깅을 위한 로그 추가
+            console.log('API Response:', apiResponse);
+            console.log('API Response data type:', typeof apiResponse.data);
+            console.log('API Response data is array:', Array.isArray(apiResponse.data));
+            
             if (apiResponse.data && apiResponse.data.length > 0) {
                 contentToRender = renderData(apiResponse.data || apiResponse.message);
+            } else if (apiResponse.data && typeof apiResponse.data === 'object' && !Array.isArray(apiResponse.data)) {
+                // 분석 결과 객체인 경우
+                console.log('Rendering analysis result with data:', apiResponse.data);
+                contentToRender = renderAnalysisResult(apiResponse.data);
             } else {
+                console.log('No data found, showing no-data message');
                 contentToRender = <p className="no-data-message">조회된 데이터가 없습니다.</p>;
                 if (patientName) {
                     contentToRender = <p className="no-data-message">'{patientName}' 환자 관련 데이터를 찾을 수 없습니다.</p>;
@@ -416,9 +395,43 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
                   try {
                     addApiCallLog('API', 'Agent 가 파악한 API 를 호출합니다.');
                     let json;
-                    // Check if the step belongs to the manufacturing workflow
-                    if (step.step_id === 701) { 
-                      json = await manufacturingMockApi.postSend(formData);
+                    // 이메일 전송 처리
+                    if (step.api.url === '/api/send_email') {
+                      // 사용자의 원본 질문에서 이메일 내용 추출
+                      const originalQuestion = lastUserInput || '';
+                      let emailContent = '';
+                      let emailSubject = '벤츠 신차 출시 행사 초대';
+                      
+                      // 원본 질문에서 이메일 내용 추출 시도
+                      if (originalQuestion.includes('다음 이메일을') || originalQuestion.includes('이메일을')) {
+                        // 사용자가 직접 이메일 내용을 제공한 경우
+                        const emailMatch = originalQuestion.match(/다음 이메일을[^:]*:(.*?)(?=\.$|$)/s);
+                                                if (emailMatch) {
+                          const originalContent = emailMatch[1].trim();
+                          try {
+                            const translatedContent = await translateToKorean(originalContent);
+                            emailContent = `=== 원문 ===\n${originalContent}\n\n=== 한국어 번역 ===\n${translatedContent}`;
+                          } catch (error) {
+                            console.error('Translation error:', error);
+                            emailContent = originalContent;
+                          }
+                        } else {
+                          // 전체 질문을 이메일 내용으로 사용
+                          try {
+                            const translatedQuestion = await translateToKorean(originalQuestion);
+                            emailContent = `=== 원문 ===\n${originalQuestion}\n\n=== 한국어 번역 ===\n${translatedQuestion}`;
+                          } catch (error) {
+                            console.error('Translation error:', error);
+                            emailContent = originalQuestion;
+                          }
+                        }
+                      } else {
+                        // 기본 이메일 내용
+                        const defaultContent = "다음 달 11일 독일 본사에서 개최되는 신차 세계 최초 출시 행사에 한국 자동차 전문 기자단과 VIP 여러분을 초대할 예정입니다. 아래 링크를 참고하여 보고서를 작성해 주시기 바랍니다.";
+                        emailContent = defaultContent;
+                      }
+                      
+                      json = await mockApi.sendEmail(formData.recipient_email, emailSubject, emailContent);
                     } else {
                       json = await mockApi.postSend(formData);
                     }
@@ -462,18 +475,7 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
       finalContent = (
         <div className="iframe-content-wrapper">
           {contentToRender}
-          {/* 장비 제어(750) 단계에만 Next 버튼 추가 */}
-          {step.step_id === 750 && (
-            <button
-              className="next-btn"
-              onClick={() => {
-                const nextIdx = layoutData.findIndex(s => s.step_id === 761);
-                if (nextIdx !== -1) setCurrentStepIndex(nextIdx);
-              }}
-            >
-              Next
-            </button>
-          )}
+
         </div>
       );
     } else {
@@ -502,7 +504,7 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
     if (!isIframe) {
       setIsLoadingStep(false);
     }
-  }, [layoutData, handleWorkflowComplete, renderData, addApiCallLog, lastUserInput, currentOperator]);
+  }, [layoutData, handleWorkflowComplete, renderData, addApiCallLog]);
 
 
   useEffect(() => {
@@ -532,6 +534,9 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
     setInteractionInput('');
     setIsSendingInteraction(true);
     setLastUserInput(userQuery); // <--- 입력 전송 시에만 lastUserInput 갱신
+    
+    // 전역 변수에 사용자의 원본 질문 저장 (PostForm에서 접근하기 위해)
+    window.lastUserInput = userQuery;
 
     try {
         addApiCallLog('LLM', 'Banya Agent LLM 이 업무 절차를 분석 중입니다.'); // getLayout api 대신 LLM 시작 메시지
@@ -549,16 +554,26 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
             const parts = matchedIntentKey.split('_');
             const stepIdFromIntent = parseInt(parts[parts.length - 1]);
             
-            // 병원용과 제조용 워크플로우 구분
-            if (matchedIntentKey.startsWith("HOSPITAL_")) {
+            // 자동차 업계 워크플로우 처리
+            if (matchedIntentKey.startsWith("AUTOMOTIVE_")) {
+                selectedLayoutData = fixedLayoutData;
+                initialStep = fixedLayoutData.find(s => s.step_id === stepIdFromIntent);
+                if (initialStep) {
+                    llmResponseExplanation = initialStep.answer?.[0] || initialStep.description || "워크플로우를 시작합니다.";
+                } else {
+                    llmResponseExplanation = "죄송합니다. LLM이 요청을 이해했지만, 해당 워크플로우 스텝을 찾을 수 없습니다.";
+                }
+            }
+            // 병원용 워크플로우 처리
+            else if (matchedIntentKey.startsWith("HOSPITAL_")) {
                 selectedLayoutData = fixedLayoutData;
                 if (matchedIntentKey.startsWith("HOSPITAL_FULL_WORKFLOW_")) {
                     initialStep = fixedLayoutData.find(s => s.step_id === stepIdFromIntent);
-                    llmResponseExplanation = initialStep?.answer[0] || "업무의 전체 워크플로우를 준비했습니다.";
+                    llmResponseExplanation = initialStep?.answer?.[0] || initialStep?.description || "업무의 전체 워크플로우를 준비했습니다.";
                 } else {
                     initialStep = fixedLayoutData.find(s => s.step_id === stepIdFromIntent);
                     if (initialStep) {
-                        llmResponseExplanation = initialStep.answer[0];
+                        llmResponseExplanation = initialStep.answer?.[0] || initialStep.description || "워크플로우를 시작합니다.";
                         // 환자 이름이 추출되었다면 설명에 추가
                         if (extractedEntities?.patient_name) {
                             llmResponseExplanation = `'${extractedEntities.patient_name}' 환자 ${initialStep.process_name}을(를) 조회합니다.`;
@@ -566,14 +581,6 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
                     } else {
                         llmResponseExplanation = "죄송합니다. LLM이 요청을 이해했지만, 해당 워크플로우 스텝을 찾을 수 없습니다.";
                     }
-                }
-            } else if (matchedIntentKey.startsWith("MANUFACTURING_")) {
-                selectedLayoutData = manufacturingLayoutData;
-                initialStep = manufacturingLayoutData.find(s => s.step_id === stepIdFromIntent);
-                if (initialStep) {
-                    llmResponseExplanation = initialStep.answer[0];
-                } else {
-                    llmResponseExplanation = "죄송합니다. LLM이 요청을 이해했지만, 해당 제조 워크플로우 스텝을 찾을 수 없습니다.";
                 }
             }
         } else {
@@ -680,113 +687,13 @@ const TableRenderer = ({ data, header }) => {
     return <p className="no-data-message">표시할 데이터가 없거나 형식이 올바르지 않습니다.</p>;
   }
 
-  // SOP 데이터인지 판별 (두 번째 행에 '비고'가 2개)
-  const isSopTable = Array.isArray(data[0]) && data[1] && Array.isArray(data[1]) && data[1].filter(x => x === "비고").length === 2;
-
-  if (isSopTable) {
-    // SopManager 컴포넌트 정의 (내부)
-    const SopManager = ({ initialSopData }) => {
-      const STORAGE_KEY = "sopRows";
-      // localStorage에서 불러오기, 없으면 initialSopData 사용
-      const getInitialRows = () => {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          try { return JSON.parse(saved); } catch { return initialSopData.slice(2); }
-        }
-        return initialSopData.slice(2);
-      };
-      const [sopRows, setSopRows] = React.useState(getInitialRows);
-
-      // sopRows가 바뀔 때마다 localStorage에 저장
-      React.useEffect(() => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(sopRows));
-      }, [sopRows]);
-
-      const [form, setForm] = React.useState({ 단계: '', 항목: '', 방법: '', 방법상세: '', 기준: '', sop: '', 비고: '' });
-      const [editIdx, setEditIdx] = React.useState(null);
-
-      // 입력 변경 핸들러
-      const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
-
-      // 추가/수정
-      const handleSubmit = e => {
-        e.preventDefault();
-        if (editIdx === null) {
-          setSopRows([...sopRows, Object.values(form)]);
-        } else {
-          setSopRows(sopRows.map((row, idx) => idx === editIdx ? Object.values(form) : row));
-          setEditIdx(null);
-        }
-        setForm({ 단계: '', 항목: '', 방법: '', 방법상세: '', 기준: '', sop: '', 비고: '' });
-      };
-
-      // 행 클릭(수정)
-      const handleRowClick = idx => {
-        setEditIdx(idx);
-        const [단계, 항목, 방법, 방법상세, 기준, sop, 비고] = sopRows[idx];
-        setForm({ 단계, 항목, 방법, 방법상세, 기준, sop, 비고 });
-      };
-
-      // 삭제
-      const handleDelete = idx => setSopRows(sopRows.filter((_, i) => i !== idx));
-
-      const fixedHeader = [
-        "검사 단계", "검사 항목", "검사 방법", "검사 방법 상세", "합격 기준", "관련 SOP", "비고"
-      ];
-      const sopNoRow = initialSopData[0];
-
-      return (
-        <div style={{ width: '100%' }}>
-          <form onSubmit={handleSubmit} className="sop-form-row">
-            {["단계", "항목", "방법", "방법상세", "기준", "sop", "비고"].map((key, i) => (
-              <input
-                key={key}
-                name={key}
-                value={form[key]}
-                onChange={handleChange}
-                placeholder={["검사 단계", "검사 항목", "검사 방법", "검사 방법 상세", "합격 기준", "관련 SOP", "비고"][i]}
-              />
-            ))}
-            <button type="submit">{editIdx === null ? "추가" : "수정"}</button>
-            {editIdx !== null && <button type="button" onClick={() => { setEditIdx(null); setForm({ 단계: '', 항목: '', 방법: '', 방법상세: '', 기준: '', sop: '', 비고: '' }); }}>취소</button>}
-          </form>
-          <div className="table-wrapper">
-            <table className="styled-table">
-              <thead>
-                <tr>
-                  <th colSpan={fixedHeader.length + 1} style={{ textAlign: "left" }}>
-                    {sopNoRow[0]}: <strong>{sopNoRow[1]}</strong>
-                  </th>
-                </tr>
-                <tr>
-                  {fixedHeader.map((item, idx) => (
-                    <th key={idx}>{item}</th>
-                  ))}
-                  <th>삭제</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sopRows.map((row, idx) => (
-                  <tr key={idx} onClick={() => handleRowClick(idx)} style={{ background: editIdx === idx ? '#eef' : undefined }}>
-                    {row.map((cell, i) => <td key={i}>{cell}</td>)}
-                    <td><button onClick={e => { e.stopPropagation(); handleDelete(idx); }}>삭제</button></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      );
-    };
-    // SopManager 렌더링
-    return <SopManager initialSopData={data} />;
-  }
-
-  // 2차원 배열인지 확인 (BOM, SOP 데이터)
-  const is2DArray = Array.isArray(data[0]) && data[0].length > 0;
   
-  if (is2DArray) {
-    // 2차원 배열 처리 (BOM, SOP 데이터)
+
+      // 2차원 배열인지 확인
+    const is2DArray = Array.isArray(data[0]) && data[0].length > 0;
+    
+    if (is2DArray) {
+      // 2차원 배열 처리
     const tableHeader = data[0]; // 첫 번째 행이 헤더
     const tableData = data.slice(1); // 나머지 행이 데이터
     
@@ -853,13 +760,51 @@ const PostForm = ({ step, onFormSubmit, addApiCallLog }) => {
       
       let defaultValue = '';
       if (paramType === "date") defaultValue = new Date().toISOString().substring(0, 10);
-      else if (paramType === "description") defaultValue = "정보 전송";
+      else if (paramType === "description") {
+        // 이메일 전송의 경우 사용자의 원본 질문에서 이메일 내용 추출하여 원문과 번역 설정
+        if (step.api.url === '/api/send_email') {
+          const originalQuestion = window.lastUserInput || "정보 전송";
+          
+          // 사용자의 원본 질문에서 이메일 내용 추출
+          if (originalQuestion.includes('다음 이메일을') || originalQuestion.includes('이메일을')) {
+            const emailMatch = originalQuestion.match(/다음 이메일을[^:]*:(.*?)(?=\.$|$)/s);
+            if (emailMatch) {
+              const originalContent = emailMatch[1].trim();
+              // 비동기 번역을 위해 기본값으로 원문만 설정하고, useEffect에서 번역 처리
+              defaultValue = originalContent;
+            } else {
+              defaultValue = originalQuestion;
+            }
+          } else {
+            defaultValue = originalQuestion;
+          }
+        } else {
+          defaultValue = "정보 전송";
+        }
+      }
       initialData[paramName] = defaultValue;
     });
     setFormData(initialData);
     setFormError('');
     setFileContent('');
-  }, [step.api.parameters]);
+    
+    // 이메일 전송의 경우 자동으로 번역 처리
+    if (step.api.url === '/api/send_email' && initialData.description) {
+      const handleAutoTranslate = async () => {
+        try {
+          const originalContent = initialData.description;
+          const translatedContent = await translateToKorean(originalContent);
+          const emailContent = `=== 원문 ===\n${originalContent}\n\n=== 한국어 번역 ===\n${translatedContent}`;
+          setFormData(prev => ({ ...prev, description: emailContent }));
+        } catch (error) {
+          console.error('Auto translation error:', error);
+          // 번역 실패 시 원본 텍스트 유지
+        }
+      };
+      
+      handleAutoTranslate();
+    }
+  }, [step.api.parameters, step.api.url]);
 
   const handleChange = (e) => {
     setFormError('');
@@ -885,6 +830,8 @@ const PostForm = ({ step, onFormSubmit, addApiCallLog }) => {
   const handleRecipientSelect = useCallback((email) => {
     setFormData(prev => ({ ...prev, recipient_email: email }));
   }, []);
+
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -919,7 +866,20 @@ const PostForm = ({ step, onFormSubmit, addApiCallLog }) => {
             {paramType === 'date' ? (
               <input type="date" id={paramName} name={paramName} value={formData[paramName] || ''} onChange={handleChange} required />
             ) : paramType === 'description' ? (
-              <textarea id={paramName} name={paramName} rows="3" style={{ height: '50px' }} value={formData[paramName] || ''} onChange={handleChange} required />
+              <div className="email-content-display">
+                {formData[paramName] && formData[paramName].includes('=== 원문 ===') ? (
+                  <div>
+                    <div className="email-content-section email-content-original">
+                      <p>{formData[paramName].split('=== 원문 ===')[1].split('=== 한국어 번역 ===')[0].trim()}</p>
+                    </div>
+                    <div className="email-content-section email-content-translation">
+                      <p>{formData[paramName].split('=== 한국어 번역 ===')[1].trim()}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <textarea id={paramName} name={paramName} rows="3" style={{ height: '50px' }} value={formData[paramName] || ''} onChange={handleChange} required />
+                )}
+              </div>
             ) : paramType === 'data' ? (
               <>
                 <input type="file" id={paramName} name={paramName} onChange={handleChange} accept="*/*" required />
@@ -955,10 +915,9 @@ const RecipientSearchInput = ({ id, name, value, onSelectRecipient, addApiCallLo
 
   useEffect(() => {
     if (value) {
-        // 병원용과 제조용 수신자 모두 확인
+        // 병원용 수신자 확인
         const hospitalSelected = (mockApi.getRecipientData() || []).find(r => r.이메일 === value);
-        const manufacturingSelected = (manufacturingRecipientData || []).find(r => r.이메일 === value);
-        const selected = hospitalSelected || manufacturingSelected;
+        const selected = hospitalSelected;
         
         if (selected) {
             setSelectedRecipientName(`${selected.이름} (${selected.이메일})`);
@@ -987,19 +946,12 @@ const RecipientSearchInput = ({ id, name, value, onSelectRecipient, addApiCallLo
     searchTimeoutRef.current = setTimeout(async () => {
       try {
         addApiCallLog('LLM', `수신자 검색 LLM 이 '${searchTerm}' 에 대한 의미를 분석 중입니다.`);
-        // 병원용과 제조용 수신자 검색 모두 시도
+        // 병원용 수신자 검색
         const hospitalResponse = await mockApi.searchRecipients(searchTerm);
-        const manufacturingResponse = await manufacturingMockApi.searchRecipients(searchTerm);
         
-        // 두 결과를 합쳐서 정렬
-        const allResults = [...(hospitalResponse.data || []), ...(manufacturingResponse.data || [])];
-        const uniqueResults = allResults.filter((item, index, self) => 
-          index === self.findIndex(t => t.이메일 === item.이메일)
-        );
-        
-        if (hospitalResponse.success || manufacturingResponse.success) {
-          setSearchResults(uniqueResults.slice(0, 5)); // 상위 5개만 표시
-          addApiCallLog('Gemma', `LLM 의미 검색 완료: ${uniqueResults.length}명`);
+        if (hospitalResponse.success) {
+          setSearchResults(hospitalResponse.data.slice(0, 5)); // 상위 5개만 표시
+          addApiCallLog('Gemma', `LLM 의미 검색 완료: ${hospitalResponse.data.length}명`);
         } else {
           setSearchResults([]);
           addApiCallLog('Gemma', `LLM 의미 검색 실패`);

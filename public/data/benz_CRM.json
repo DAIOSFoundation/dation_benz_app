@@ -122,7 +122,9 @@
           {"allocation_id": 7, "model_id": 102, "dealership_id": 4, "allocation_quantity": 15, "production_date": "2025-08-22", "shipping_date": "2025-08-27", "estimated_arrival": "2025-09-22", "priority_level": 3, "status": "계획"},
           {"allocation_id": 8, "model_id": 107, "dealership_id": 4, "allocation_quantity": 8, "production_date": "2025-08-28", "shipping_date": "2025-09-02", "estimated_arrival": "2025-09-28", "priority_level": 2, "status": "계획"},
           {"allocation_id": 9, "model_id": 106, "dealership_id": 5, "allocation_quantity": 12, "production_date": "2025-08-30", "shipping_date": "2025-09-05", "estimated_arrival": "2025-10-05", "priority_level": 3, "status": "계획"},
-          {"allocation_id": 10, "model_id": 105, "dealership_id": 5, "allocation_quantity": 5, "production_date": "2025-09-05", "shipping_date": "2025-09-10", "estimated_arrival": "2025-10-10", "priority_level": 1, "status": "계획"}
+          {"allocation_id": 10, "model_id": 105, "dealership_id": 5, "allocation_quantity": 5, "production_date": "2025-09-05", "shipping_date": "2025-09-10", "estimated_arrival": "2025-10-10", "priority_level": 1, "status": "계획"},
+          {"allocation_id": 11, "model_id": 103, "dealership_id": 1, "allocation_quantity": 8, "production_date": "2025-07-25", "shipping_date": "2025-07-30", "estimated_arrival": "2025-08-15", "priority_level": 1, "status": "생산중"},
+          {"allocation_id": 12, "model_id": 107, "dealership_id": 1, "allocation_quantity": 5, "production_date": "2025-07-28", "shipping_date": "2025-08-02", "estimated_arrival": "2025-08-25", "priority_level": 2, "status": "계획"}
         ]
       }
     ]

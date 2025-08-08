@@ -1,5 +1,5 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  openDeployWindow: (content, deploymentTime) => ipcRenderer.send('open-deploy-window', { content, deploymentTime })
+  // 배포 관련 API 제거됨
 });

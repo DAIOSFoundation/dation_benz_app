@@ -90,7 +90,8 @@ const fixedLayoutData = [
     "description": "한국 내 벤츠 딜러사들의 기본 정보를 조회합니다.",
     "question": ["딜러 정보", "딜러사 정보", "한성자동차", "효성더클래스", "KCC오토", "연락처", "담당자"],
     "recipients": ["김민준", "이서연", "박지훈", "최은지", "정우진"],
-    "template": "딜러 정보 조회 요청"
+    "template": "딜러 정보 조회 요청",
+    "answer": ["한국 내 벤츠 딜러사들의 기본 정보를 조회합니다."]
   },
   {
     "process_name": "차량 판매 현황",
@@ -99,7 +100,8 @@ const fixedLayoutData = [
     "description": "딜러별 차량 판매 실적을 조회합니다.",
     "question": ["판매 실적", "판매 현황", "매출", "판매 통계", "E-Class", "C-Class", "GLC"],
     "recipients": ["김민준", "이서연", "박지훈", "최은지", "정우진"],
-    "template": "판매 실적 조회 요청"
+    "template": "판매 실적 조회 요청",
+    "answer": ["딜러별 차량 판매 실적을 조회합니다."]
   },
   {
     "process_name": "생산 배정 현황",
@@ -118,6 +120,64 @@ const fixedLayoutData = [
     "question": ["고객 대기", "대기 명단", "구매 대기", "대기 순번", "EQS 대기", "S-Class 대기"],
     "recipients": ["김민준", "이서연", "박지훈", "최은지", "정우진"],
     "template": "고객 대기 현황 조회 요청"
+  },
+  {
+    "process_name": "월별 판매 분석",
+    "step_id": 4,
+    "step_name": "7월 판매 현황 분석",
+    "description": "7월 한국 내 총 판매 대수와 판매 금액을 분석합니다.",
+    "question": ["7월 판매", "총 판매 대수", "판매 금액", "한국 내 판매"],
+    "api": {
+      "url": "/api/sales_analysis",
+      "method": "GET"
+    },
+    "answer": ["7월 한국 내 총 판매 현황을 분석하여 총 판매 대수와 판매 금액을 조회합니다."]
+  },
+  {
+    "process_name": "딜러별 세그먼트 판매",
+    "step_id": 5,
+    "step_name": "효성더클래스 세단 판매 분석",
+    "description": "효성더클래스를 통해 7월에 주문된 세단의 총 수를 분석합니다.",
+    "question": ["효성더클래스 세단", "딜러별 세그먼트", "세단 판매"],
+    "api": {
+      "url": "/api/dealership_sales",
+      "method": "GET"
+    },
+    "answer": ["효성더클래스를 통해 7월에 주문된 세단의 총 수를 분석합니다."]
+  },
+  {
+    "process_name": "딜러별 배정 현황",
+    "step_id": 6,
+    "step_name": "한성자동차 SUV 배정 분석",
+    "description": "한성자동차에 8월에 배정될 SUV의 총 수량을 분석합니다.",
+    "question": ["한성자동차 SUV", "8월 배정", "SUV 배정 수량"],
+    "api": {
+      "url": "/api/allocation_analysis",
+      "method": "GET"
+    },
+    "answer": ["한성자동차에 8월에 배정될 SUV의 총 수량을 분석합니다."]
+  },
+  {
+    "process_name": "이메일 전송",
+    "step_id": 7,
+    "step_name": "이메일 전송",
+    "description": "이메일 전송 폼을 통해 원하는 수신자에게 이메일을 전송할 수 있습니다.",
+    "question": ["이메일 전송", "담당자", "초대 이메일", "보고서 작성"],
+    "api": {
+      "url": "/api/send_email",
+      "method": "POST",
+      "parameters": [
+        {
+          "name": "recipient_email",
+          "type": "searchable_recipient"
+        },
+        {
+          "name": "description",
+          "type": "description"
+        }
+      ]
+    },
+    "answer": ["이메일 전송 폼을 준비했습니다."]
   }
 ];
 
@@ -296,7 +356,302 @@ const mockApi = {
   generateMockRAGDocuments,
   
   // 고정 레이아웃 데이터
-  fixedLayoutData
+  fixedLayoutData,
+
+  // 새로운 분석 함수들
+  getSalesAnalysis: async (month, year) => {
+    const sales = benzCrmData.database_schema.tables.find(table => table.table_name === 'VehicleSales');
+    if (!sales) return { success: false, message: '판매 데이터를 찾을 수 없습니다.' };
+
+    const targetMonth = month || 7;
+    const targetYear = year || 2025;
+    
+    const monthlySales = sales.data.filter(sale => {
+      const saleDate = new Date(sale.sale_date);
+      return saleDate.getMonth() + 1 === targetMonth && saleDate.getFullYear() === targetYear;
+    });
+
+    const totalQuantity = monthlySales.length;
+    const totalAmount = monthlySales.reduce((sum, sale) => sum + sale.price_krw, 0);
+
+    return {
+      success: true,
+      data: {
+        month: targetMonth,
+        year: targetYear,
+        totalQuantity,
+        totalAmount,
+        sales: monthlySales.map(sale => ({
+          ...sale,
+          dealership_name: getDealershipNameFromId(sale.dealership_id),
+          model_name: getVehicleModelNameFromId(sale.model_id)
+        }))
+      }
+    };
+  },
+
+  getDealershipSalesBySegment: async (dealershipName, month, year, segment) => {
+    console.log('getDealershipSalesBySegment called with:', { dealershipName, month, year, segment });
+    
+    const sales = benzCrmData.database_schema.tables.find(table => table.table_name === 'VehicleSales');
+    const models = benzCrmData.database_schema.tables.find(table => table.table_name === 'VehicleModels');
+    const dealerships = benzCrmData.database_schema.tables.find(table => table.table_name === 'Dealerships');
+    
+    if (!sales || !models || !dealerships) {
+      console.log('Required tables not found');
+      return { success: false, message: '데이터를 찾을 수 없습니다.' };
+    }
+
+    // 딜러 ID 찾기
+    console.log('Available dealerships:', dealerships.data.map(d => d.dealership_name));
+    
+    // 딜러명 매칭 로직 개선
+    const dealership = dealerships.data.find(d => {
+      const searchName = dealershipName.toLowerCase();
+      const actualName = d.dealership_name.toLowerCase();
+      
+      // 정확한 매칭
+      if (actualName === searchName) return true;
+      
+      // 부분 매칭
+      if (actualName.includes(searchName) || searchName.includes(actualName)) return true;
+      
+      // 한국어-영어 매칭
+      const koreanToEnglish = {
+        '효성더클래스': 'hyosung the class',
+        '한성자동차': 'hansung motors',
+        'kcc오토': 'kcc auto',
+        '더스타모터스': 'the star motors',
+        '신세계모터스': 'shinsegae motors'
+      };
+      
+      const englishName = koreanToEnglish[searchName];
+      if (englishName && actualName.includes(englishName)) return true;
+      
+      return false;
+    });
+    
+    if (!dealership) {
+      console.log('Dealership not found for:', dealershipName);
+      return { success: false, message: '딜러를 찾을 수 없습니다.' };
+    }
+    
+    console.log('Found dealership:', dealership);
+
+    // 세그먼트에 해당하는 모델 ID들 찾기
+    console.log('Available models:', models.data.map(m => ({ name: m.model_name, segment: m.segment })));
+    console.log('Searching for segment:', segment);
+    
+    const segmentModels = models.data.filter(model => {
+      const modelSegment = model.segment.toLowerCase();
+      const searchSegment = segment.toLowerCase();
+      
+      // "Sedan" 검색 시 "Sedan", "EV Sedan", "Luxury Sedan" 등 모두 포함
+      if (searchSegment === 'sedan') {
+        return modelSegment.includes('sedan');
+      }
+      // "SUV" 검색 시 "SUV", "Large SUV" 등 모두 포함
+      if (searchSegment === 'suv') {
+        return modelSegment.includes('suv');
+      }
+      // 기타 세그먼트는 정확히 매칭
+      return modelSegment.includes(searchSegment);
+    });
+    
+    console.log('Found segment models:', segmentModels.map(m => ({ name: m.model_name, segment: m.segment })));
+    const segmentModelIds = segmentModels.map(model => model.model_id);
+    console.log('Segment model IDs:', segmentModelIds);
+
+    const targetMonth = month || 7;
+    const targetYear = year || 2025;
+    
+    console.log('Filtering sales for:', { dealership_id: dealership.dealership_id, targetMonth, targetYear, segmentModelIds });
+
+    const filteredSales = sales.data.filter(sale => {
+      const saleDate = new Date(sale.sale_date);
+      const matches = sale.dealership_id === dealership.dealership_id &&
+             saleDate.getMonth() + 1 === targetMonth &&
+             saleDate.getFullYear() === targetYear &&
+             segmentModelIds.includes(sale.model_id);
+      
+      if (sale.dealership_id === dealership.dealership_id) {
+        console.log('Sale match check:', { 
+          sale_id: sale.sale_id, 
+          sale_date: sale.sale_date, 
+          model_id: sale.model_id, 
+          matches 
+        });
+      }
+      
+      return matches;
+    });
+
+    console.log('Filtered sales:', filteredSales);
+    const totalQuantity = filteredSales.length;
+    const totalAmount = filteredSales.reduce((sum, sale) => sum + sale.price_krw, 0);
+
+    return {
+      success: true,
+      data: {
+        dealership: dealership.dealership_name,
+        month: targetMonth,
+        year: targetYear,
+        segment,
+        totalQuantity,
+        totalAmount,
+        sales: filteredSales.map(sale => ({
+          ...sale,
+          model_name: getVehicleModelNameFromId(sale.model_id),
+          segment: segmentModels.find(m => m.model_id === sale.model_id)?.segment
+        }))
+      }
+    };
+  },
+
+  getAllocationByDealership: async (dealershipName, month, year) => {
+    const allocations = benzCrmData.database_schema.tables.find(table => table.table_name === 'ProductionAllocation');
+    const dealerships = benzCrmData.database_schema.tables.find(table => table.table_name === 'Dealerships');
+    const models = benzCrmData.database_schema.tables.find(table => table.table_name === 'VehicleModels');
+    
+    if (!allocations || !dealerships || !models) {
+      return { success: false, message: '배정 데이터를 찾을 수 없습니다.' };
+    }
+
+    // 딜러 ID 찾기
+    const dealership = dealerships.data.find(d => {
+      const searchName = dealershipName.toLowerCase();
+      const actualName = d.dealership_name.toLowerCase();
+      
+      // 정확한 매칭
+      if (actualName === searchName) return true;
+      
+      // 부분 매칭
+      if (actualName.includes(searchName) || searchName.includes(actualName)) return true;
+      
+      // 한국어-영어 매칭
+      const koreanToEnglish = {
+        '효성더클래스': 'hyosung the class',
+        '한성자동차': 'hansung motors',
+        'kcc오토': 'kcc auto',
+        '더스타모터스': 'the star motors',
+        '신세계모터스': 'shinsegae motors'
+      };
+      
+      const englishName = koreanToEnglish[searchName];
+      if (englishName && actualName.includes(englishName)) return true;
+      
+      return false;
+    });
+    
+    if (!dealership) {
+      return { success: false, message: '딜러를 찾을 수 없습니다.' };
+    }
+
+    const targetMonth = month || 8;
+    const targetYear = year || 2025;
+
+    const monthlyAllocations = allocations.data.filter(allocation => {
+      const arrivalDate = new Date(allocation.estimated_arrival);
+      return allocation.dealership_id === dealership.dealership_id &&
+             arrivalDate.getMonth() + 1 === targetMonth &&
+             arrivalDate.getFullYear() === targetYear;
+    });
+
+    // SUV 세그먼트만 필터링
+    const suvModels = models.data.filter(model => 
+      model.segment.toLowerCase().includes('suv')
+    );
+    const suvModelIds = suvModels.map(model => model.model_id);
+
+    const suvAllocations = monthlyAllocations.filter(allocation => 
+      suvModelIds.includes(allocation.model_id)
+    );
+
+    const totalQuantity = suvAllocations.reduce((sum, allocation) => sum + allocation.allocation_quantity, 0);
+
+    return {
+      success: true,
+      data: {
+        dealership: dealership.dealership_name,
+        month: targetMonth,
+        year: targetYear,
+        segment: 'SUV',
+        totalQuantity,
+        allocations: suvAllocations.map(allocation => ({
+          ...allocation,
+          model_name: getVehicleModelNameFromId(allocation.model_id),
+          segment: suvModels.find(m => m.model_id === allocation.model_id)?.segment
+        }))
+      }
+    };
+  },
+
+  sendEmail: async (recipientEmail, subject, content) => {
+    // 이메일 전송 시뮬레이션
+    const recipients = recipientData;
+    const recipient = recipients.find(r => r.이메일 === recipientEmail);
+    
+    if (!recipient) {
+      return { success: false, message: '수신자를 찾을 수 없습니다.' };
+    }
+
+    return {
+      success: true,
+      data: {
+        recipient: recipient.이름,
+        email: recipientEmail,
+        subject,
+        content,
+        sentAt: new Date().toISOString(),
+        status: '전송완료'
+      },
+      message: `${recipient.이름}님에게 이메일이 성공적으로 전송되었습니다.`
+    };
+  },
+
+  // 기존 API 함수들 (호환성 유지)
+  getPatients: async (patientId, patientName) => {
+    return { success: true, data: [], message: '자동차 업계 시스템에서는 환자 데이터를 제공하지 않습니다.' };
+  },
+  getAppointments: async (appointmentId, date, patientName) => {
+    return { success: true, data: [], message: '자동차 업계 시스템에서는 예약 데이터를 제공하지 않습니다.' };
+  },
+  getSurgeries: async (surgeryId, patientName) => {
+    return { success: true, data: [], message: '자동차 업계 시스템에서는 수술 데이터를 제공하지 않습니다.' };
+  },
+  getPhotoRecords: async (recordId, patientName) => {
+    return { success: true, data: [], message: '자동차 업계 시스템에서는 사진 기록을 제공하지 않습니다.' };
+  },
+  getProducts: async () => {
+    const models = benzCrmData.database_schema.tables.find(table => table.table_name === 'VehicleModels');
+    return { success: true, data: models ? models.data : [] };
+  },
+  getSurveys: async () => {
+    return { success: true, data: [], message: '자동차 업계 시스템에서는 설문 데이터를 제공하지 않습니다.' };
+  },
+  getLeads: async () => {
+    const waitlist = benzCrmData.database_schema.tables.find(table => table.table_name === 'CustomerWaitlist');
+    return { success: true, data: waitlist ? waitlist.data : [] };
+  },
+  getCallback: async () => {
+    return { success: true, data: [], message: '콜백 데이터가 없습니다.' };
+  },
+  postSend: async (formData) => {
+    // 이메일 전송 처리
+    if (formData.recipient_email && formData.description) {
+      return await mockApi.sendEmail(formData.recipient_email, '벤츠 본사 공지사항', formData.description);
+    }
+    return { success: false, message: '필수 데이터가 누락되었습니다.' };
+  },
+  searchRecipients: async (searchTerm) => {
+    const results = recipientData.filter(recipient => 
+      recipient.이름.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      recipient.부서.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      recipient.직책.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      recipient.이메일.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    return { success: true, data: results };
+  }
 };
 
 export { mockApi, fixedLayoutData, recipientData };

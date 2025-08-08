@@ -37,7 +37,7 @@ async function fileToGenerativePart(file) {
  * Gemini API를 호출하여 사용자 입력과 제공된 의도 매핑을 기반으로 가장 유사한 의도를 식별합니다.
  * 또한, 특정 의도와 관련된 엔티티(예: 환자 이름)를 추출합니다.
  * @param {string} userMessage - 사용자의 입력 메시지
- * @param {Object} intentMapping - 의도 키와 해당 질문 목록을 포함하는 객체 (예: {"BOM_STEP_0": ["그릴리 BOM 확인"]})
+ * @param {Object} intentMapping - 의도 키와 해당 질문 목록을 포함하는 객체 (예: {"AUTOMOTIVE_DEALER_INFO_0": ["딜러 정보 조회"]})
  * @returns {Promise<{matched_intent: string, extracted_entities?: Object}>} - 식별된 의도 키와 추출된 엔티티 객체
  */
 export const getGeminiIntent = async (userMessage, intentMapping) => {
@@ -131,5 +131,33 @@ export const getGeminiTextResponse = async (promptText, imageFile = null, contex
     } catch (error) {
         console.error("Error calling Gemini API for text response:", error);
         return { text: "An error occurred while getting text response from LLM." };
+    }
+};
+
+/**
+ * Gemini API를 사용하여 텍스트를 한국어로 번역합니다.
+ * @param {string} text - 번역할 텍스트 (영어, 독일어 등)
+ * @returns {Promise<string>} - 한국어로 번역된 텍스트
+ */
+export const translateToKorean = async (text) => {
+    const prompt = `다음 텍스트를 자연스러운 한국어로 번역해주세요. 
+    번역 시 다음 사항을 고려해주세요:
+    1. 자동차 업계 전문 용어는 적절한 한국어로 번역
+    2. 비즈니스 이메일 톤 유지
+    3. 자연스러운 한국어 표현 사용
+    4. 원문의 의미를 정확히 전달
+    
+    번역할 텍스트: "${text}"
+    
+    번역 결과만 한국어로 출력해주세요.`;
+
+    try {
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        return response.text().trim();
+    } catch (error) {
+        console.error("Error calling Gemini API for translation:", error);
+        // 번역 실패 시 원본 텍스트 반환
+        return text;
     }
 };

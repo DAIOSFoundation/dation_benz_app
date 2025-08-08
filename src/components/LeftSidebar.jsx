@@ -11,46 +11,18 @@ function LeftSidebar({ isOpen, savedSessions, onLoadSession, selectedSavedSessio
     <div className={`left-sidebar ${isOpen ? 'open' : 'closed'}`}>
       <nav className="main-menu">
         <div
-          className={`menu-item ${selectedMenu === 'Dealer Management' ? 'selected' : ''}`}
-          onClick={() => setSelectedMenu('Dealer Management')}
+          className={`menu-item ${selectedMenu === 'Interaction' ? 'selected' : ''}`}
+          onClick={() => setSelectedMenu('Interaction')}
         >
-          <img src={MessageIcon} alt="Dealer Management" />
-          <span>딜러 관리</span>
+          <img src={MessageIcon} alt="Interaction" />
+          <span>Interaction</span>
         </div>
         <div
-          className={`menu-item ${selectedMenu === 'Vehicle Management' ? 'selected' : ''}`}
-          onClick={() => setSelectedMenu('Vehicle Management')}
+          className={`menu-item ${selectedMenu === 'Prompt Setting' ? 'selected' : ''}`}
+          onClick={() => setSelectedMenu('Prompt Setting')}
         >
-          <img src={ElementsIcon} alt="Vehicle Management" />
-          <span>차량 관리</span>
-        </div>
-        <div
-          className={`menu-item ${selectedMenu === 'Sales Analytics' ? 'selected' : ''}`}
-          onClick={() => setSelectedMenu('Sales Analytics')}
-        >
-          <img src={ReactIcon} alt="Sales Analytics" />
-          <span>판매 현황</span>
-        </div>
-        <div
-          className={`menu-item ${selectedMenu === 'Production Status' ? 'selected' : ''}`}
-          onClick={() => setSelectedMenu('Production Status')}
-        >
-          <img src={MessageIcon} alt="Production Status" />
-          <span>생산 현황</span>
-        </div>
-        <div
-          className={`menu-item ${selectedMenu === 'Customer Waitlist' ? 'selected' : ''}`}
-          onClick={() => setSelectedMenu('Customer Waitlist')}
-        >
-          <img src={ElementsIcon} alt="Customer Waitlist" />
-          <span>고객 대기</span>
-        </div>
-        <div
-          className={`menu-item ${selectedMenu === 'Communication Hub' ? 'selected' : ''}`}
-          onClick={() => setSelectedMenu('Communication Hub')}
-        >
-          <img src={ReactIcon} alt="Communication Hub" />
-          <span>커뮤니케이션</span>
+          <img src={ElementsIcon} alt="Prompt Setting" />
+          <span>Prompt Setting</span>
         </div>
       </nav>
 
