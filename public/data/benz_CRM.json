@@ -78,4 +78,53 @@
         "columns": [
           {"column_name": "waitlist_id", "type": "INTEGER", "is_primary_key": true, "description": "구매 대기 고유 ID"},
           {"column_name": "dealership_id", "type": "INTEGER", "is_foreign_key": true, "references_table": "Dealerships", "references_column": "dealership_id", "description": "고객이 대기 신청을 한 딜러사 ID"},
-          {"column_name": "customer_name", "typ
+          {"column_name": "customer_name", "type": "VARCHAR", "description": "고객 이름"},
+          {"column_name": "customer_phone", "type": "VARCHAR", "description": "고객 연락처"},
+          {"column_name": "customer_email", "type": "VARCHAR", "description": "고객 이메일"},
+          {"column_name": "model_id", "type": "INTEGER", "is_foreign_key": true, "references_table": "VehicleModels", "references_column": "model_id", "description": "대기 신청한 차량 모델 ID"},
+          {"column_name": "waitlist_date", "type": "DATE", "description": "대기 신청 일자"},
+          {"column_name": "priority_level", "type": "INTEGER", "description": "우선순위 레벨 (1: 높음, 2: 보통, 3: 낮음)"},
+          {"column_name": "estimated_delivery", "type": "DATE", "description": "예상 배송 일자"},
+          {"column_name": "status", "type": "VARCHAR", "description": "대기 상태 (대기중, 배정완료, 취소)"}
+        ],
+        "data": [
+          {"waitlist_id": 1, "dealership_id": 1, "customer_name": "김철수", "customer_phone": "+82-10-1234-5678", "customer_email": "kim.cs@email.com", "model_id": 104, "waitlist_date": "2025-07-15", "priority_level": 1, "estimated_delivery": "2025-09-15", "status": "대기중"},
+          {"waitlist_id": 2, "dealership_id": 1, "customer_name": "이영희", "customer_phone": "+82-10-2345-6789", "customer_email": "lee.yh@email.com", "model_id": 105, "waitlist_date": "2025-07-10", "priority_level": 1, "estimated_delivery": "2025-08-30", "status": "대기중"},
+          {"waitlist_id": 3, "dealership_id": 2, "customer_name": "박민수", "customer_phone": "+82-10-3456-7890", "customer_email": "park.ms@email.com", "model_id": 104, "waitlist_date": "2025-07-12", "priority_level": 2, "estimated_delivery": "2025-10-15", "status": "대기중"},
+          {"waitlist_id": 4, "dealership_id": 2, "customer_name": "최지영", "customer_phone": "+82-10-4567-8901", "customer_email": "choi.jy@email.com", "model_id": 101, "waitlist_date": "2025-07-08", "priority_level": 1, "estimated_delivery": "2025-08-15", "status": "배정완료"},
+          {"waitlist_id": 5, "dealership_id": 3, "customer_name": "정현우", "customer_phone": "+82-10-5678-9012", "customer_email": "jung.hw@email.com", "model_id": 103, "waitlist_date": "2025-07-20", "priority_level": 2, "estimated_delivery": "2025-09-30", "status": "대기중"},
+          {"waitlist_id": 6, "dealership_id": 3, "customer_name": "한소영", "customer_phone": "+82-10-6789-0123", "customer_email": "han.sy@email.com", "model_id": 108, "waitlist_date": "2025-07-18", "priority_level": 1, "estimated_delivery": "2025-09-20", "status": "대기중"},
+          {"waitlist_id": 7, "dealership_id": 4, "customer_name": "윤도현", "customer_phone": "+82-10-7890-1234", "customer_email": "yoon.dh@email.com", "model_id": 102, "waitlist_date": "2025-07-22", "priority_level": 3, "estimated_delivery": "2025-11-15", "status": "대기중"},
+          {"waitlist_id": 8, "dealership_id": 5, "customer_name": "임서진", "customer_phone": "+82-10-8901-2345", "customer_email": "lim.sj@email.com", "model_id": 106, "waitlist_date": "2025-07-25", "priority_level": 2, "estimated_delivery": "2025-10-30", "status": "대기중"}
+        ]
+      },
+      {
+        "table_name": "ProductionAllocation",
+        "purpose": "독일 본사에서 한국 딜러로의 차량 배정 계획을 관리합니다.",
+        "columns": [
+          {"column_name": "allocation_id", "type": "INTEGER", "is_primary_key": true, "description": "배정 고유 ID"},
+          {"column_name": "model_id", "type": "INTEGER", "is_foreign_key": true, "references_table": "VehicleModels", "references_column": "model_id", "description": "배정할 차량 모델 ID"},
+          {"column_name": "dealership_id", "type": "INTEGER", "is_foreign_key": true, "references_table": "Dealerships", "references_column": "dealership_id", "description": "배정받을 딜러사 ID"},
+          {"column_name": "allocation_quantity", "type": "INTEGER", "description": "배정 수량"},
+          {"column_name": "production_date", "type": "DATE", "description": "생산 완료 예정일"},
+          {"column_name": "shipping_date", "type": "DATE", "description": "출하 예정일"},
+          {"column_name": "estimated_arrival", "type": "DATE", "description": "한국 도착 예정일"},
+          {"column_name": "priority_level", "type": "INTEGER", "description": "배정 우선순위 (1: 최고, 2: 높음, 3: 보통, 4: 낮음)"},
+          {"column_name": "status", "type": "VARCHAR", "description": "배정 상태 (계획, 생산중, 출하완료, 운송중, 도착완료)"}
+        ],
+        "data": [
+          {"allocation_id": 1, "model_id": 101, "dealership_id": 1, "allocation_quantity": 15, "production_date": "2025-08-15", "shipping_date": "2025-08-20", "estimated_arrival": "2025-09-15", "priority_level": 1, "status": "생산중"},
+          {"allocation_id": 2, "model_id": 102, "dealership_id": 1, "allocation_quantity": 20, "production_date": "2025-08-20", "shipping_date": "2025-08-25", "estimated_arrival": "2025-09-20", "priority_level": 2, "status": "계획"},
+          {"allocation_id": 3, "model_id": 104, "dealership_id": 2, "allocation_quantity": 8, "production_date": "2025-08-10", "shipping_date": "2025-08-15", "estimated_arrival": "2025-09-10", "priority_level": 1, "status": "출하완료"},
+          {"allocation_id": 4, "model_id": 105, "dealership_id": 2, "allocation_quantity": 10, "production_date": "2025-08-12", "shipping_date": "2025-08-17", "estimated_arrival": "2025-09-12", "priority_level": 1, "status": "운송중"},
+          {"allocation_id": 5, "model_id": 103, "dealership_id": 3, "allocation_quantity": 12, "production_date": "2025-08-18", "shipping_date": "2025-08-23", "estimated_arrival": "2025-09-18", "priority_level": 2, "status": "생산중"},
+          {"allocation_id": 6, "model_id": 108, "dealership_id": 3, "allocation_quantity": 6, "production_date": "2025-08-25", "shipping_date": "2025-08-30", "estimated_arrival": "2025-09-25", "priority_level": 1, "status": "계획"},
+          {"allocation_id": 7, "model_id": 102, "dealership_id": 4, "allocation_quantity": 15, "production_date": "2025-08-22", "shipping_date": "2025-08-27", "estimated_arrival": "2025-09-22", "priority_level": 3, "status": "계획"},
+          {"allocation_id": 8, "model_id": 107, "dealership_id": 4, "allocation_quantity": 8, "production_date": "2025-08-28", "shipping_date": "2025-09-02", "estimated_arrival": "2025-09-28", "priority_level": 2, "status": "계획"},
+          {"allocation_id": 9, "model_id": 106, "dealership_id": 5, "allocation_quantity": 12, "production_date": "2025-08-30", "shipping_date": "2025-09-05", "estimated_arrival": "2025-10-05", "priority_level": 3, "status": "계획"},
+          {"allocation_id": 10, "model_id": 105, "dealership_id": 5, "allocation_quantity": 5, "production_date": "2025-09-05", "shipping_date": "2025-09-10", "estimated_arrival": "2025-10-10", "priority_level": 1, "status": "계획"}
+        ]
+      }
+    ]
+  }
+}
