@@ -15,6 +15,7 @@
   display: flex;
   align-items: center;
   gap: 15px;
+  flex: 1;
 }
 
 .playground-text {
@@ -27,10 +28,49 @@
   min-width: 220px;
 }
 
+.header-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+
+.current-dealer-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: var(--primary-bg);
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.dealer-label {
+  font-size: 0.9rem;
+  color: var(--text-color-secondary);
+  font-weight: 500;
+}
+
+.dealer-name {
+  font-size: 1rem;
+  color: var(--text-color-primary);
+  font-weight: 600;
+}
+
+.date-info {
+  font-size: 0.85rem;
+  color: var(--text-color-secondary);
+  margin-left: 8px;
+  padding-left: 8px;
+  border-left: 1px solid var(--border-color);
+}
+
 .header-right {
   display: flex;
   align-items: center;
   gap: 16px; /* 아이콘과 버튼 사이 간격 */
+  flex: 1;
+  justify-content: flex-end;
 }
 
 /* 사용자 프로필 스타일 추가 */
@@ -99,17 +139,17 @@
 }
 
 .save-chat-button {
-  background-color: var(--accent-color-dark);
+  background-color: #2c5aa0;
 }
 .save-chat-button:hover {
-  background-color: var(--accent-color);
+  background-color: #3a6bb8;
 }
 
 /* 좌측 사이드바 토글 아이콘 회전 */
 .icon-button.rotate-open {
-  transform: rotate(0deg); /* 열린 상태에서는 기본 각도 */
+  transform: rotate(180deg);
 }
 
 .icon-button.rotate-closed {
-  transform: rotate(180deg); /* 닫힌 상태에서는 180도 회전 */
+  transform: rotate(0deg);
 }

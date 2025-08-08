@@ -29,7 +29,7 @@ function App() {
   const [selectedLLM, setSelectedLLM] = useState('Banya Gemma 27B Tuned');
   const [chatHistory, setChatHistory] = useState([]); // MainContent의 현재 대화 내용
   const [currentPromptInput, setCurrentPromptInput] = useState('');
-  const [selectedMenu, setSelectedMenu] = useState('General');
+  const [selectedMenu, setSelectedMenu] = useState('Dealer Management');
   const [savedChatSessions, setSavedChatSessions] = useState([]); // <-- 저장된 챗 세션 목록
   const [selectedSavedSessionId, setSelectedSavedSessionId] = useState(null); // <-- 현재 로드된 저장 세션 ID
   const [apiCallLogs, setApiCallLogs] = useState([]); // 새로운 상태: API 호출 로그
@@ -199,11 +199,11 @@ function App() {
   }, [lastLlmOutput]);
 
 
-  // 메뉴 선택 핸들러: Interaction 메뉴 선택 시 RightSidebar를 엽니다.
+  // 메뉴 선택 핸들러: 딜러 관리 메뉴 선택 시 RightSidebar를 엽니다.
   const handleMenuSelect = (menuName) => {
     // console.log('App: Menu selected:', menuName); // Debug: 메뉴 선택 확인
     setSelectedMenu(menuName);
-    if (menuName === 'Interaction' || menuName === 'General') { // General 페이지에서도 사이드바 열림
+    if (menuName === 'Dealer Management' || menuName === 'Vehicle Management' || menuName === 'Sales Analytics') { // 딜러 관련 페이지에서 사이드바 열림
       setIsRightSidebarOpen(true);
     }
     // 메뉴 변경 시 Source 로그 초기화
@@ -214,56 +214,56 @@ function App() {
 
   const promptsTemplates = useMemo(() => ([
     {
-      id: 'bom-info',
-      title: '그릴리 제품 군의 원재료 구성',
-      description: '그릴리 제품 군의 BOM(원자재 명세서)을 확인하고, 특정 원재료의 사용 여부를 질문할 수 있습니다.',
-      example: '그릴리 BOM 보여줘\n그릴리 SOP 보여줘\nSOP 전송해줘',
-      category: 'Interaction',
+      id: 'dealer-management',
+      title: '딜러 관리 시스템',
+      description: '한국 내 벤츠 딜러사들의 정보를 조회하고 관리할 수 있습니다.',
+      example: '한성자동차 딜러 정보 보여줘\n효성더클래스 연락처 알려줘\nKCC오토 담당자 정보 조회',
+      category: 'Dealer Management',
       author: 'Admin',
       date: getRandomDate(),
     },
     {
-      id: 'toksnfill-work-guide',
-      title: '톡스앤필 업무 가이드',
-      description: '톡스앤필의 병원 홍보, 환자 예약, 조회, 수술 사진 기록 등의 업무를 관리할 수 있음',
-      example: '병원 홍보 내용 보여줘\n환자 예약 현황 보여줘\n박민지 환자 수술 기록 찾아줘',
-      category: 'Interaction',
+      id: 'vehicle-sales',
+      title: '차량 판매 현황',
+      description: '딜러별 차량 판매 실적과 VIN 정보를 조회할 수 있습니다.',
+      example: '한성자동차 7월 판매 현황 보여줘\nE-Class 판매 통계 조회\nVIN001HANSUNG 차량 정보 찾아줘',
+      category: 'Sales Analytics',
       author: 'System',
       date: getRandomDate(),
     },
     {
-      id: 'food-news-guide',
-      title: '식품 제조 뉴스 가이드',
-      description: '최신 식품 뉴스, 시장 트렌드, 신제품 정보 등을 얻을 수 있습니다.',
-      example: '최근 식품 시장 트렌드는?\n최근 허니버터칩을 출시한 식품회사는?\n동원식품 그릴리에 대해서 설명해줘\n교촌 치킨이 최근 출시한 메뉴는?',
-      category: 'General',
+      id: 'production-status',
+      title: '생산 및 배정 현황',
+      description: '독일 본사의 차량 생산 현황과 한국 배정 계획을 확인할 수 있습니다.',
+      example: 'E-Class 생산 현황 보여줘\n한국 배정 계획 조회\nGLC 생산 일정 확인',
+      category: 'Production Status',
       author: 'System',
       date: getRandomDate(),
     },
     {
-      id: 'image-analysis-guide',
-      title: '이미지 분석 가이드',
-      description: '이미지를 Ctr+C 로 복사하여 챗팅창에 Ctr+V 로 붙여넣고 다음가 같이 질문하세요.',
-      example: '첨부한 이미지에 대해 설명해줘',
-      category: 'General',
+      id: 'customer-waitlist',
+      title: '고객 대기 명단',
+      description: '특정 차량 모델을 구매 대기 중인 고객들의 정보를 관리합니다.',
+      example: 'EQS 대기 고객 목록 보여줘\nS-Class 대기 순번 조회\n고객 대기 현황 통계',
+      category: 'Customer Waitlist',
       author: 'System',
       date: getRandomDate(),
     },
     {
-      id: 'mes-plm-guide',
-      title: 'MES/PLM 조회 가이드',
-      description: 'MES/PLM 시스템의 데이터를 조회하고 관련 대시보드를 확인하는 방법을 안내합니다.',
-      example: '모니터링 대시보드 띄워\n생산 현황 보여줘',
-      category: 'Interaction',
+      id: 'vehicle-models',
+      title: '차량 모델 정보',
+      description: '벤츠의 각 차량 모델에 대한 상세 정보를 조회할 수 있습니다.',
+      example: 'E-Class (W214) 사양 보여줘\n전기차 모델 목록 조회\nSUV 모델 가격 정보',
+      category: 'Vehicle Management',
       author: 'System',
       date: getRandomDate(),
     },
     {
-      id: 'equipment-control',
-      title: '생산 장비 제어',
-      description: '생산 장비의 파라미터를 조작하는 자연어 명령어 프롬프트입니다.',
-      example: '압출기 1의 3구간 온도를 280도로 설정합니다. 이유는 공정 안정화입니다.\n화학 반응기 2 교반기 속도를 150으로 변경해주세요.\n연신 라인 1 장력 목표값 1500으로 맞춰줘.\n건조 오븐 1의 팬 속도를 1200 RPM으로 올려.',
-      category: 'Interaction',
+      id: 'communication-hub',
+      title: '본사-딜러 커뮤니케이션',
+      description: '독일 본사와 한국 딜러 간의 실시간 소통을 지원합니다.',
+      example: '본사에 생산 일정 문의\n딜러별 판매 실적 보고서 전송\n차량 배정 요청서 작성',
+      category: 'Communication Hub',
       author: 'System',
       date: getRandomDate(),
     }
@@ -292,7 +292,7 @@ function App() {
           toggleLeftSidebar={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)}
           isLeftSidebarOpen={isLeftSidebarOpen}
           onNewChat={handleNewChat}
-          isInteractionPage={selectedMenu === 'Interaction'} // NEW PROP
+          isInteractionPage={selectedMenu === 'Production Status'} // NEW PROP
           onDeployApp={handleDeployApp} // NEW PROP
           onSaveChat={handleSaveChat}
           chatHistory={chatHistory}

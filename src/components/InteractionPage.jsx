@@ -15,7 +15,7 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
   const [error, setError] = useState(null);
 
   // Interaction 페이지 최초 로딩 시 표시될 알림 메시지로 llmExplanation을 초기화합니다.
-  const [llmExplanation, setLlmExplanation] = useState("안녕하세요. Banya Agent 이 업무를 도와 드립니다.");
+  const [llmExplanation, setLlmExplanation] = useState("안녕하세요. Benz Global Management Agent가 업무를 도와 드립니다.");
   const [interactionChatHistory, setInteractionChatHistory] = useState([]);
   const [interactionInput, setInteractionInput] = useState('');
   const [isSendingInteraction, setIsSendingInteraction] = useState(false);
@@ -28,65 +28,82 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
   // 1. lastUserInput 상태 추가
   const [lastUserInput, setLastUserInput] = useState('');
 
-  // 병원용과 제조용 fixedLayoutData의 question들을 Gemini가 이해할 수 있는 매핑으로 변환
+  // 자동차 업계 워크플로우 데이터의 question들을 Gemini가 이해할 수 있는 매핑으로 변환
   const geminiIntentKeywords = useMemo(() => {
     const keywords = {};
     
-    // 병원용 워크플로우
-    fixedLayoutData.forEach(step => {
-        if (step.question && step.question.length > 0) {
-            const intentKey = `HOSPITAL_${step.process_name.replace(/ /g, '_').toUpperCase()}_${step.step_id}`;
-            keywords[intentKey] = step.question;
-        }
-        if (step.step_id === 0) { // Assuming step_id 0 is the full workflow overview
-            keywords["HOSPITAL_FULL_WORKFLOW_0"] = ["병원 소개", "병원 일반 정보", "홈페이지", "업무 안내", "병원 홍보", "진료 과목", "일반 시술 안내"];
-        }
-    });
+    // 딜러 관리 워크플로우
+    const dealerWorkflow = [
+      { process_name: "딜러 정보 조회", step_id: 0, question: ["딜러 정보", "딜러사 정보", "한성자동차", "효성더클래스", "KCC오토", "연락처", "담당자"] },
+      { process_name: "딜러 연락처 관리", step_id: 1, question: ["연락처", "이메일", "전화번호", "담당자 정보"] },
+      { process_name: "딜러 성과 분석", step_id: 2, question: ["성과", "실적", "판매 통계", "딜러별 성과"] }
+    ];
     
-    // 제조용 워크플로우
-    manufacturingLayoutData.forEach(step => {
-        if (step.question && step.question.length > 0) {
-            const intentKey = `MANUFACTURING_${step.process_name.replace(/ /g, '_').toUpperCase()}_${step.step_id}`;
-            keywords[intentKey] = step.question;
-        }
+    // 차량 관리 워크플로우
+    const vehicleWorkflow = [
+      { process_name: "차량 모델 정보", step_id: 0, question: ["차량 모델", "E-Class", "C-Class", "GLC", "EQS", "S-Class", "사양", "가격"] },
+      { process_name: "차량 재고 관리", step_id: 1, question: ["재고", "재고 현황", "차량 재고", "배정 현황"] },
+      { process_name: "VIN 추적", step_id: 2, question: ["VIN", "차량 식별", "차량 이력", "VIN 추적"] }
+    ];
+    
+    // 판매 현황 워크플로우
+    const salesWorkflow = [
+      { process_name: "판매 실적 조회", step_id: 0, question: ["판매 실적", "판매 현황", "매출", "판매 통계"] },
+      { process_name: "고객 대기 관리", step_id: 1, question: ["고객 대기", "대기 명단", "구매 대기", "대기 순번"] },
+      { process_name: "생산 배정 현황", step_id: 2, question: ["생산 현황", "배정 계획", "생산 일정", "한국 배정"] }
+    ];
+    
+    // 모든 워크플로우 통합
+    [...dealerWorkflow, ...vehicleWorkflow, ...salesWorkflow].forEach(step => {
+      if (step.question && step.question.length > 0) {
+        const intentKey = `AUTOMOTIVE_${step.process_name.replace(/ /g, '_').toUpperCase()}_${step.step_id}`;
+        keywords[intentKey] = step.question;
+      }
     });
     
     return keywords;
   }, []);
 
-  // ID-Name 매핑 데이터를 위한 useMemo (병원용과 제조용 통합)
+  // ID-Name 매핑 데이터를 위한 useMemo (자동차 업계)
   const idToNameMaps = useMemo(() => {
-    const patients = mockApi.getPatientDataForMapping();
-    const products = mockApi.getProductDataForMapping();
-    const leads = mockApi.getLeadDataForMapping();
-    const hospitalRecipients = mockApi.getRecipientData();
-    const manufacturingRecipients = manufacturingRecipientData;
+    // 벤츠 딜러 데이터에서 매핑 정보 추출
+    const dealers = [
+      { dealership_id: 1, dealership_name: "Hansung Motors", contact_person: "Kim Min-jun" },
+      { dealership_id: 2, dealership_name: "Hyosung The Class", contact_person: "Lee Seo-yeon" },
+      { dealership_id: 3, dealership_name: "KCC Auto", contact_person: "Park Ji-hoon" },
+      { dealership_id: 4, dealership_name: "The Star Motors", contact_person: "Choi Eun-ji" },
+      { dealership_id: 5, dealership_name: "Shinsegae Motors", contact_person: "Jung Woo-jin" }
+    ];
+    
+    const vehicleModels = [
+      { model_id: 101, model_name: "E-Class (W214)", segment: "Sedan" },
+      { model_id: 102, model_name: "C-Class (W206)", segment: "Sedan" },
+      { model_id: 103, model_name: "GLC (X254)", segment: "SUV" },
+      { model_id: 104, model_name: "EQS (V297)", segment: "EV Sedan" },
+      { model_id: 105, model_name: "S-Class (W223)", segment: "Luxury Sedan" }
+    ];
 
-    const patientIdToName = new Map(patients.map(p => [p.patient_id, p.name]));
-    const productIdToName = new Map(products.map(p => [p.product_id, p.name]));
-    const leadIdToName = new Map(leads.map(l => [l.lead_id, l.name]));
-    const hospitalRecipientEmailToName = new Map(hospitalRecipients.map(r => [r.이메일, r.이름]));
-    const manufacturingRecipientEmailToName = new Map(manufacturingRecipients.map(r => [r.이메일, r.이름]));
+    const dealershipIdToName = new Map(dealers.map(d => [d.dealership_id, d.dealership_name]));
+    const modelIdToName = new Map(vehicleModels.map(v => [v.model_id, v.model_name]));
+    const dealershipIdToContact = new Map(dealers.map(d => [d.dealership_id, d.contact_person]));
 
     return {
-      patientIdToName,
-      productIdToName,
-      leadIdToName,
-      hospitalRecipientEmailToName,
-      manufacturingRecipientEmailToName,
+      dealershipIdToName,
+      modelIdToName,
+      dealershipIdToContact,
     };
   }, []); // 의존성 배열 비워두어 컴포넌트 마운트 시 한 번만 계산
 
-  // 장비 제어 파라미터 데이터 (명령어 딕셔너리)
+  // 차량 생산 및 배정 파라미터 데이터 (명령어 딕셔너리)
   const controlParameters = [
-      { equipment: '압출기 1', parameter: '온도 설정값 (1구간)', unit: '°C', min: 200, max: 300 },
-      { equipment: '압출기 1', parameter: '온도 설정값 (3구간)', unit: '°C', min: 250, max: 300 },
-      { equipment: '압출기 1', parameter: '스크류 속도', unit: 'RPM', min: 10, max: 150 },
-      { equipment: '연신 라인 1', parameter: '장력 목표값', unit: 'N', min: 1000, max: 2000 },
-      { equipment: '화학 반응기 2', parameter: '온도 설정값', unit: '°C', min: 150, max: 250 },
-      { equipment: '화학 반응기 2', parameter: '교반기 속도', unit: 'RPM', min: 50, max: 200 },
-      { equipment: '건조 오븐 1', parameter: '온도 설정값', unit: '°C', min: 80, max: 180 },
-      { equipment: '건조 오븐 1', parameter: '팬 속도', unit: 'RPM', min: 500, max: 1500 },
+      { equipment: '생산 라인 1', parameter: '일일 생산 목표', unit: '대', min: 50, max: 200 },
+      { equipment: '생산 라인 1', parameter: '품질 검사 기준', unit: '%', min: 95, max: 100 },
+      { equipment: '배정 시스템', parameter: '한국 배정 우선순위', unit: '순위', min: 1, max: 10 },
+      { equipment: '배정 시스템', parameter: '배정 차량 수량', unit: '대', min: 10, max: 100 },
+      { equipment: '품질 관리', parameter: '검사 완료율', unit: '%', min: 90, max: 100 },
+      { equipment: '품질 관리', parameter: '불량률 허용치', unit: '%', min: 0, max: 5 },
+      { equipment: '운송 시스템', parameter: '배송 일정 조정', unit: '일', min: 1, max: 30 },
+      { equipment: '운송 시스템', parameter: '운송 우선순위', unit: '순위', min: 1, max: 5 },
   ];
 
   // 입력문에서 장비/파라미터/값/사유 추출 함수 (데이터 딕셔너리 기반으로 개선)

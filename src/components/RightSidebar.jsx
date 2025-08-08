@@ -76,7 +76,7 @@ function RightSidebar({ isOpen, toggleSidebar, apiCallLogs, selectedMenu, lastLl
     <div className={`right-sidebar ${isOpen ? 'open' : 'closed'}`}>
       {/* 새로운 사이드바 헤더 추가 */}
       <div className="sidebar-header">
-        <h3>Agent Action Status</h3> {/* 스크린샷에 'Right Sidebar' 텍스트 있음 */}
+        <h3>Benz Global Status</h3> {/* 벤츠 글로벌 관리 시스템 상태 */}
         <img
           src={SidebarRightIcon}
           alt="Close Sidebar"
@@ -87,7 +87,7 @@ function RightSidebar({ isOpen, toggleSidebar, apiCallLogs, selectedMenu, lastLl
       </div>
       <div className="sidebar-content">
         {processedLogs.length === 0 ? (
-          <p className="no-logs-message">Agent 동작 내역이 없습니다.</p>
+          <p className="no-logs-message">벤츠 글로벌 시스템 동작 내역이 없습니다.</p>
         ) : (
           <ul className="api-call-log-list">
             {processedLogs.map((log, index) => (

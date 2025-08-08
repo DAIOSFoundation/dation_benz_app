@@ -11,31 +11,52 @@ function LeftSidebar({ isOpen, savedSessions, onLoadSession, selectedSavedSessio
     <div className={`left-sidebar ${isOpen ? 'open' : 'closed'}`}>
       <nav className="main-menu">
         <div
-          className={`menu-item ${selectedMenu === 'General' ? 'selected' : ''}`}
-          onClick={() => setSelectedMenu('General')}
+          className={`menu-item ${selectedMenu === 'Dealer Management' ? 'selected' : ''}`}
+          onClick={() => setSelectedMenu('Dealer Management')}
         >
-          <img src={MessageIcon} alt="General" />
-          <span>General</span>
+          <img src={MessageIcon} alt="Dealer Management" />
+          <span>딜러 관리</span>
         </div>
         <div
-          className={`menu-item ${selectedMenu === 'Interaction' ? 'selected' : ''}`}
-          onClick={() => setSelectedMenu('Interaction')}
+          className={`menu-item ${selectedMenu === 'Vehicle Management' ? 'selected' : ''}`}
+          onClick={() => setSelectedMenu('Vehicle Management')}
         >
-          <img src={ElementsIcon} alt="Interaction" />
-          <span>Interaction</span>
+          <img src={ElementsIcon} alt="Vehicle Management" />
+          <span>차량 관리</span>
         </div>
         <div
-          className={`menu-item ${selectedMenu === 'Make Prompt' ? 'selected' : ''}`}
-          onClick={() => setSelectedMenu('Make Prompt')}
+          className={`menu-item ${selectedMenu === 'Sales Analytics' ? 'selected' : ''}`}
+          onClick={() => setSelectedMenu('Sales Analytics')}
         >
-          <img src={ReactIcon} alt="Make Prompt" />
-          <span>Make Prompt</span>
+          <img src={ReactIcon} alt="Sales Analytics" />
+          <span>판매 현황</span>
+        </div>
+        <div
+          className={`menu-item ${selectedMenu === 'Production Status' ? 'selected' : ''}`}
+          onClick={() => setSelectedMenu('Production Status')}
+        >
+          <img src={MessageIcon} alt="Production Status" />
+          <span>생산 현황</span>
+        </div>
+        <div
+          className={`menu-item ${selectedMenu === 'Customer Waitlist' ? 'selected' : ''}`}
+          onClick={() => setSelectedMenu('Customer Waitlist')}
+        >
+          <img src={ElementsIcon} alt="Customer Waitlist" />
+          <span>고객 대기</span>
+        </div>
+        <div
+          className={`menu-item ${selectedMenu === 'Communication Hub' ? 'selected' : ''}`}
+          onClick={() => setSelectedMenu('Communication Hub')}
+        >
+          <img src={ReactIcon} alt="Communication Hub" />
+          <span>커뮤니케이션</span>
         </div>
       </nav>
 
       <div className="chat-history-section">
         <div className="chat-history-header">
-          <span>CHAT HISTORY</span>
+          <span>대화 기록</span>
           <span className="dropdown-arrow">▼</span>
         </div>
         <ul className="chat-history-list">

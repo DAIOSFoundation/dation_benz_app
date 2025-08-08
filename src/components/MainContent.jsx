@@ -10,30 +10,31 @@ import { calculateSimilarity } from '../utils/textSimilarity'; // NEW: 유사도
 import PromptExamplesPopup from './PromptExamplesPopup'; // 팝업 컴포넌트 임포트
 
 // Define API constants for RAG
-//const BASE_RAG_API_PATH = '/api/v1/rag/retrievers/food'; // The actual path on the banya.ai server
-const BASE_RAG_API_PATH = '/api/v1/rags/retriever/2c8d64af-77a0-4abc-949b-06e6f594d17c';
+const BASE_RAG_API_PATH = '/api/v1/rags/retriever/benz-global-management';
 const API_PROXY_PREFIX = '/api'; // The proxy prefix defined in vite.config.js
 
-// getCategoryAndRagContext 함수를 RAG 우선 로직으로 변경
+// getCategoryAndRagContext 함수를 자동차 업계 RAG 로직으로 변경
 async function getCategoryAndRagContext(question, addApiCallLog) {
   const SIMILARITY_THRESHOLD = 0.8; // 유사도 임계값
   const encodedQuestion = encodeURIComponent(question);
 
-  // 1. RAG API URL 정의
-  const foodRagUrl = `https://api.banya.ai/api/v1/rags/retriever/food?question=${encodedQuestion}`;
-  let skinRagUrl;
+  // 1. RAG API URL 정의 - 벤츠 딜러 데이터 기반
+  const dealerRagUrl = `https://api.banya.ai/api/v1/rags/retriever/benz-dealers?question=${encodedQuestion}`;
+  const vehicleRagUrl = `https://api.banya.ai/api/v1/rags/retriever/benz-vehicles?question=${encodedQuestion}`;
+  let salesRagUrl;
   if (import.meta.env.DEV) {
-    skinRagUrl = `${API_PROXY_PREFIX}${BASE_RAG_API_PATH}?question=${encodedQuestion}`;
+    salesRagUrl = `${API_PROXY_PREFIX}${BASE_RAG_API_PATH}?question=${encodedQuestion}`;
   } else {
-    skinRagUrl = `https://api.banya.ai${BASE_RAG_API_PATH}?question=${encodedQuestion}`;
+    salesRagUrl = `https://api.banya.ai${BASE_RAG_API_PATH}?question=${encodedQuestion}`;
   }
 
-  addApiCallLog('API', '카테고리 분석을 위해 RAG API 동시 호출 중...');
+  addApiCallLog('API', '자동차 업계 카테고리 분석을 위해 RAG API 동시 호출 중...');
 
   // 2. RAG API 병렬 호출
-  const [foodResponse, skinResponse] = await Promise.all([
-    fetch(foodRagUrl).then(res => res.json()).catch(() => null),
-    fetch(skinRagUrl).then(res => res.json()).catch(() => null)
+  const [dealerResponse, vehicleResponse, salesResponse] = await Promise.all([
+    fetch(dealerRagUrl).then(res => res.json()).catch(() => null),
+    fetch(vehicleRagUrl).then(res => res.json()).catch(() => null),
+    fetch(salesRagUrl).then(res => res.json()).catch(() => null)
   ]);
 
   // 3. 최대 유사도 추출 함수
@@ -42,36 +43,44 @@ async function getCategoryAndRagContext(question, addApiCallLog) {
     return Math.max(...data.data.documents.map(doc => doc.similarity || 0));
   };
 
-  const maxFoodSim = getMaxSimilarity(foodResponse);
-  const maxSkinSim = getMaxSimilarity(skinResponse);
+  const maxDealerSim = getMaxSimilarity(dealerResponse);
+  const maxVehicleSim = getMaxSimilarity(vehicleResponse);
+  const maxSalesSim = getMaxSimilarity(salesResponse);
 
   let category = '기타';
   let ragContext = null;
   let ragData = null; // 선택된 카테고리의 RAG 데이터 저장
 
   // 4. 유사도 기반 카테고리 결정
-  if (maxFoodSim >= SIMILARITY_THRESHOLD || maxSkinSim >= SIMILARITY_THRESHOLD) {
-    if (maxFoodSim >= maxSkinSim) {
-      category = '식품';
-      ragData = foodResponse;
+  const maxSim = Math.max(maxDealerSim, maxVehicleSim, maxSalesSim);
+  if (maxSim >= SIMILARITY_THRESHOLD) {
+    if (maxSim === maxDealerSim) {
+      category = '딜러관리';
+      ragData = dealerResponse;
+    } else if (maxSim === maxVehicleSim) {
+      category = '차량관리';
+      ragData = vehicleResponse;
     } else {
-      category = '피부과';
-      ragData = skinResponse;
+      category = '판매현황';
+      ragData = salesResponse;
     }
-    addApiCallLog('category', `RAG 유사도 기반 카테고리 분석: ${category} (유사도: ${Math.max(maxFoodSim, maxSkinSim).toFixed(2)})`);
+    addApiCallLog('category', `RAG 유사도 기반 카테고리 분석: ${category} (유사도: ${maxSim.toFixed(2)})`);
   } else {
     // 5. Gemini API로 폴백
     addApiCallLog('LLM', 'RAG 유사도가 낮아 LLM으로 카테고리 분석 중...');
-    const prompt = `아래 질문이 '식품', '피부과', '기타' 중 어떤 카테고리에 더 가까운지 한 단어로만 답하세요.\n질문: ${question}`;
+    const prompt = `아래 질문이 '딜러관리', '차량관리', '판매현황', '기타' 중 어떤 카테고리에 더 가까운지 한 단어로만 답하세요.\n질문: ${question}`;
     try {
       const response = await getGeminiTextResponse(prompt);
       const answer = response?.text?.trim();
-      if (answer?.includes('식품')) {
-        category = '식품';
-        ragData = foodResponse; // 기존에 호출한 데이터 재사용
-      } else if (answer?.includes('피부과')) {
-        category = '피부과';
-        ragData = skinResponse; // 기존에 호출한 데이터 재사용
+      if (answer?.includes('딜러')) {
+        category = '딜러관리';
+        ragData = dealerResponse;
+      } else if (answer?.includes('차량') || answer?.includes('모델')) {
+        category = '차량관리';
+        ragData = vehicleResponse;
+      } else if (answer?.includes('판매') || answer?.includes('실적')) {
+        category = '판매현황';
+        ragData = salesResponse;
       } else {
         category = '기타';
       }
@@ -86,7 +95,7 @@ async function getCategoryAndRagContext(question, addApiCallLog) {
     ragContext = ragData.data.documents.map(doc => doc.page_content).join('\n\n---\n\n');
     ragData.data.documents.forEach(doc => {
       if (doc.metadata?.source) {
-        addApiCallLog('Source', '', doc.similarity, `🧇 출처: ${doc.metadata.source}`, doc.page_content, doc.metadata.file_url);
+        addApiCallLog('Source', '', doc.similarity, `🚗 출처: ${doc.metadata.source}`, doc.page_content, doc.metadata.file_url);
       }
     });
   }
