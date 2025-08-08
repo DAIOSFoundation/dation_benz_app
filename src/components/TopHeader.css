@@ -51,6 +51,10 @@
   font-size: 1rem;
   color: var(--text-color-primary);
   font-weight: 600;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .date-info {

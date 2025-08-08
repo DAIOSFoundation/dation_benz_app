@@ -29,8 +29,8 @@ function TopHeader({ toggleRightSidebar, isRightSidebarOpen, toggleLeftSidebar, 
 
       <div className="header-center">
         <div className="current-dealer-info">
-          <span className="dealer-label">현재 딜러:</span>
-          <span className="dealer-name">한성자동차 (Hansung Motors)</span>
+          <span className="dealer-label">현재 위치:</span>
+          <span className="dealer-name">독일 본사 (Mercedes-Benz Headquarters)</span>
           <span className="date-info">{currentDate}</span>
         </div>
       </div>
@@ -46,7 +46,7 @@ function TopHeader({ toggleRightSidebar, isRightSidebarOpen, toggleLeftSidebar, 
         )}
         <div className="user-profile">
           <img src={TonyProfileIcon} alt="User Profile" className="profile-image" />
-          <span className="username">Benz Manager</span>
+          <span className="username">Dr. Hans Mueller</span>
         </div>
         {!isRightSidebarOpen && (
           <img
