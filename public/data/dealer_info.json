@@ -2,16 +2,16 @@
   "tables": [
     {
       "table_name": "Contacts",
-      "purpose": "벤츠 한국 딜러사의 주요 의사결정권자 및 헤드 매니저들의 연락처 정보를 관리합니다. 이 정보는 독일 본사와의 원활한 소통을 지원합니다.",
+      "purpose": "Manages contact information of key decision makers and head managers of Mercedes-Benz Korean dealers. This information supports smooth communication with German headquarters.",
       "columns": [
-        {"column_name": "contact_id", "type": "INTEGER", "is_primary_key": true, "description": "연락처 고유 ID"},
-        {"column_name": "dealership_id", "type": "INTEGER", "is_foreign_key": true, "references_table": "Dealerships", "references_column": "dealership_id", "description": "소속 딜러사 ID"},
-        {"column_name": "name", "type": "VARCHAR", "description": "담당자 이름"},
-        {"column_name": "email", "type": "VARCHAR", "description": "이메일 주소"},
-        {"column_name": "phone_number", "type": "VARCHAR", "description": "전화번호"},
-        {"column_name": "position", "type": "VARCHAR", "description": "직책 (예: General Manager, Head of Sales)"},
-        {"column_name": "department", "type": "VARCHAR", "description": "소속 부서 (예: Management, Sales)"},
-        {"column_name": "address", "type": "VARCHAR", "description": "근무지 주소 (딜러사 주소와 동일하거나 특정 사무실 주소)"}
+        {"column_name": "contact_id", "type": "INTEGER", "is_primary_key": true, "description": "Contact unique ID"},
+        {"column_name": "dealership_id", "type": "INTEGER", "is_foreign_key": true, "references_table": "Dealerships", "references_column": "dealership_id", "description": "Affiliated dealership ID"},
+        {"column_name": "name", "type": "VARCHAR", "description": "Contact person name"},
+        {"column_name": "email", "type": "VARCHAR", "description": "Email address"},
+        {"column_name": "phone_number", "type": "VARCHAR", "description": "Phone number"},
+        {"column_name": "position", "type": "VARCHAR", "description": "Position (e.g., General Manager, Head of Sales)"},
+        {"column_name": "department", "type": "VARCHAR", "description": "Department (e.g., Management, Sales)"},
+        {"column_name": "address", "type": "VARCHAR", "description": "Work address (same as dealership address or specific office address)"}
       ],
       "data": [
         {"contact_id": 1, "dealership_id": 1, "name": "Lee Dong-woo", "email": "dw.lee@hansung.co.kr", "phone_number": "+82-2-1234-5678", "position": "General Manager", "department": "Management", "address": "Seoul, South Korea"},

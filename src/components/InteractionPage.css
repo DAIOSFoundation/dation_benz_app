@@ -60,9 +60,9 @@
 .llm-notification-wrapper {
   /* max-width: 800px; <--- 이 부분을 제거하거나 100%로 변경하여 부모(interaction-main-content-wrapper)의 너비를 사용 */
   width: 100%; /* 부모(interaction-main-content-wrapper)의 100% 너비 차지 */
-  margin: 20px auto;
-  margin-bottom: 50px;
-  padding: 15px 20px;
+  margin: 10px auto;
+  margin-bottom: 20px;
+  padding: 12px 20px;
   background-color: #e6f7ff;
   border: 1px solid #91d5ff;
   border-radius: 8px;
@@ -86,6 +86,126 @@
   margin: 0;
   flex-grow: 1;
   font-weight: 500;
+}
+
+/* 마크다운 렌더링 스타일 */
+.llm-notification-message h1,
+.llm-notification-message h2,
+.llm-notification-message h3,
+.llm-notification-message h4,
+.llm-notification-message h5,
+.llm-notification-message h6 {
+  margin: 8px 0 4px 0;
+  color: #1890ff;
+  font-weight: 600;
+}
+
+.llm-notification-message p {
+  margin: 4px 0;
+  color: #1890ff;
+}
+
+.llm-notification-message ul,
+.llm-notification-message ol {
+  margin: 4px 0;
+  padding-left: 20px;
+  color: #1890ff;
+}
+
+.llm-notification-message li {
+  margin: 2px 0;
+  color: #1890ff;
+}
+
+.llm-notification-message strong,
+.llm-notification-message b {
+  font-weight: 600;
+  color: #1890ff;
+}
+
+.llm-notification-message em,
+.llm-notification-message i {
+  font-style: italic;
+  color: #1890ff;
+}
+
+.llm-notification-message code {
+  background-color: rgba(24, 144, 255, 0.1);
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: #1890ff;
+}
+
+.llm-notification-message pre {
+  background-color: rgba(24, 144, 255, 0.05);
+  padding: 8px;
+  border-radius: 4px;
+  overflow-x: auto;
+  margin: 4px 0;
+}
+
+.llm-notification-message pre code {
+  background-color: transparent;
+  padding: 0;
+  color: #1890ff;
+}
+
+.llm-notification-message blockquote {
+  border-left: 3px solid #1890ff;
+  margin: 4px 0;
+  padding-left: 12px;
+  color: #1890ff;
+  font-style: italic;
+}
+
+.llm-notification-message a {
+  color: #1890ff;
+  text-decoration: underline;
+}
+
+.llm-notification-message a:hover {
+  color: #40a9ff;
+}
+
+/* 마크다운 테이블 스타일 */
+.llm-notification-message table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 0.9rem;
+  background-color: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.llm-notification-message table thead {
+  background-color: #f8f9fa;
+}
+
+.llm-notification-message table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 2px solid #dee2e6;
+  background-color: #f8f9fa;
+}
+
+.llm-notification-message table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #dee2e6;
+  color: #212529;
+}
+
+.llm-notification-message table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.llm-notification-message table tbody tr:last-child td {
+  border-bottom: none;
 }
 
 /* InteractionPage 내 대화 기록 영역 */
@@ -134,7 +254,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start; /* 자식 요소(버튼 등)를 좌측 정렬 */
-  gap: 16px; /* 제목, 설명, 콘텐츠 간의 일관된 간격 */
+  gap: 0; /* 제목과 콘텐츠 간의 간격 제거 */
 }
 
 .dynamic-app-wrapper > h2,
@@ -144,7 +264,8 @@
 }
 
 .dynamic-app-wrapper > h2 {
-  margin-bottom: 8px; /* 제목 아래 간격 */
+  margin: 0; /* 제목의 모든 마진 제거 */
+  padding: 0; /* 제목의 모든 패딩 제거 */
 }
 .dynamic-app-wrapper > p {
   margin-bottom: 16px; /* 설명 아래 간격 */
@@ -522,7 +643,7 @@
 }
 
 .email-content-original::before {
-  content: "=== 원문 ===";
+  content: attr(data-label);
   display: block;
   font-weight: bold;
   color: #495057;
@@ -536,12 +657,45 @@
 }
 
 .email-content-translation::before {
-  content: "=== 한국어 번역 ===";
+  content: attr(data-label);
   display: block;
   font-weight: bold;
   color: #155724;
   margin-bottom: 10px;
   font-size: 1.1rem;
+}
+
+.translation-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  margin: 10px 0;
+}
+
+.translation-loading p {
+  margin: 0;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+.translation-loading::after {
+  content: '';
+  width: 16px;
+  height: 16px;
+  margin-left: 8px;
+  border: 2px solid #dee2e6;
+  border-top: 2px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .email-content-section p {

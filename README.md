@@ -50,6 +50,7 @@ npm run electron:build
 - **Desktop**: Electron 31.0.2
 - **AI**: Google Generative AI (@google/generative-ai)
 - **Markdown**: react-markdown + rehype-raw + remark-gfm
+- **Internationalization**: React Context API 기반 다국어 지원
 - **Build**: electron-builder
 
 ### 🚗 **주요 기능**
@@ -59,6 +60,8 @@ npm run electron:build
 - 자동차 업계 관련 질의응답 처리
 - 본사-딜러 간 커뮤니케이션 지원
 - 대화 세션 저장/불러오기 기능
+- **다국어 프롬프트 지원**: 한국어/영어/독일어 등 다국어 질문 처리
+- **일반 질문 처리**: 자동차 전문가 역할로 기술적 조언 제공
 
 #### 2. **벤츠 딜러 데이터 관리**
 글로벌 자동차 업계의 다양한 데이터를 JSON 형태로 관리:
@@ -213,7 +216,25 @@ Interaction 페이지에서 호출 가능한 업무는 **자동차 업계 워크
 
 ---
 
-#### **5. 기존 워크플로우 기능들**
+#### **5. 일반 질문 처리 기능**
+**질문 예시**: 
+- "Wie fülle ich das Kühlmittel in meinem Mercedes E350 nach?" (독일어: 내 Mercedes E350의 냉각수를 어떻게 보충하나요?)
+- "Wie lautet die Modellbezeichnung des leistungsstärksten Fahrzeugs von Mercedes-Benz?" (독일어: Mercedes-Benz의 가장 강력한 차량의 모델명은 무엇인가요?)
+
+**시스템 동작**:
+1. 사용자 질문 입력 (다국어 지원)
+2. Gemini AI가 `GENERAL_QUESTION` intent로 분류
+3. 자동차 업계 관리 시스템과 관련이 없는 일반 질문으로 판단
+4. 데이터베이스 조회 없이 Gemini AI에 직접 전송
+5. 자동차 전문가 역할로 기술적 조언 제공
+6. 마크다운 형식으로 구조화된 응답 표시
+
+**지원 언어**: 한국어, 영어, 독일어 등 다국어
+**응답 형식**: 마크다운 렌더링 (제목, 목록, 강조, 코드 블록 등)
+
+---
+
+#### **6. 기존 워크플로우 기능들**
 
 **딜러 정보 조회**:
 - 질문: "한성자동차 딜러 정보 보여줘"
@@ -252,10 +273,120 @@ Interaction 페이지에서 호출 가능한 업무는 **자동차 업계 워크
 3. **API 호출**: 매칭된 intent에 따라 적절한 API 함수 호출
 4. **결과 렌더링**: 분석 결과를 사용자 친화적인 UI로 표시
 
+#### **다국어 프롬프트 지원**
+- **의도 분류 프롬프트**: 한국어/영어 다국어 지원
+- **일반 질문 처리**: 자동차 전문가 역할로 다국어 질문 처리
+- **번역 기능**: 영어/독일어 → 한국어 자동 번역
+- **마크다운 렌더링**: 구조화된 응답 표시
+- **동적 언어 전환**: 실시간 언어 변경 지원
+
 #### **UI 컴포넌트**
 - **분석 결과 카드**: 주요 수치를 강조하여 표시
 - **상세 내역 테이블**: 필터링된 데이터의 상세 정보
 - **이메일 전송 폼**: 수신자 검색 및 내용 편집 기능
 - **실시간 로그**: API 호출 상태 및 진행 상황 표시
+- **마크다운 렌더링**: ReactMarkdown을 활용한 구조화된 응답 표시
+- **다국어 인터페이스**: 한국어/영어 실시간 전환 지원
 
 이 프로젝트는 **글로벌 자동차 회사의 본사와 지역 딜러 간의 업무 자동화와 AI 기반 의사결정 지원**을 목표로 하는 종합적인 자동차 업계 관리 시스템입니다.
+
+---
+
+## 🌍 **다국어 프롬프트 지원 시스템**
+
+### **개요**
+시스템은 현재 선택된 언어에 따라 Gemini AI 프롬프트를 동적으로 생성하여 일관된 품질의 응답을 제공합니다.
+
+### **지원 언어**
+- **한국어 (Korean)**: 기본 언어, 모든 기능 완전 지원
+- **영어 (English)**: 모든 기능 완전 지원
+- **독일어 (German)**: 질문 입력 및 처리 지원
+
+### **다국어 프롬프트 기능**
+
+#### **1. 의도 분류 프롬프트**
+- **동적 언어 전환**: 현재 언어에 따라 프롬프트 자동 생성
+- **엔티티 추출**: 딜러명, 날짜, 세그먼트 등 다국어 인식
+- **일반 질문 분류**: `GENERAL_QUESTION` intent로 자동 분류
+
+#### **2. 일반 질문 처리**
+- **자동차 전문가 역할**: 기술적 조언 및 유지보수 가이드
+- **마크다운 응답**: 구조화된 답변 (제목, 목록, 강조, 코드 블록)
+- **다국어 입력**: 한국어, 영어, 독일어 질문 처리
+
+#### **3. 번역 기능**
+- **자동 번역**: 영어/독일어 → 한국어 자동 번역
+- **이메일 번역**: 원문과 번역문 동시 제공
+- **비즈니스 톤 유지**: 자동차 업계 전문 용어 적절한 번역
+
+### **기술적 구현**
+
+#### **번역 키 시스템**
+```javascript
+// 의도 분류 프롬프트
+intentClassificationExpert: "자동차 업계 관리 시스템의 의도 분류 전문가"
+analysisGuidelines: "분석 지침"
+entityDealer: "딜러명 (예: \"Hyosung The Class\", \"한성자동차\")"
+
+// 일반 질문 처리
+automotiveExpert: "당신은 자동차 전문가입니다"
+responseGuidelines: "답변 시 다음 사항을 고려해주세요"
+
+// 번역 기능
+translateToKorean: "다음 텍스트를 자연스러운 한국어로 번역해주세요"
+```
+
+#### **동적 프롬프트 생성**
+```javascript
+// 현재 언어에 따른 프롬프트 생성
+const prompt = `${t('intentClassificationExpert')}. 
+${t('intentAnalysisGuidance')}
+
+${t('userMessage')}: "${userMessage}"
+
+${t('analysisGuidelines')}:
+1. ${t('analysisGuideline1')}
+2. ${t('analysisGuideline2')}
+...`;
+```
+
+#### **마크다운 렌더링**
+```javascript
+// ReactMarkdown을 활용한 구조화된 응답 표시
+<ReactMarkdown>{llmExplanation}</ReactMarkdown>
+
+// CSS 스타일링
+.llm-notification-message h1, h2, h3 { /* 제목 스타일 */ }
+.llm-notification-message ul, ol { /* 목록 스타일 */ }
+.llm-notification-message code { /* 코드 블록 스타일 */ }
+```
+
+### **사용 예시**
+
+#### **한국어 질문**
+```
+질문: "벤츠 E350의 냉각수를 보충하려면 어떻게 해?"
+응답: 마크다운 형식의 단계별 가이드
+```
+
+#### **영어 질문**
+```
+Question: "How do I fill the coolant in my Mercedes E350?"
+Response: Structured markdown guide in Korean
+```
+
+#### **독일어 질문**
+```
+Frage: "Wie fülle ich das Kühlmittel in meinem Mercedes E350 nach?"
+Antwort: Strukturierte Markdown-Anleitung auf Koreanisch
+
+Frage: "Wie lautet die Modellbezeichnung des leistungsstärksten Fahrzeugs von Mercedes-Benz?"
+Antwort: Strukturierte Markdown-Antwort auf Deutsch
+```
+
+### **장점**
+- **일관된 품질**: 언어에 관계없이 동일한 품질의 응답
+- **자연스러운 번역**: 자동차 업계 전문 용어 적절한 번역
+- **구조화된 응답**: 마크다운을 통한 가독성 향상
+- **실시간 전환**: 언어 변경 시 즉시 적용
+- **확장 가능**: 새로운 언어 추가 용이

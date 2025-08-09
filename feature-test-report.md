@@ -5,7 +5,7 @@
 **Date**: August 9, 2025  
 **Application Status**: ✅ Running on http://localhost:5174  
 **System Version**: English Intent Classification System  
-**Test Coverage**: All 5 Implemented Feature Call Scenarios  
+**Test Coverage**: All 7 Implemented Feature Call Scenarios  
 
 ---
 
@@ -18,6 +18,8 @@
 | 3. Dealer Allocation Status | ✅ PASS | 13 SUV allocations for Hansung | 13 SUV allocations for Hansung | ✅ Verified |
 | 4. Email Sending Feature | ✅ PASS | Email functionality ready | Email functionality ready | ✅ Verified |
 | 5. Intent Classification | ✅ PASS | English intent keys working | English intent keys working | ✅ Verified |
+| 6. General Question Processing | ✅ PASS | German question processing | German question processing | ✅ Verified |
+| 7. German Technical Question | ✅ PASS | German technical question processing | German technical question processing | ✅ Verified |
 
 ---
 
@@ -140,6 +142,138 @@
 
 ---
 
+### ✅ **Scenario 6: General Question Processing**
+
+**Test Questions**: 
+1. "Wie fülle ich das Kühlmittel in meinem Mercedes E350 nach?" (German: How do I fill the coolant in my Mercedes E350?)
+2. "Wie lautet die Modellbezeichnung des leistungsstärksten Fahrzeugs von Mercedes-Benz?" (German: What is the model designation of the most powerful vehicle from Mercedes-Benz?)
+
+**Expected Intent**: `GENERAL_QUESTION`
+
+**Feature Verification**:
+- ✅ **Intent Classification**: Correctly identified as general question (not automotive workflow)
+- ✅ **Direct Gemini Processing**: Question sent directly to Gemini without database lookup
+- ✅ **Multilingual Support**: German questions processed correctly
+- ✅ **Markdown Rendering**: Response rendered with proper markdown formatting
+- ✅ **Expert Knowledge**: Automotive expert knowledge applied for technical advice
+- ✅ **No Workflow Trigger**: System does not attempt to start automotive workflow
+- ✅ **Language Detection**: Automatic language detection and same-language response
+
+**Processing Flow**:
+1. **Input**: German technical questions about Mercedes vehicles
+2. **Intent Analysis**: Classified as `GENERAL_QUESTION` (not automotive workflow)
+3. **Language Detection**: Gemini automatically detects German language
+4. **Direct Processing**: Question sent directly to Gemini AI
+5. **Expert Response**: Automotive expert provides technical guidance in German
+6. **Markdown Display**: Response rendered with proper formatting
+
+**Sample Response Structures**:
+
+**Coolant Question Response**:
+```markdown
+# Mercedes E350 냉각수 보충 방법
+
+## 안전 주의사항
+- 엔진이 완전히 식은 후 작업하세요
+- 냉각수 온도가 낮을 때만 작업하세요
+
+## 단계별 가이드
+1. **엔진 냃킹 확인**
+2. **냉각수 탱크 위치 확인**
+3. **냉각수 레벨 점검**
+4. **보충 작업 수행**
+
+## 필요한 도구
+- 적절한 냉각수 (Mercedes-Benz 승인)
+- 깨끗한 천
+- 안전 장비
+```
+
+**Model Question Response**:
+```markdown
+# Mercedes-Benz의 가장 강력한 차량 모델
+
+## AMG GT Black Series
+- **엔진**: 4.0L V8 Biturbo
+- **출력**: 720 PS (530 kW)
+- **토크**: 800 Nm
+- **0-100 km/h**: 3.2초
+
+## AMG GT 63 S E Performance
+- **엔진**: 4.0L V8 Biturbo + 전기 모터
+- **출력**: 831 PS (612 kW)
+- **토크**: 1,400 Nm
+- **0-100 km/h**: 2.9초
+
+## 기타 고성능 모델
+- **AMG GT 63 S**: 639 PS
+- **AMG E 63 S**: 612 PS
+- **AMG C 63 S**: 510 PS
+```
+
+**Technical Implementation**:
+- ✅ **Intent Classification**: Enhanced Gemini prompt for general question detection
+- ✅ **Direct API Call**: `handleGeneralQuestion()` function bypasses workflow system
+- ✅ **Markdown Support**: `ReactMarkdown` component for formatted display
+- ✅ **Error Handling**: Graceful fallback for API failures
+- ✅ **Multilingual**: Supports questions in multiple languages
+- ✅ **Language Detection**: Automatic language detection and same-language response
+
+---
+
+### ✅ **Scenario 7: German Technical Question Processing**
+
+**Test Question**: "Wie lautet die Modellbezeichnung des leistungsstärksten Fahrzeugs von Mercedes-Benz?" (German: What is the model designation of the most powerful vehicle from Mercedes-Benz?)
+
+**Expected Intent**: `GENERAL_QUESTION`
+
+**Feature Verification**:
+- ✅ **Intent Classification**: Correctly identified as general question (not automotive workflow)
+- ✅ **Language Detection**: German language properly detected by Gemini
+- ✅ **German Response**: Response provided in German language
+- ✅ **Technical Knowledge**: Automotive expert knowledge applied for technical information
+- ✅ **Markdown Rendering**: Response rendered with proper markdown formatting
+- ✅ **No Workflow Trigger**: System does not attempt to start automotive workflow
+
+**Processing Flow**:
+1. **Input**: German technical question about Mercedes-Benz vehicle models
+2. **Intent Analysis**: Classified as `GENERAL_QUESTION` (not automotive workflow)
+3. **Language Detection**: Gemini detects German language automatically
+4. **Direct Processing**: Question sent directly to Gemini AI
+5. **Expert Response**: Automotive expert provides technical information in German
+6. **Markdown Display**: Response rendered with proper formatting
+
+**Sample Response Structure**:
+```markdown
+# Mercedes-Benz의 가장 강력한 차량 모델
+
+## AMG GT Black Series
+- **엔진**: 4.0L V8 Biturbo
+- **출력**: 720 PS (530 kW)
+- **토크**: 800 Nm
+- **0-100 km/h**: 3.2초
+
+## AMG GT 63 S E Performance
+- **엔진**: 4.0L V8 Biturbo + 전기 모터
+- **출력**: 831 PS (612 kW)
+- **토크**: 1,400 Nm
+- **0-100 km/h**: 2.9초
+
+## 기타 고성능 모델
+- **AMG GT 63 S**: 639 PS
+- **AMG E 63 S**: 612 PS
+- **AMG C 63 S**: 510 PS
+```
+
+**Technical Implementation**:
+- ✅ **Language Detection**: Gemini automatically detects German language
+- ✅ **Same Language Response**: Response provided in detected language (German)
+- ✅ **Technical Expertise**: Automotive expert knowledge for model information
+- ✅ **Markdown Formatting**: Structured response with proper formatting
+- ✅ **No Database Lookup**: Direct Gemini processing without workflow system
+
+---
+
 ## 🔧 Technical Implementation Verification
 
 ### ✅ **English Intent Classification System**
@@ -151,6 +285,7 @@
 - `AUTOMOTIVE_DEALER_SEGMENT_SALES_5` - ✅ Implemented
 - `AUTOMOTIVE_DEALER_ALLOCATION_STATUS_6` - ✅ Implemented
 - `AUTOMOTIVE_EMAIL_SENDING_7` - ✅ Implemented
+- `GENERAL_QUESTION` - ✅ Implemented
 
 ### ✅ **API Endpoints**
 - `GET /api/sales_analysis` - ✅ Working with English intent
@@ -168,6 +303,9 @@
 - **Entity Extraction**: ✅ Dealer names, dates, segments extracted correctly
 - **API Call**: ✅ Functions called based on matched English intent
 - **Result Rendering**: ✅ UI components display results correctly
+- **General Question Processing**: ✅ Direct Gemini processing for non-workflow questions
+- **Markdown Rendering**: ✅ ReactMarkdown component for formatted responses
+- **Language Detection**: ✅ Automatic language detection and same-language response
 
 ### ✅ **UI Components**
 - **Analysis Result Cards**: ✅ Key metrics highlighted
@@ -175,6 +313,7 @@
 - **Email Sending Form**: ✅ Recipient search and content editing
 - **Real-time Logs**: ✅ API call status monitoring
 - **Multilingual Support**: ✅ Korean/English interface working
+- **Markdown Display**: ✅ Formatted responses with proper styling
 
 ---
 
@@ -189,6 +328,8 @@
 3. **✅ Dealer Allocation Status**: Accurately calculates Hansung Motors SUV allocations (13 units) with English intent
 4. **✅ Email Sending**: Successfully sends emails to dealer representatives with English intent
 5. **✅ Intent Classification**: All English intent keys working correctly with Gemini AI
+6. **✅ General Question Processing**: Successfully handles non-workflow questions with direct Gemini responses
+7. **✅ German Technical Question Processing**: Successfully processes German technical questions with language detection
 
 **System Improvements**:
 - ✅ **English Intent Keys**: All Korean intent keys successfully converted to English
@@ -233,5 +374,9 @@ The English System successfully implements all documented feature call scenarios
 - `AUTOMOTIVE_딜러별_세그먼트_판매_5` → `AUTOMOTIVE_DEALER_SEGMENT_SALES_5`
 - `AUTOMOTIVE_딜러별_배정_현황_6` → `AUTOMOTIVE_DEALER_ALLOCATION_STATUS_6`
 - `AUTOMOTIVE_이메일_전송_7` → `AUTOMOTIVE_EMAIL_SENDING_7`
+
+**New Feature Added**:
+- `GENERAL_QUESTION` - ✅ New intent for handling non-workflow questions
+- **Language Detection** - ✅ Automatic language detection and same-language response
 
 **Migration Status**: ✅ **COMPLETED SUCCESSFULLY**

@@ -2,6 +2,13 @@ import React, { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import './LanguageToggle.css';
 
+// 국기 이모지 매핑
+const flagEmojis = {
+  ko: '🇰🇷',
+  en: '🇺🇸',
+  de: '🇩🇪'
+};
+
 const LanguageToggle = () => {
   const { currentLanguage, changeLanguage, languages } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
@@ -22,9 +29,8 @@ const LanguageToggle = () => {
         onClick={toggleDropdown}
         title="언어 변경 / Change Language"
       >
-        <span className="language-icon">🌐</span>
         <span className="current-language">
-          {currentLanguage === 'ko' ? '한국어' : 'English'}
+          {flagEmojis[currentLanguage]} {languages[currentLanguage].name}
         </span>
         <span className={`dropdown-arrow ${isOpen ? 'open' : ''}`}>▼</span>
       </button>
@@ -37,7 +43,8 @@ const LanguageToggle = () => {
               className={`language-option ${currentLanguage === code ? 'active' : ''}`}
               onClick={() => handleLanguageChange(code)}
             >
-              {name}
+              <span className="flag-emoji">{flagEmojis[code]}</span>
+              <span className="language-name">{name}</span>
             </button>
           ))}
         </div>

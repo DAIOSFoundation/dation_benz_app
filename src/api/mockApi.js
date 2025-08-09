@@ -5,79 +5,79 @@ import { calculateSimilarity, preprocessText, getTermFrequency } from '../utils/
 import benzCrmData from '../../public/data/benz_CRM.json';
 import dealerInfoData from '../../public/data/dealer_info.json';
 
-// 벤츠 독일 본사 및 한국 딜러 수신자 데이터 정의
+// Mercedes-Benz Germany HQ and Korea Dealer Recipient Data
 const recipientData = [
   {
     "이름": "Dr. Hans Mueller",
-    "부서": "글로벌 운영 총괄",
-    "직책": "이사",
-    "소속": "벤츠 독일 본사",
+    "부서": "Global Operations Management",
+    "직책": "Director",
+    "소속": "Mercedes-Benz Germany HQ",
     "이메일": "hans.mueller@mercedes-benz.de",
     "전화번호": "+49-711-17-1000",
-    "근무장소": "독일 슈투트가르트 본사"
+    "근무장소": "Stuttgart HQ, Germany"
   },
   {
     "이름": "Dr. Anna Schmidt",
-    "부서": "아시아 태평양 지역",
-    "직책": "지역 총괄",
-    "소속": "벤츠 독일 본사",
+    "부서": "Asia Pacific Region",
+    "직책": "Regional Director",
+    "소속": "Mercedes-Benz Germany HQ",
     "이메일": "anna.schmidt@mercedes-benz.de",
     "전화번호": "+49-711-17-1001",
-    "근무장소": "독일 슈투트가르트 본사"
+    "근무장소": "Stuttgart HQ, Germany"
   },
   {
     "이름": "Michael Weber",
-    "부서": "생산 계획",
-    "직책": "팀장",
-    "소속": "벤츠 독일 본사",
+    "부서": "Production Planning",
+    "직책": "Team Leader",
+    "소속": "Mercedes-Benz Germany HQ",
     "이메일": "michael.weber@mercedes-benz.de",
     "전화번호": "+49-711-17-1002",
-    "근무장소": "독일 슈투트가르트 본사"
+    "근무장소": "Stuttgart HQ, Germany"
   },
   {
     "이름": "Sarah Fischer",
-    "부서": "품질 관리",
-    "직책": "팀장",
-    "소속": "벤츠 독일 본사",
+    "부서": "Quality Management",
+    "직책": "Team Leader",
+    "소속": "Mercedes-Benz Germany HQ",
     "이메일": "sarah.fischer@mercedes-benz.de",
     "전화번호": "+49-711-17-1003",
-    "근무장소": "독일 슈투트가르트 본사"
+    "근무장소": "Stuttgart HQ, Germany"
   },
   {
     "이름": "Thomas Wagner",
-    "부서": "물류 및 배정",
-    "직책": "팀장",
-    "소속": "벤츠 독일 본사",
+    "부서": "Logistics & Allocation",
+    "직책": "Team Leader",
+    "소속": "Mercedes-Benz Germany HQ",
     "이메일": "thomas.wagner@mercedes-benz.de",
     "전화번호": "+49-711-17-1004",
-    "근무장소": "독일 슈투트가르트 본사"
+    "근무장소": "Stuttgart HQ, Germany"
   },
   {
-    "이름": "김민준",
-    "부서": "영업팀",
-    "직책": "팀장",
-    "소속": "한성자동차",
+    "이름": "Minjun Kim",
+    "부서": "Sales Team",
+    "직책": "Team Leader",
+    "소속": "Hansung Motors",
     "이메일": "minjun.kim@hansung.co.kr",
     "전화번호": "+82-2-1234-5678",
-    "근무장소": "서울 본사 영업팀"
+    "근무장소": "Seoul HQ Sales Team"
   },
   {
-    "이름": "이서연",
-    "부서": "마케팅팀",
-    "직책": "팀장",
-    "소속": "효성더클래스",
+    "이름": "Seoyeon Lee",
+    "부서": "Marketing Team",
+    "직책": "Team Leader",
+    "소속": "Hyosung The Class",
     "이메일": "seoyeon.lee@hyosungtheclass.co.kr",
     "전화번호": "+82-2-2345-6789",
-    "근무장소": "서울 본사 마케팅팀"
+    "근무장소": "Seoul HQ Marketing Team"
   },
   {
-    "이름": "박지훈",
-    "부서": "서비스팀",
-    "직책": "팀장",
-    "소속": "KCC오토",
+    "이름": "Jihoon Park",
+    "부서": "Service Team",
+    "직책": "Team Leader",
+    "소속": "KCC Auto",
     "이메일": "jihoon.park@kccauto.co.kr",
     "전화번호": "+82-2-3456-7890",
-    "근무장소": "서울 본사 서비스팀"
+    "근무장소": "Seoul HQ Service Team"
   }
 ];
 
@@ -167,7 +167,7 @@ const getFixedLayoutData = (t) => [
     "step_id": 7,
     "step_name": "Email Sending",
     "description": t('emailSendingDesc'),
-    "question": ["이메일 전송", "담당자", "초대 이메일", "보고서 작성"],
+    "question": ["email sending", "representative", "invitation email", "report writing"],
     "api": {
       "url": "/api/send_email",
       "method": "POST",
@@ -610,6 +610,7 @@ const mockApi = {
         totalAmount,
         sales: filteredSales.map(sale => ({
           ...sale,
+          dealership_name: getDealershipNameFromId(sale.dealership_id),
           model_name: getVehicleModelNameFromId(sale.model_id),
           segment: segmentModels.find(m => m.model_id === sale.model_id)?.segment
         }))
@@ -688,6 +689,7 @@ const mockApi = {
         totalQuantity,
         allocations: suvAllocations.map(allocation => ({
           ...allocation,
+          dealership_name: getDealershipNameFromId(allocation.dealership_id),
           model_name: getVehicleModelNameFromId(allocation.model_id),
           segment: suvModels.find(m => m.model_id === allocation.model_id)?.segment
         }))
@@ -701,7 +703,7 @@ const mockApi = {
     const recipient = recipients.find(r => r.이메일 === recipientEmail);
     
     if (!recipient) {
-      return { success: false, message: '수신자를 찾을 수 없습니다.' };
+      return { success: false, message: 'Recipient not found.' };
     }
 
     return {
@@ -714,43 +716,31 @@ const mockApi = {
         sentAt: new Date().toISOString(),
         status: '전송완료'
       },
-      message: `${recipient.이름}님에게 이메일이 성공적으로 전송되었습니다.`
+      message: `Email successfully sent to ${recipient.이름}.`
     };
   },
 
-  // 기존 API 함수들 (호환성 유지)
-  getPatients: async (patientId, patientName) => {
-    return { success: true, data: [], message: '자동차 업계 시스템에서는 환자 데이터를 제공하지 않습니다.' };
-  },
-  getAppointments: async (appointmentId, date, patientName) => {
-    return { success: true, data: [], message: '자동차 업계 시스템에서는 예약 데이터를 제공하지 않습니다.' };
-  },
-  getSurgeries: async (surgeryId, patientName) => {
-    return { success: true, data: [], message: '자동차 업계 시스템에서는 수술 데이터를 제공하지 않습니다.' };
-  },
-  getPhotoRecords: async (recordId, patientName) => {
-    return { success: true, data: [], message: '자동차 업계 시스템에서는 사진 기록을 제공하지 않습니다.' };
-  },
+
   getProducts: async () => {
     const models = benzCrmData.database_schema.tables.find(table => table.table_name === 'VehicleModels');
     return { success: true, data: models ? models.data : [] };
   },
   getSurveys: async () => {
-    return { success: true, data: [], message: '자동차 업계 시스템에서는 설문 데이터를 제공하지 않습니다.' };
+    return { success: true, data: [], message: 'Survey data is not provided in the automotive industry system.' };
   },
   getLeads: async () => {
     const waitlist = benzCrmData.database_schema.tables.find(table => table.table_name === 'CustomerWaitlist');
     return { success: true, data: waitlist ? waitlist.data : [] };
   },
   getCallback: async () => {
-    return { success: true, data: [], message: '콜백 데이터가 없습니다.' };
+    return { success: true, data: [], message: 'No callback data available.' };
   },
   postSend: async (formData) => {
     // 이메일 전송 처리
     if (formData.recipient_email && formData.description) {
-      return await mockApi.sendEmail(formData.recipient_email, '벤츠 본사 공지사항', formData.description);
+      return await mockApi.sendEmail(formData.recipient_email, 'Mercedes-Benz HQ Notice', formData.description);
     }
-    return { success: false, message: '필수 데이터가 누락되었습니다.' };
+    return { success: false, message: 'Required data is missing.' };
   },
   searchRecipients: async (searchTerm) => {
     const results = recipientData.filter(recipient => 

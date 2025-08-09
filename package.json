@@ -50,7 +50,10 @@
     },
     "mac": {
       "hardenedRuntime": false,
-      "target": ["dmg", "zip"],
+      "target": [
+        "dmg",
+        "zip"
+      ],
       "icon": "public/dation_logo.icns",
       "identity": null
     },

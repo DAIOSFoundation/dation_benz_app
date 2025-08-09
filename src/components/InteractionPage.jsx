@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import './InteractionPage.css';
-import { mockApi, fixedLayoutData } from '../api/mockApi';
+import { mockApi, fixedLayoutData, getFixedLayoutData } from '../api/mockApi';
 import { useLanguage } from '../contexts/LanguageContext';
 
 import InputBox from './InputBox';
 import LoadingAnimation from './LoadingAnimation';
 import LightbulbIcon from '../assets/lightbulb.png';
-import { getGeminiIntent, translateToKorean } from '../utils/geminiApi';
+import { getGeminiIntent, translateToKorean, handleGeneralQuestion } from '../utils/geminiApi';
+import ReactMarkdown from 'react-markdown';
 
 // NEW PROP: onLlmExplanationChange, clearSourceLogs
 function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExplanationChange, currentOperator }) {
@@ -33,7 +34,7 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
   const interactionInputRef = useRef(null);
   const chatDisplayRef = useRef(null);
 
-  // LLM이 추출한 엔티티(예: 환자 이름)를 저장하는 상태
+  // LLM이 추출한 엔티티를 저장하는 상태
   const [currentExtractedEntities, setCurrentExtractedEntities] = useState({});
 
   // 1. lastUserInput 상태 추가
@@ -105,12 +106,21 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
       { model_id: 102, model_name: "C-Class (W206)", segment: "Sedan" },
       { model_id: 103, model_name: "GLC (X254)", segment: "SUV" },
       { model_id: 104, model_name: "EQS (V297)", segment: "EV Sedan" },
-      { model_id: 105, model_name: "S-Class (W223)", segment: "Luxury Sedan" }
+      { model_id: 105, model_name: "S-Class (W223)", segment: "Luxury Sedan" },
+      { model_id: 106, model_name: "A-Class (W177)", segment: "Compact Sedan/Hatchback" },
+      { model_id: 107, model_name: "GLE (V167)", segment: "Large SUV" },
+      { model_id: 108, model_name: "EQE (V295)", segment: "EV Sedan" }
     ];
 
     const dealershipIdToName = new Map(dealers.map(d => [d.dealership_id, d.dealership_name]));
     const modelIdToName = new Map(vehicleModels.map(v => [v.model_id, v.model_name]));
     const dealershipIdToContact = new Map(dealers.map(d => [d.dealership_id, d.contact_person]));
+
+    // 디버깅을 위한 로그
+    console.log('Created ID to Name Maps:', {
+      dealershipIdToName: Array.from(dealershipIdToName.entries()),
+      modelIdToName: Array.from(modelIdToName.entries())
+    });
 
     return {
       dealershipIdToName,
@@ -165,7 +175,11 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
       return <TableRenderer data={data} header={null} />;
     }
 
-    const { patientIdToName, productIdToName, leadIdToName, hospitalRecipientEmailToName } = idToNameMaps;
+    const { dealershipIdToName, modelIdToName, dealershipIdToContact } = idToNameMaps;
+
+    // 디버깅을 위한 로그 추가
+    console.log('ID to Name Maps:', { dealershipIdToName, modelIdToName });
+    console.log('Original data sample:', data[0]);
 
     // 원본 데이터의 첫 번째 객체에서 헤더를 먼저 추출
     let originalHeader = typeof data[0] === 'object' && data[0] !== null ? Object.keys(data[0]) : [];
@@ -173,52 +187,70 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
     const transformedData = data.map(row => {
       const newRow = { ...row }; // 원본 객체를 복사
 
-      // 동적으로 ID 필드를 찾아 이름으로 변환
+      // 동적으로 ID 필드를 찾아 이름으로 변환하고 ID 필드 제거
       for (const key in newRow) {
         if (key.endsWith('_id')) { // _id 로 끝나는 필드 찾기
           const idValue = newRow[key];
-          let nameKey = key.replace('_id', '_name'); // 예: patient_id -> patient_name
+          let nameKey = key.replace('_id', '_name'); // 예: product_id -> product_name
 
-          if (key === 'patient_id' && patientIdToName.has(idValue)) {
-            newRow[nameKey] = patientIdToName.get(idValue);
-          } else if (key === 'product_id' && productIdToName.has(idValue)) {
-            newRow[nameKey] = productIdToName.get(idValue);
-          } else if (key === 'lead_id' && leadIdToName.has(idValue)) {
-            newRow[nameKey] = leadIdToName.get(idValue);
+          console.log(`Processing ${key}: ${idValue}, type: ${typeof idValue}`);
+
+          if (key === 'dealership_id') {
+            const dealershipNames = {
+              1: "Hansung Motors",
+              2: "Hyosung The Class", 
+              3: "KCC Auto",
+              4: "The Star Motors",
+              5: "Shinsegae Motors"
+            };
+            newRow[nameKey] = dealershipNames[idValue] || `Dealership ${idValue}`;
+            console.log(`Found dealership name: ${newRow[nameKey]}`);
+            delete newRow[key]; // ID 필드 제거
+          } else if (key === 'model_id') {
+            const modelNames = {
+              101: "E-Class (W214)",
+              102: "C-Class (W206)",
+              103: "GLC (X254)",
+              104: "EQS (V297)",
+              105: "S-Class (W223)",
+              106: "A-Class (W177)",
+              107: "GLE (V167)",
+              108: "EQE (V295)"
+            };
+            newRow[nameKey] = modelNames[idValue] || `Model ${idValue}`;
+            console.log(`Found model name: ${newRow[nameKey]}`);
+            delete newRow[key]; // ID 필드 제거
+          } else if (key === 'allocation_id') {
+            newRow['allocation_name'] = `Allocation #${idValue}`;
+            delete newRow[key]; // ID 필드 제거
+          } else {
+            // 기타 ID 필드들도 제거
+            delete newRow[key];
           }
           // 추가적인 ID-Name 매핑이 필요하다면 여기에 else if 추가
-        } else if (key === 'recipient_email') {
-            // 병원용 수신자 확인
-            if (hospitalRecipientEmailToName.has(newRow[key])) {
-                newRow['recipient_name'] = hospitalRecipientEmailToName.get(newRow[key]);
-            }
         }
       }
       return newRow;
     });
 
-    // 동적으로 추가된 _name 필드를 기존 _id 필드 바로 뒤에 삽입하여 헤더 순서 조정
+    // ID 필드를 제외하고 name 필드만 표시하도록 헤더 조정
     let finalHeader = [];
-    const patientNameExistsInTransformed = transformedData.length > 0 && transformedData[0].hasOwnProperty('patient_name');
 
     originalHeader.forEach(key => {
-      // 'name' 필드가 원본 헤더에 있고, 'patient_id' 필드가 존재하며, 'patient_name'이 변환된 데이터에 추가되었다면
-      // 원본 'name' 필드를 헤더에 추가하지 않아 중복을 방지합니다.
-      if (key === 'name' && originalHeader.includes('patient_id') && patientNameExistsInTransformed) {
-        return; // Skip adding 'name' to finalHeader
-      }
-
-      finalHeader.push(key);
+      // ID 필드는 건너뛰고 name 필드만 추가
       if (key.endsWith('_id')) {
         const nameKey = key.replace('_id', '_name');
-        // transformedData의 첫 번째 객체에 해당 nameKey가 있는지 확인 (데이터가 비어있지 않다고 가정)
+        // transformedData의 첫 번째 객체에 해당 nameKey가 있는지 확인
         if (transformedData.length > 0 && transformedData[0].hasOwnProperty(nameKey)) {
           finalHeader.push(nameKey);
         }
-      } else if (key === 'recipient_email') {
-          if (transformedData.length > 0 && transformedData[0].hasOwnProperty('recipient_name')) {
-              finalHeader.push('recipient_name');
-          }
+        // allocation_id의 경우 allocation_name도 추가
+        if (key === 'allocation_id' && transformedData.length > 0 && transformedData[0].hasOwnProperty('allocation_name')) {
+          finalHeader.push('allocation_name');
+        }
+      } else {
+        // ID가 아닌 필드는 그대로 추가
+        finalHeader.push(key);
       }
     });
 
@@ -229,12 +261,39 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
 
   // 분석 결과 렌더링 함수
   const renderAnalysisResult = useCallback((data) => {
+    // 월과 년도를 언어에 맞게 변환하는 함수
+    const getMonthYearDisplay = (monthNumber, yearNumber) => {
+      // 현재 언어에 따라 월과 년도 표시 반환
+      const currentLanguage = localStorage.getItem('language') || 'ko';
+      
+      if (currentLanguage === 'ko') {
+        // 한국어: 숫자 + 월 + 년도 + 년
+        return `${monthNumber}월 ${yearNumber}년`;
+      } else {
+        // 영어: 월 이름 + 년도
+        const monthNames = {
+          1: 'January',
+          2: 'February',
+          3: 'March',
+          4: 'April',
+          5: 'May',
+          6: 'June',
+          7: 'July',
+          8: 'August',
+          9: 'September',
+          10: 'October',
+          11: 'November',
+          12: 'December'
+        };
+        return `${monthNames[monthNumber] || monthNumber} ${yearNumber}`;
+      }
+    };
     if (data.month && data.year && data.totalQuantity !== undefined) {
       // 판매 분석 결과
       if (data.totalAmount !== undefined) {
         return (
           <div className="analysis-result">
-            <h3>📊 {data.month}월 {data.year}년 {t('salesAnalysisResult')}</h3>
+            <h3>📊 {getMonthYearDisplay(data.month, data.year)} {t('salesAnalysisResult')}</h3>
             <div className="analysis-summary">
               <div className="analysis-item">
                 <span className="label">{t('totalSalesVolume')}:</span>
@@ -248,7 +307,7 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
             {data.sales && data.sales.length > 0 && (
               <div className="sales-details">
                 <h4>{t('detailedSalesHistory')}</h4>
-                <TableRenderer data={data.sales} header={Object.keys(data.sales[0])} />
+                <TableRenderer data={data.sales} header={Object.keys(data.sales[0]).filter(key => !key.endsWith('_id'))} />
               </div>
             )}
           </div>
@@ -259,7 +318,7 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
       if (data.totalQuantity !== undefined && data.segment === 'SUV') {
         return (
           <div className="analysis-result">
-            <h3>🚗 {data.dealership} {data.month}월 {data.year}년 {t('suvAllocationStatus')}</h3>
+            <h3>🚗 {data.dealership} {getMonthYearDisplay(data.month, data.year)} {t('suvAllocationStatus')}</h3>
             <div className="analysis-summary">
               <div className="analysis-item">
                 <span className="label">{t('totalSuvAllocation')}:</span>
@@ -269,7 +328,7 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
             {data.allocations && data.allocations.length > 0 && (
               <div className="allocation-details">
                 <h4>{t('allocationDetails')}</h4>
-                <TableRenderer data={data.allocations} header={Object.keys(data.allocations[0])} />
+                <TableRenderer data={data.allocations} header={Object.keys(data.allocations[0]).filter(key => !key.endsWith('_id'))} />
               </div>
             )}
           </div>
@@ -281,7 +340,7 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
     if (data.dealership && data.segment && data.totalQuantity !== undefined) {
       return (
         <div className="analysis-result">
-          <h3>🏢 {data.dealership} {data.month}월 {data.year}년 {data.segment} {t('dealerSegmentSalesStatus')}</h3>
+          <h3>🏢 {data.dealership} {getMonthName(data.month)} {data.year}년 {data.segment} {t('dealerSegmentSalesStatus')}</h3>
           <div className="analysis-summary">
             <div className="analysis-item">
               <span className="label">{t('totalSegmentSales', { segment: data.segment })}:</span>
@@ -295,7 +354,7 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
           {data.sales && data.sales.length > 0 ? (
             <div className="sales-details">
               <h4>{t('detailedSalesHistory')}</h4>
-              <TableRenderer data={data.sales} header={Object.keys(data.sales[0])} />
+              <TableRenderer data={data.sales} header={Object.keys(data.sales[0]).filter(key => !key.endsWith('_id'))} />
             </div>
           ) : (
             <div className="no-data-message">
@@ -339,17 +398,12 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
       } else {
         try {
           const resource = urlPath.split('/').pop();
-          const patientName = extractedEntities?.patient_name;
           
           if (method === 'GET') {
             addApiCallLog('Data', `관련 Data (${resource}) 를 분석 중입니다.`);
             let apiResponse;
             
             switch (resource) {
-              case 'patients': apiResponse = await mockApi.getPatients(null, patientName); break;
-              case 'appointments': apiResponse = await mockApi.getAppointments(null, null, patientName); break;
-              case 'surgeries': apiResponse = await mockApi.getSurgeries(null, patientName); break;
-              case 'photo_records': apiResponse = await mockApi.getPhotoRecords(null, patientName); break;
               case 'products': apiResponse = await mockApi.getProducts(); break;
               case 'surveys': apiResponse = await mockApi.getSurveys(); break;
               case 'leads': apiResponse = await mockApi.getLeads(); break;
@@ -379,7 +433,7 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
                 break;
               case 'send_email': 
                 // 이메일 전송은 POST로 처리되므로 여기서는 처리하지 않음
-                apiResponse = { success: true, data: [], message: '이메일 전송은 POST 요청으로 처리됩니다.' }; 
+                apiResponse = { success: true, data: [], message: 'Email sending is processed via POST request.' }; 
                 break;
               default: throw new Error(`Unsupported GET API: ${urlPath}`);
             }
@@ -398,9 +452,6 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
             } else {
                 console.log('No data found, showing no-data message');
                 contentToRender = <p className="no-data-message">{t('noDataMessage')}</p>;
-                if (patientName) {
-                    contentToRender = <p className="no-data-message">{t('patientDataNotFound', { patientName })}</p>;
-                }
             }
           } else if (method === 'POST') {
             contentToRender = (
@@ -426,7 +477,7 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
                                                 if (emailMatch) {
                           const originalContent = emailMatch[1].trim();
                           try {
-                            const translatedContent = await translateToKorean(originalContent);
+                            const translatedContent = await translateToKorean(originalContent, t);
                             emailContent = `=== ${t('originalText')} ===\n${originalContent}\n\n=== ${t('koreanTranslation')} ===\n${translatedContent}`;
                           } catch (error) {
                             console.error('Translation error:', error);
@@ -435,7 +486,7 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
                         } else {
                           // 전체 질문을 이메일 내용으로 사용
                           try {
-                            const translatedQuestion = await translateToKorean(originalQuestion);
+                            const translatedQuestion = await translateToKorean(originalQuestion, t);
                             emailContent = `=== ${t('originalText')} ===\n${originalQuestion}\n\n=== ${t('koreanTranslation')} ===\n${translatedQuestion}`;
                           } catch (error) {
                             console.error('Translation error:', error);
@@ -500,7 +551,6 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
       finalContent = (
         <div className="dynamic-app-wrapper">
           <h2>{step.process_name}</h2>
-          <p>{step.description}</p>
           {contentToRender}
           {/* POST 폼이 아닐 때만 Next 버튼 표시 */}
           {!(step.api && step.api.method === 'POST') && 
@@ -558,7 +608,7 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
     try {
         addApiCallLog('LLM', t('banyaAgentAnalyzing')); // getLayout api 대신 LLM 시작 메시지
         // getGeminiIntent 호출 변경: 객체 반환을 기대
-        const { matched_intent: matchedIntentKey, extracted_entities: extractedEntities } = await getGeminiIntent(userQuery, geminiIntentKeywords);
+        const { matched_intent: matchedIntentKey, extracted_entities: extractedEntities } = await getGeminiIntent(userQuery, geminiIntentKeywords, t);
         console.log("Matched Intent Key from Gemini:", matchedIntentKey);
         console.log("Extracted Entities from Gemini:", extractedEntities);
         addApiCallLog('Gemma', `LLM 의도 분석 완료: ${matchedIntentKey}`); // 기존 Gemini 로그는 유지
@@ -567,39 +617,29 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
         let initialStep = null;
         let selectedLayoutData = null;
 
-        if (matchedIntentKey && matchedIntentKey !== "NONE" && matchedIntentKey !== "ERROR") {
+        if (matchedIntentKey === "GENERAL_QUESTION") {
+            // 일반 질문 처리
+            addApiCallLog('Gemma', t('generalQuestionProcessing'));
+            const generalResponse = await handleGeneralQuestion(userQuery, t);
+            llmResponseExplanation = generalResponse;
+            setLayoutData([]);
+            setCurrentStepIndex(null);
+        } else if (matchedIntentKey && matchedIntentKey !== "NONE" && matchedIntentKey !== "ERROR") {
             const parts = matchedIntentKey.split('_');
             const stepIdFromIntent = parseInt(parts[parts.length - 1]);
             
             // 자동차 업계 워크플로우 처리
             if (matchedIntentKey.startsWith("AUTOMOTIVE_")) {
-                selectedLayoutData = fixedLayoutData;
-                initialStep = fixedLayoutData.find(s => s.step_id === stepIdFromIntent);
+                const dynamicLayoutData = getFixedLayoutData(t);
+                selectedLayoutData = dynamicLayoutData;
+                initialStep = dynamicLayoutData.find(s => s.step_id === stepIdFromIntent);
                 if (initialStep) {
                     llmResponseExplanation = initialStep.answer?.[0] || initialStep.description || t('workflowStart');
                 } else {
                     llmResponseExplanation = t('workflowNotFound');
                 }
             }
-            // 병원용 워크플로우 처리
-            else if (matchedIntentKey.startsWith("HOSPITAL_")) {
-                selectedLayoutData = fixedLayoutData;
-                if (matchedIntentKey.startsWith("HOSPITAL_FULL_WORKFLOW_")) {
-                    initialStep = fixedLayoutData.find(s => s.step_id === stepIdFromIntent);
-                    llmResponseExplanation = initialStep?.answer?.[0] || initialStep?.description || "업무의 전체 워크플로우를 준비했습니다.";
-                } else {
-                    initialStep = fixedLayoutData.find(s => s.step_id === stepIdFromIntent);
-                    if (initialStep) {
-                                            llmResponseExplanation = initialStep.answer?.[0] || initialStep.description || t('workflowStart');
-                    // 환자 이름이 추출되었다면 설명에 추가
-                    if (extractedEntities?.patient_name) {
-                        llmResponseExplanation = `'${extractedEntities.patient_name}' 환자 ${initialStep.process_name}을(를) 조회합니다.`;
-                    }
-                } else {
-                    llmResponseExplanation = t('workflowNotFound');
-                }
-                }
-            }
+
         } else {
             llmResponseExplanation = t('sorryNotUnderstood');
         }
@@ -655,7 +695,9 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
         {llmExplanation && !isSendingInteraction && !isLoadingStep && (
             <div className="llm-notification-wrapper">
                 <img src={LightbulbIcon} alt="Info" className="llm-notification-icon" />
-                <p className="llm-notification-message">{llmExplanation}</p>
+                <div className="llm-notification-message">
+                    <ReactMarkdown>{llmExplanation}</ReactMarkdown>
+                </div>
             </div>
         )}
 
@@ -679,11 +721,7 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
             {currentStepContent}
           </div>
         )}
-        {llmExplanation && layoutData.length === 0 && currentStepIndex === null && !isSendingInteraction && !isLoadingStep && (
-          <div className="interaction-dynamic-content">
-              {/* 이 경우 llmExplanation이 상단에 고정되므로, 여기서는 비워둡니다. */}
-          </div>
-        )}
+
       </div> {/* interaction-main-content-wrapper 끝 */}
 
 
@@ -705,6 +743,19 @@ const TableRenderer = ({ data, header }) => {
   if (!Array.isArray(data) || data.length === 0) { // 방어 코드 추가
     return <p className="no-data-message">표시할 데이터가 없거나 형식이 올바르지 않습니다.</p>;
   }
+
+  // 숫자 포맷팅 함수
+  const formatNumber = (value) => {
+    if (typeof value === 'number' || (typeof value === 'string' && !isNaN(Number(value)))) {
+      const num = Number(value);
+      if (Number.isInteger(num)) {
+        return num.toLocaleString();
+      } else {
+        return num.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+      }
+    }
+    return value;
+  };
 
   
 
@@ -730,7 +781,7 @@ const TableRenderer = ({ data, header }) => {
             {tableData?.map((row, rowIndex) => (
               <tr key={rowIndex}>
                 {row?.map((cell, colIndex) => (
-                  <td key={colIndex}>{cell}</td>
+                  <td key={colIndex}>{formatNumber(cell)}</td>
                 ))}
               </tr>
             ))}
@@ -739,7 +790,7 @@ const TableRenderer = ({ data, header }) => {
       </div>
     );
   } else {
-    // 기존 객체 배열 처리 (병원 데이터)
+            // 기존 객체 배열 처리
     return (
       <div className="table-wrapper">
         <table className="styled-table">
@@ -754,7 +805,7 @@ const TableRenderer = ({ data, header }) => {
             {data?.map((row, rowIndex) => (
               <tr key={rowIndex}>
                 {header?.map((col, colIndex) => (
-                  <td key={colIndex}>{row[col]}</td>
+                  <td key={colIndex}>{formatNumber(row[col])}</td>
                 ))}
               </tr>
             ))}
@@ -767,9 +818,11 @@ const TableRenderer = ({ data, header }) => {
 
 // PostForm 컴포넌트 (addApiCallLog prop 추가)
 const PostForm = ({ step, onFormSubmit, addApiCallLog }) => {
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({});
   const [fileContent, setFileContent] = useState('');
   const [formError, setFormError] = useState('');
+  const [isTranslating, setIsTranslating] = useState(false);
 
   useEffect(() => {
     const initialData = {};
@@ -809,15 +862,18 @@ const PostForm = ({ step, onFormSubmit, addApiCallLog }) => {
     
     // 이메일 전송의 경우 자동으로 번역 처리
     if (step.api.url === '/api/send_email' && initialData.description) {
+      setIsTranslating(true);
       const handleAutoTranslate = async () => {
         try {
           const originalContent = initialData.description;
-          const translatedContent = await translateToKorean(originalContent);
-          const emailContent = `=== 원문 ===\n${originalContent}\n\n=== 한국어 번역 ===\n${translatedContent}`;
+          const translatedContent = await translateToKorean(originalContent, t);
+          const emailContent = `=== ${t('originalText')} ===\n${originalContent}\n\n=== ${t('koreanTranslation')} ===\n${translatedContent}`;
           setFormData(prev => ({ ...prev, description: emailContent }));
         } catch (error) {
           console.error('Auto translation error:', error);
           // 번역 실패 시 원본 텍스트 유지
+        } finally {
+          setIsTranslating(false);
         }
       };
       
@@ -886,13 +942,17 @@ const PostForm = ({ step, onFormSubmit, addApiCallLog }) => {
               <input type="date" id={paramName} name={paramName} value={formData[paramName] || ''} onChange={handleChange} required />
             ) : paramType === 'description' ? (
               <div className="email-content-display">
-                {formData[paramName] && formData[paramName].includes('=== 원문 ===') ? (
+                {isTranslating ? (
+                  <div className="translation-loading">
+                    <p>{t('processing')}...</p>
+                  </div>
+                ) : formData[paramName] && formData[paramName].includes(`=== ${t('originalText')} ===`) ? (
                   <div>
-                    <div className="email-content-section email-content-original">
-                      <p>{formData[paramName].split('=== 원문 ===')[1].split('=== 한국어 번역 ===')[0].trim()}</p>
+                    <div className="email-content-section email-content-original" data-label={`=== ${t('originalText')} ===`}>
+                      <p>{formData[paramName].split(`=== ${t('originalText')} ===`)[1].split(`=== ${t('koreanTranslation')} ===`)[0].trim()}</p>
                     </div>
-                    <div className="email-content-section email-content-translation">
-                      <p>{formData[paramName].split('=== 한국어 번역 ===')[1].trim()}</p>
+                    <div className="email-content-section email-content-translation" data-label={`=== ${t('koreanTranslation')} ===`}>
+                      <p>{formData[paramName].split(`=== ${t('koreanTranslation')} ===`)[1].trim()}</p>
                     </div>
                   </div>
                 ) : (
@@ -926,6 +986,7 @@ const PostForm = ({ step, onFormSubmit, addApiCallLog }) => {
 
 // RecipientSearchInput 컴포넌트
 const RecipientSearchInput = ({ id, name, value, onSelectRecipient, addApiCallLog }) => {
+  const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [selectedRecipientName, setSelectedRecipientName] = useState('');
@@ -934,9 +995,8 @@ const RecipientSearchInput = ({ id, name, value, onSelectRecipient, addApiCallLo
 
   useEffect(() => {
     if (value) {
-        // 병원용 수신자 확인
-        const hospitalSelected = (mockApi.getRecipientData() || []).find(r => r.이메일 === value);
-        const selected = hospitalSelected;
+        // 수신자 확인
+        const selected = (mockApi.getRecipientData() || []).find(r => r.이메일 === value);
         
         if (selected) {
             setSelectedRecipientName(`${selected.이름} (${selected.이메일})`);
@@ -964,21 +1024,21 @@ const RecipientSearchInput = ({ id, name, value, onSelectRecipient, addApiCallLo
     setIsSearching(true);
     searchTimeoutRef.current = setTimeout(async () => {
       try {
-        addApiCallLog('LLM', `수신자 검색 LLM 이 '${searchTerm}' 에 대한 의미를 분석 중입니다.`);
-        // 병원용 수신자 검색
-        const hospitalResponse = await mockApi.searchRecipients(searchTerm);
+        addApiCallLog('LLM', `Recipient search LLM is analyzing the meaning of '${searchTerm}'.`);
+        // 수신자 검색
+        const response = await mockApi.searchRecipients(searchTerm);
         
-        if (hospitalResponse.success) {
-          setSearchResults(hospitalResponse.data.slice(0, 5)); // 상위 5개만 표시
-          addApiCallLog('Gemma', `LLM 의미 검색 완료: ${hospitalResponse.data.length}명`);
+        if (response.success) {
+          setSearchResults(response.data.slice(0, 5)); // 상위 5개만 표시
+          addApiCallLog('Gemma', `LLM semantic search completed: ${response.data.length} recipients`);
         } else {
           setSearchResults([]);
-          addApiCallLog('Gemma', `LLM 의미 검색 실패`);
+          addApiCallLog('Gemma', `LLM semantic search failed`);
         }
       } catch (error) {
         console.error("Error searching recipients:", error);
         setSearchResults([]);
-        addApiCallLog('Gemma', `LLM 의미 검색 중 오류 발생: ${error.message}`);
+        addApiCallLog('Gemma', `Error occurred during LLM semantic search: ${error.message}`);
       } finally {
         setIsSearching(false);
       }
@@ -1006,26 +1066,26 @@ const RecipientSearchInput = ({ id, name, value, onSelectRecipient, addApiCallLo
         name={name}
         value={searchTerm}
         onChange={handleInputChange}
-        placeholder="수신자 이름, 부서, 직책 등으로 검색"
+        placeholder={t('recipientSearchPlaceholder')}
         required
         autoComplete="off"
       />
-      {isSearching && <div className="search-loading">검색 중...</div>}
+      {isSearching && <div className="search-loading">{t('searching')}...</div>}
       {searchResults.length > 0 && !selectedRecipientName && (
         <ul className="search-results-list">
           {searchResults.map((recipient, index) => (
             <li key={index} onClick={() => handleResultClick(recipient)}>
-              <strong>{recipient.이름}</strong> ({recipient.부서 || '부서 없음'}, {recipient.직책 || '직책 없음'}) - {recipient.이메일}
+              <strong>{recipient.이름}</strong> ({recipient.부서 || t('noDepartment')}, {recipient.직책 || t('noPosition')}) - {recipient.이메일}
             </li>
           ))}
         </ul>
       )}
       {searchTerm && !selectedRecipientName && searchResults.length === 0 && !isSearching && (
-        <p className="no-results-message">검색 결과가 없습니다.</p>
+        <p className="no-results-message">{t('noSearchResults')}</p>
       )}
       {selectedRecipientName && (
         <p className="selected-recipient-display">
-          선택됨: <strong>{selectedRecipientName}</strong>
+          {t('selected')}: <strong>{selectedRecipientName}</strong>
         </p>
       )}
     </div>

@@ -50,6 +50,7 @@ The current **Dation Benz Global Management System** project is an **AI agent de
 - **Desktop**: Electron 31.0.2
 - **AI**: Google Generative AI (@google/generative-ai)
 - **Markdown**: react-markdown + rehype-raw + remark-gfm
+- **Internationalization**: React Context API-based multilingual support
 - **Build**: electron-builder
 
 ### 🚗 **Main Features**
@@ -59,6 +60,8 @@ The current **Dation Benz Global Management System** project is an **AI agent de
 - Automotive industry-related Q&A processing
 - Headquarters-dealer communication support
 - Chat session save/load functionality
+- **Multilingual Prompt Support**: Korean/English/German and other multilingual question processing
+- **General Question Processing**: Automotive expert role for technical advice
 
 #### 2. **Mercedes-Benz Dealer Data Management**
 Manages various data in JSON format for the global automotive industry:
@@ -213,7 +216,25 @@ Businesses that can be called from the Interaction page are focused on **Automot
 
 ---
 
-#### **5. Existing Workflow Features**
+#### **5. General Question Processing Feature**
+**Question Examples**: 
+- "Wie fülle ich das Kühlmittel in meinem Mercedes E350 nach?" (German: How do I fill the coolant in my Mercedes E350?)
+- "Wie lautet die Modellbezeichnung des leistungsstärksten Fahrzeugs von Mercedes-Benz?" (German: What is the model designation of the most powerful vehicle from Mercedes-Benz?)
+
+**System Operation**:
+1. User enters question (multilingual support)
+2. Gemini AI classifies as `GENERAL_QUESTION` intent
+3. Recognizes as general question unrelated to automotive industry management system
+4. Sends directly to Gemini AI without database lookup
+5. Provides technical advice in automotive expert role
+6. Displays structured response in markdown format
+
+**Supported Languages**: Korean, English, German, and other multilingual support
+**Response Format**: Markdown rendering (titles, lists, emphasis, code blocks, etc.)
+
+---
+
+#### **6. Existing Workflow Features**
 
 **Dealer Information Lookup**:
 - Question: "Show me Hansung Motors dealer information"
@@ -252,10 +273,120 @@ Businesses that can be called from the Interaction page are focused on **Automot
 3. **API Call**: Call appropriate API functions based on matched intent
 4. **Result Rendering**: Display analysis results in user-friendly UI
 
+#### **Multilingual Prompt Support**
+- **Intent Classification Prompts**: Korean/English multilingual support
+- **General Question Processing**: Automotive expert role for multilingual question processing
+- **Translation Features**: English/German → Korean automatic translation
+- **Markdown Rendering**: Structured response display
+- **Dynamic Language Switching**: Real-time language change support
+
 #### **UI Components**
 - **Analysis Result Cards**: Highlight key metrics for display
 - **Detailed History Tables**: Detailed information of filtered data
 - **Email Sending Form**: Recipient search and content editing features
 - **Real-time Logs**: Display API call status and progress
+- **Markdown Rendering**: Structured response display using ReactMarkdown
+- **Multilingual Interface**: Korean/English real-time switching support
 
 This project is a comprehensive automotive industry management system aimed at **business automation and AI-based decision support between global automotive company headquarters and regional dealers**.
+
+---
+
+## 🌍 **Multilingual Prompt Support System**
+
+### **Overview**
+The system dynamically generates Gemini AI prompts based on the currently selected language to provide consistent quality responses.
+
+### **Supported Languages**
+- **Korean (한국어)**: Default language, full support for all features
+- **English**: Full support for all features
+- **German (Deutsch)**: Question input and processing support
+
+### **Multilingual Prompt Features**
+
+#### **1. Intent Classification Prompts**
+- **Dynamic Language Switching**: Automatic prompt generation based on current language
+- **Entity Extraction**: Multilingual recognition of dealer names, dates, segments, etc.
+- **General Question Classification**: Automatic classification as `GENERAL_QUESTION` intent
+
+#### **2. General Question Processing**
+- **Automotive Expert Role**: Technical advice and maintenance guides
+- **Markdown Responses**: Structured answers (titles, lists, emphasis, code blocks)
+- **Multilingual Input**: Korean, English, German question processing
+
+#### **3. Translation Features**
+- **Automatic Translation**: English/German → Korean automatic translation
+- **Email Translation**: Original text and translation provided simultaneously
+- **Business Tone Maintenance**: Appropriate translation of automotive industry terminology
+
+### **Technical Implementation**
+
+#### **Translation Key System**
+```javascript
+// Intent classification prompts
+intentClassificationExpert: "Automotive Industry Management System Intent Classification Expert"
+analysisGuidelines: "Analysis Guidelines"
+entityDealer: "Dealer name (e.g., \"Hyosung The Class\", \"한성자동차\")"
+
+// General question processing
+automotiveExpert: "You are an automotive expert"
+responseGuidelines: "Consider the following when responding"
+
+// Translation features
+translateToKorean: "Please translate the following text into natural Korean"
+```
+
+#### **Dynamic Prompt Generation**
+```javascript
+// Prompt generation based on current language
+const prompt = `${t('intentClassificationExpert')}. 
+${t('intentAnalysisGuidance')}
+
+${t('userMessage')}: "${userMessage}"
+
+${t('analysisGuidelines')}:
+1. ${t('analysisGuideline1')}
+2. ${t('analysisGuideline2')}
+...`;
+```
+
+#### **Markdown Rendering**
+```javascript
+// Structured response display using ReactMarkdown
+<ReactMarkdown>{llmExplanation}</ReactMarkdown>
+
+// CSS styling
+.llm-notification-message h1, h2, h3 { /* Title styles */ }
+.llm-notification-message ul, ol { /* List styles */ }
+.llm-notification-message code { /* Code block styles */ }
+```
+
+### **Usage Examples**
+
+#### **Korean Question**
+```
+Question: "벤츠 E350의 냉각수를 보충하려면 어떻게 해?"
+Response: Step-by-step guide in markdown format
+```
+
+#### **English Question**
+```
+Question: "How do I fill the coolant in my Mercedes E350?"
+Response: Structured markdown guide in Korean
+```
+
+#### **German Question**
+```
+Frage: "Wie fülle ich das Kühlmittel in meinem Mercedes E350 nach?"
+Antwort: Strukturierte Markdown-Anleitung auf Koreanisch
+
+Frage: "Wie lautet die Modellbezeichnung des leistungsstärksten Fahrzeugs von Mercedes-Benz?"
+Antwort: Strukturierte Markdown-Antwort auf Deutsch
+```
+
+### **Benefits**
+- **Consistent Quality**: Same quality responses regardless of language
+- **Natural Translation**: Appropriate translation of automotive industry terminology
+- **Structured Responses**: Improved readability through markdown
+- **Real-time Switching**: Immediate application when language changes
+- **Extensible**: Easy to add new languages

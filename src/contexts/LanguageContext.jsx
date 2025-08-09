@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import ko from '../locales/ko';
 import en from '../locales/en';
+import de from '../locales/de';
 
 const LanguageContext = createContext();
 
@@ -18,7 +19,8 @@ export const LanguageProvider = ({ children }) => {
 
   const languages = {
     ko: { name: '한국어', translations: ko },
-    en: { name: 'English', translations: en }
+    en: { name: 'English', translations: en },
+    de: { name: 'Deutsch', translations: de }
   };
 
   useEffect(() => {

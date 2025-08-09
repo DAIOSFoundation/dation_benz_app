@@ -37,33 +37,34 @@ async function fileToGenerativePart(file) {
  * Gemini API를 호출하여 사용자 입력을 분석하여 의도를 분류하고 관련 엔티티를 추출합니다.
  * @param {string} userMessage - 사용자의 입력 메시지
  * @param {Object} intentMapping - 의도 키와 해당 질문 목록을 포함하는 객체
+ * @param {Function} t - 다국어 번역 함수
  * @returns {Promise<{matched_intent: string, extracted_entities?: Object}>} - 식별된 의도 키와 추출된 엔티티 객체
  */
-export const getGeminiIntent = async (userMessage, intentMapping) => {
+export const getGeminiIntent = async (userMessage, intentMapping, t) => {
     const intentString = JSON.stringify(intentMapping, null, 2);
 
-    const prompt = `당신은 자동차 업계 관리 시스템의 의도 분류 전문가입니다. 
-사용자의 질문을 분석하여 가장 적합한 업무 의도를 분류하고, 관련 정보를 추출해주세요.
+    const prompt = `${t('intentClassificationExpert')}. 
+${t('intentAnalysisGuidance')}
 
-사용자 메시지: "${userMessage}"
+${t('userMessage')}: "${userMessage}"
 
-가능한 업무 의도 목록:
+${t('possibleIntents')}:
 ${intentString}
 
-분석 지침:
-1. 사용자 메시지의 의미를 정확히 파악하여 가장 적합한 의도를 선택하세요.
-2. 자동차 업계 관련 용어를 이해하고 매칭하세요 (예: 딜러명, 차량 모델, 세그먼트 등).
-3. 다음 엔티티들을 추출하세요:
-   - dealer: 딜러명 (예: "Hyosung The Class", "한성자동차", "효성더클래스")
-   - month: 월 (숫자, 예: 7, 8)
-   - year: 년도 (숫자, 예: 2025)
-   - segment: 차량 세그먼트 (예: "Sedan", "SUV", "세단")
-   - model: 차량 모델명 (예: "E-Class", "GLC")
-   - patient_name: 환자명 (병원 시스템용)
+${t('analysisGuidelines')}:
+1. ${t('analysisGuideline1')}
+2. ${t('analysisGuideline2')}
+3. ${t('analysisGuideline3')}
+   - dealer: ${t('entityDealer')}
+   - month: ${t('entityMonth')}
+   - year: ${t('entityYear')}
+   - segment: ${t('entitySegment')}
+   - model: ${t('entityModel')}
 
-4. 영어와 한국어 모두 지원하세요.
+4. ${t('analysisGuideline4')}
+5. ${t('analysisGuideline5')}
 
-JSON 형식으로만 응답하세요:
+${t('jsonResponseFormat')}:
 {
   "matched_intent": "INTENT_KEY",
   "extracted_entities": {
@@ -71,18 +72,18 @@ JSON 형식으로만 응답하세요:
     "month": 숫자,
     "year": 숫자,
     "segment": "세그먼트",
-    "model": "모델명",
-    "patient_name": "환자명"
+    "model": "모델명"
   }
 }
 
-적합한 의도가 없으면: {"matched_intent": "NONE", "extracted_entities": {}}
+${t('noMatchingIntent')}: {"matched_intent": "NONE", "extracted_entities": {}}
+${t('generalQuestionCase')}: {"matched_intent": "GENERAL_QUESTION", "extracted_entities": {}}
 
-예시:
-- "What were the total sales volume and sales amount in Korea for July?" 
-  → {"matched_intent": "AUTOMOTIVE_VEHICLE_SALES_STATUS_1", "extracted_entities": {"month": 7, "year": 2025}}
-- "효성더클래스에서 7월에 주문한 세단 수량은?" 
-  → {"matched_intent": "AUTOMOTIVE_DEALER_SEGMENT_SALES_5", "extracted_entities": {"dealer": "효성더클래스", "month": 7, "year": 2025, "segment": "Sedan"}}`;
+${t('example1')}:
+- "${t('example1Question')}" 
+  ${t('example1Answer')}
+- "${t('example2Question')}" 
+  ${t('example2Answer')}`;
 
     try {
         const result = await model.generateContent(prompt);
@@ -171,17 +172,17 @@ export const getGeminiTextResponse = async (promptText, imageFile = null, contex
  * @param {string} text - 번역할 텍스트 (영어, 독일어 등)
  * @returns {Promise<string>} - 한국어로 번역된 텍스트
  */
-export const translateToKorean = async (text) => {
-    const prompt = `다음 텍스트를 자연스러운 한국어로 번역해주세요. 
-    번역 시 다음 사항을 고려해주세요:
-    1. 자동차 업계 전문 용어는 적절한 한국어로 번역
-    2. 비즈니스 이메일 톤 유지
-    3. 자연스러운 한국어 표현 사용
-    4. 원문의 의미를 정확히 전달
+export const translateToKorean = async (text, t) => {
+    const prompt = `${t('translateToKorean')} 
+    ${t('translationGuidelines')}:
+    1. ${t('translationGuideline1')}
+    2. ${t('translationGuideline2')}
+    3. ${t('translationGuideline3')}
+    4. ${t('translationGuideline4')}
     
-    번역할 텍스트: "${text}"
+    ${t('textToTranslate')}: "${text}"
     
-    번역 결과만 한국어로 출력해주세요.`;
+    ${t('translationResult')}`;
 
     try {
         const result = await model.generateContent(prompt);
@@ -191,5 +192,65 @@ export const translateToKorean = async (text) => {
         console.error("Error calling Gemini API for translation:", error);
         // 번역 실패 시 원본 텍스트 반환
         return text;
+    }
+};
+
+/**
+ * Gemini API를 사용하여 텍스트를 독일어로 번역합니다.
+ * @param {string} text - 번역할 텍스트 (한국어, 영어 등)
+ * @returns {Promise<string>} - 독일어로 번역된 텍스트
+ */
+export const translateToGerman = async (text, t) => {
+    const prompt = `${t('translateToGerman')} 
+    ${t('translationGuidelines')}:
+    1. ${t('translationGuideline1')}
+    2. ${t('translationGuideline2')}
+    3. ${t('translationGuideline3')}
+    4. ${t('translationGuideline4')}
+    
+    ${t('textToTranslate')}: "${text}"
+    
+    ${t('translationResult')}`;
+
+    try {
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        return response.text().trim();
+    } catch (error) {
+        console.error("Error calling Gemini API for German translation:", error);
+        // 번역 실패 시 원본 텍스트 반환
+        return text;
+    }
+};
+
+export const handleGeneralQuestion = async (question, t) => {
+    /**
+     * 일반적인 질문에 대해 Gemini에게 직접 답변을 요청합니다.
+     * @param {string} question - 사용자의 일반 질문
+     * @param {Function} t - 다국어 번역 함수
+     * @returns {Promise<string>} - Gemini의 답변
+     */
+    
+    const prompt = `${t('automotiveExpert')}
+
+${t('userQuestion')}: "${question}"
+
+${t('responseGuidelines')}:
+1. ${t('responseGuideline1')}
+2. ${t('responseGuideline2')}
+3. ${t('responseGuideline3')}
+4. ${t('responseGuideline4')}
+5. ${t('responseGuideline5')}
+6. ${t('detectAndRespondInSameLanguage')}
+
+${t('response')}:`;
+
+    try {
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        return response.text().trim();
+    } catch (error) {
+        console.error("Error calling Gemini API for general question:", error);
+        return t('generalQuestionError');
     }
 };
