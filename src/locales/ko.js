@@ -164,13 +164,21 @@ export default {
   
   // Prompt Details
   dealerInfoLookupDetail: "딜러사 연락처 및 조직 정보 조회",
+  dealerInfoLookupExamples: "예시:\n• 한성자동차 연락처 정보 보여줘\n• 효성더클래스 담당자 정보 조회\n• KCC오토 회사 정보 알려줘",
   dealerContactManagementDetail: "딜러사 담당자 연락처 정보 관리",
+  dealerContactManagementExamples: "예시:\n• 한성자동차 담당자 연락처 보여줘\n• 효성더클래스 담당자 정보 조회\n• KCC오토 연락처 관리",
   vehicleModelInfoDetail: "E-Class, C-Class, GLC, EQS, S-Class 등 차량 모델 정보",
+  vehicleModelInfoExamples: "예시:\n• E-Class (W214) 사양 보여줘\n• 전기차 모델 목록 조회\n• SUV 모델 가격 정보",
   vinTrackingDetail: "차량 식별 번호를 통한 차량 이력 관리",
+  vinTrackingExamples: "예시:\n• VIN001HANSUNG 차량 정보 찾아줘\n• VIN002HYOSUNG 차량 이력 조회\n• 특정 VIN 번호로 차량 추적",
   monthlySalesAnalysisDetail: "7월 한국 내 총 판매 대수와 판매 금액 분석",
+  monthlySalesAnalysisExamples: "예시:\n• 7월 한국 총 판매 현황 보여줘\n• 7월 판매 대수와 금액 분석\n• 한국 내 월별 판매 통계",
   dealerSegmentSalesDetail: "효성더클래스 7월 세단 판매 분석",
+  dealerSegmentSalesExamples: "예시:\n• 효성더클래스 세단 판매 실적 보여줘\n• 7월 세단 판매 분석\n• 딜러별 세그먼트 판매 통계",
   dealerAllocationStatusDetail: "한성자동차 8월 SUV 배정 현황",
+  dealerAllocationStatusExamples: "예시:\n• 한성자동차 SUV 배정 현황 보여줘\n• 8월 SUV 배정 수량 분석\n• 딜러별 배정 현황 조회",
   emailSendingDetail: "Gemini 번역 기능이 포함된 이메일 전송",
+  emailSendingExamples: "예시:\n• 한성자동차 담당자에게 초대 이메일 전송\n• 효성더클래스에 판매 보고서 전송\n• KCC오토에 배정 현황 알림 전송",
   
   // Analysis Results
   salesAnalysisResult: "판매 분석 결과",
@@ -280,6 +288,9 @@ export default {
   defaultLLM: "Banya Gemma 27B Tuned",
   
   // Saved Chat Sessions
+  dealerBasicInfo: "딜러 기본 정보",
+  dealerBasicInfoDesc: "한성자동차, 효성더클래스, KCC오토 등 주요 딜러의 기본 회사 정보를 조회할 수 있습니다.",
+  dealerBasicInfoExample: "한성자동차 회사 정보 보여줘\n효성더클래스 조직 정보 알려줘\nKCC오토 회사 상세정보 조회",
   dealerInfoLookup: "딜러 정보 조회",
   dealerInfoLookupDesc: "한성자동차, 효성더클래스, KCC오토 등 주요 딜러의 연락처와 담당자 정보를 조회할 수 있습니다.",
   dealerInfoLookupExample: "한성자동차 딜러 정보 보여줘\n효성더클래스 연락처 알려줘\nKCC오토 담당자 정보 조회",

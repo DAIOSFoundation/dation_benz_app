@@ -146,7 +146,36 @@ Interaction 페이지에서 호출 가능한 업무는 **자동차 업계 워크
 
 ### 🎯 **구현된 기능 호출 시나리오**
 
-#### **1. 월별 판매 분석 기능**
+#### **1. 딜러 정보 조회 기능 (통합)**
+**질문 예시**: 
+- "한성자동차 딜러 정보를 보여줘"
+- "Show me contact information for Hansung Motors"
+- "효성더클래스 연락처 정보 알려줘"
+- "KCC오토 담당자 정보 조회"
+
+**시스템 동작**:
+1. 사용자가 Interaction 페이지에서 질문 입력
+2. Gemini AI가 질문을 분석하여 `AUTOMOTIVE_DEALER_INFO_LOOKUP_0` 의도 매칭
+3. 질문 유형에 따라 연락처 정보 또는 전체 딜러 정보 분기 처리
+4. `getDealerInfo(dealershipName, queryType)` API 호출
+5. dealer_info.json에서 딜러 정보 조회 및 표시
+6. 딜러 연락처 및 조직 정보를 테이블 형태로 표시
+
+**지원 키워드**: 
+- **영어**: "dealer information", "contact information", "dealer company", "contact person"
+- **한국어**: "딜러 정보", "연락처 정보", "담당자 정보", "딜러 회사", "딜러 조직"
+- **딜러명**: "한성자동차", "Hansung Motors", "효성더클래스", "Hyosung The Class", "KCC오토", "KCC Auto"
+
+**데이터베이스 구조**:
+- `dealer_info.json`: 딜러 기본 정보 및 연락처 정보
+- `benz_CRM.json`: 딜러 정보 (한글명 포함)
+- 한글-영어 딜러명 매핑 지원
+
+---
+
+
+
+#### **2. 월별 판매 분석 기능**
 **질문 예시**: "7월 한국 내 총 판매 대수와 판매 금액은 얼마였습니까?"
 
 **시스템 동작**:
@@ -164,7 +193,7 @@ Interaction 페이지에서 호출 가능한 업무는 **자동차 업계 워크
 
 ---
 
-#### **2. 딜러별 세그먼트 판매 분석**
+#### **3. 딜러별 세그먼트 판매 분석**
 **질문 예시**: "효성 더 클래스를 통해 7월에 주문된 세단의 총 수는 얼마였습니까?"
 
 **시스템 동작**:
@@ -182,7 +211,7 @@ Interaction 페이지에서 호출 가능한 업무는 **자동차 업계 워크
 
 ---
 
-#### **3. 딜러별 배정 현황 분석**
+#### **4. 딜러별 배정 현황 분석**
 **질문 예시**: "한성자동차에 8월에 배정될 SUV의 총 수량은 몇 대입니까?"
 
 **시스템 동작**:
@@ -199,7 +228,7 @@ Interaction 페이지에서 호출 가능한 업무는 **자동차 업계 워크
 
 ---
 
-#### **4. 이메일 전송 기능**
+#### **5. 이메일 전송 기능**
 **질문 예시**: "Bitte senden Sie die folgende E-Mail auf Koreanisch an den Hansung Motors-Vertreter. Wir laden koreanische Automobiljournalisten und VIPs zur Weltpremiere des neuen Autos am 11. nächsten Monats in der Unternehmenszentrale in Deutschland ein. Nutzen Sie den unten stehenden Link, um Ihren Bericht vorzubereiten."
 
 **시스템 동작**:
@@ -216,7 +245,7 @@ Interaction 페이지에서 호출 가능한 업무는 **자동차 업계 워크
 
 ---
 
-#### **5. 일반 질문 처리 기능**
+#### **6. 일반 질문 처리 기능**
 **질문 예시**: 
 - "Wie fülle ich das Kühlmittel in meinem Mercedes E350 nach?" (독일어: 내 Mercedes E350의 냉각수를 어떻게 보충하나요?)
 - "Wie lautet die Modellbezeichnung des leistungsstärksten Fahrzeugs von Mercedes-Benz?" (독일어: Mercedes-Benz의 가장 강력한 차량의 모델명은 무엇인가요?)

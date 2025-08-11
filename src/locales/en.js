@@ -164,13 +164,21 @@ export default {
   
   // Prompt Details
   dealerInfoLookupDetail: "Dealer contact and organizational information lookup",
+  dealerInfoLookupExamples: "Examples:\n• Show me contact information for Hansung Motors\n• Get dealer information for Hyosung The Class\n• Look up KCC Auto contact details",
   dealerContactManagementDetail: "Dealer contact person information management",
+  dealerContactManagementExamples: "Examples:\n• Show me contact person for Hansung Motors\n• Get contact information for Hyosung The Class\n• Look up KCC Auto contact management",
   vehicleModelInfoDetail: "E-Class, C-Class, GLC, EQS, S-Class and other vehicle model information",
+  vehicleModelInfoExamples: "Examples:\n• Show me E-Class (W214) specifications\n• Get electric vehicle model list\n• Look up SUV model pricing information",
   vinTrackingDetail: "Vehicle history management through vehicle identification number",
+  vinTrackingExamples: "Examples:\n• Find vehicle information for VIN001HANSUNG\n• Look up vehicle history for VIN002HYOSUNG\n• Track vehicle with specific VIN number",
   monthlySalesAnalysisDetail: "July 2025 total sales volume and amount analysis in Korea",
+  monthlySalesAnalysisExamples: "Examples:\n• Show me July total sales status in Korea\n• Analyze July sales volume and amount\n• Get monthly sales statistics in Korea",
   dealerSegmentSalesDetail: "Hyosung The Class July sedan sales analysis",
+  dealerSegmentSalesExamples: "Examples:\n• Show me Hyosung The Class sedan sales performance\n• Analyze July sedan sales\n• Get dealer segment sales statistics",
   dealerAllocationStatusDetail: "Hansung Motors August SUV allocation status",
+  dealerAllocationStatusExamples: "Examples:\n• Show me Hansung Motors SUV allocation status\n• Analyze August SUV allocation quantity\n• Look up dealer allocation status",
   emailSendingDetail: "Email sending with Gemini translation feature",
+  emailSendingExamples: "Examples:\n• Send invitation email to Hansung Motors representative\n• Send sales report to Hyosung The Class\n• Send allocation status notification to KCC Auto",
   
   // Analysis Results
   salesAnalysisResult: "Sales Analysis Result",
@@ -279,6 +287,9 @@ export default {
   defaultLLM: "Banya Gemma 27B Tuned",
   
   // Saved Chat Sessions
+  dealerBasicInfo: "Dealer Basic Information",
+  dealerBasicInfoDesc: "You can look up basic company information of major dealers such as Hansung Motors, Hyosung The Class, and KCC Auto.",
+  dealerBasicInfoExample: "Show Hansung Motors company information\nTell me Hyosung The Class organization\nLook up KCC Auto company details",
   dealerInfoLookup: "Dealer Information Lookup",
   dealerInfoLookupDesc: "You can look up contact information and person in charge of major dealers such as Hansung Motors, Hyosung The Class, and KCC Auto.",
   dealerInfoLookupExample: "Show Hansung Motors dealer information\nTell me Hyosung The Class contact\nLook up KCC Auto person in charge",

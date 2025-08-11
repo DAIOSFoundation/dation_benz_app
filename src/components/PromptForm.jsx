@@ -5,6 +5,7 @@ function PromptForm({ onSave, initialData = null }) {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [promptDescription, setPromptDescription] = useState('');
+  const [examples, setExamples] = useState('');
   const [originalId, setOriginalId] = useState(null); // 편집 시 기존 ID 저장
 
   useEffect(() => {
@@ -12,12 +13,14 @@ function PromptForm({ onSave, initialData = null }) {
       setTitle(initialData.title || '');
       setContent(initialData.content || '');
       setPromptDescription(initialData.promptDescription || '');
+      setExamples(initialData.examples || '');
       setOriginalId(initialData.id);
     } else {
       // 새 프롬프트일 경우 필드 초기화
       setTitle('');
       setContent('');
       setPromptDescription('');
+      setExamples('');
       setOriginalId(null);
     }
   }, [initialData]);
@@ -28,12 +31,13 @@ function PromptForm({ onSave, initialData = null }) {
       alert('모든 필드를 채워주세요!');
       return;
     }
-    onSave({ title, content, promptDescription }, originalId);
+    onSave({ title, content, promptDescription, examples }, originalId);
     // 저장 후 폼 초기화 (새 프롬프트 모드일 경우)
     if (!originalId) {
       setTitle('');
       setContent('');
       setPromptDescription('');
+      setExamples('');
     }
   };
 
@@ -71,6 +75,17 @@ function PromptForm({ onSave, initialData = null }) {
           onChange={(e) => setPromptDescription(e.target.value)}
           placeholder="e.g. 딜러사 연락처 및 조직 정보 조회"
           required
+        />
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="examples">Examples</label>
+        <textarea
+          id="examples"
+          value={examples}
+          onChange={(e) => setExamples(e.target.value)}
+          placeholder="e.g. • 한성자동차 연락처 정보 보여줘&#10;• 효성더클래스 담당자 정보 조회&#10;• KCC오토 회사 정보 알려줘"
+          rows="4"
         />
       </div>
 

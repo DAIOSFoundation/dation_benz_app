@@ -24,49 +24,57 @@ function MakePromptsPage() {
       id: 'p1', folderId: 'f1', title: t('dealerInfoLookup'), date: 'Dec 15, 2024', author: 'You',
       content: t('dealerInfoLookupDesc'),
       promptTitle: t('dealerInfoLookupTitle'),
-      promptDescription: t('dealerInfoLookupDetail')
+      promptDescription: t('dealerInfoLookupDetail'),
+      examples: t('dealerInfoLookupExamples')
     },
     {
       id: 'p2', folderId: 'f1', title: t('dealerContactManagement'), date: 'Dec 15, 2024', author: 'You',
       content: t('dealerContactManagementDesc'),
       promptTitle: t('dealerContactManagementTitle'),
-      promptDescription: t('dealerContactManagementDetail')
+      promptDescription: t('dealerContactManagementDetail'),
+      examples: t('dealerContactManagementExamples')
     },
     {
       id: 'p3', folderId: 'f2', title: t('vehicleModelInfo'), date: 'Dec 15, 2024', author: 'You',
       content: t('vehicleModelInfoDesc'),
       promptTitle: t('vehicleModelInfoTitle'),
-      promptDescription: t('vehicleModelInfoDetail')
+      promptDescription: t('vehicleModelInfoDetail'),
+      examples: t('vehicleModelInfoExamples')
     },
     {
       id: 'p4', folderId: 'f2', title: t('vinTracking'), date: 'Dec 15, 2024', author: 'You',
       content: t('vinTrackingDesc'),
       promptTitle: t('vinTrackingTitle'),
-      promptDescription: t('vinTrackingDetail')
+      promptDescription: t('vinTrackingDetail'),
+      examples: t('vinTrackingExamples')
     },
     {
       id: 'p5', folderId: 'f3', title: t('monthlySalesAnalysis'), date: 'Dec 15, 2024', author: 'You',
       content: t('monthlySalesAnalysisDesc'),
       promptTitle: t('monthlySalesAnalysisTitle'),
-      promptDescription: t('monthlySalesAnalysisDetail')
+      promptDescription: t('monthlySalesAnalysisDetail'),
+      examples: t('monthlySalesAnalysisExamples')
     },
     {
       id: 'p6', folderId: 'f3', title: t('dealerSegmentSales'), date: 'Dec 15, 2024', author: 'You',
       content: t('dealerSegmentSalesDesc'),
       promptTitle: t('dealerSegmentSalesTitle'),
-      promptDescription: t('dealerSegmentSalesDetail')
+      promptDescription: t('dealerSegmentSalesDetail'),
+      examples: t('dealerSegmentSalesExamples')
     },
     {
       id: 'p7', folderId: 'f3', title: t('dealerAllocationStatus'), date: 'Dec 15, 2024', author: 'You',
       content: t('dealerAllocationStatusDesc'),
       promptTitle: t('dealerAllocationStatusTitle'),
-      promptDescription: t('dealerAllocationStatusDetail')
+      promptDescription: t('dealerAllocationStatusDetail'),
+      examples: t('dealerAllocationStatusExamples')
     },
     {
       id: 'p8', folderId: 'f4', title: t('emailSending'), date: 'Dec 15, 2024', author: 'You',
       content: t('emailSendingDesc'),
       promptTitle: t('emailSendingTitle'),
-      promptDescription: t('emailSendingDetail')
+      promptDescription: t('emailSendingDetail'),
+      examples: t('emailSendingExamples')
     },
   ], [t]);
 

@@ -44,39 +44,39 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
   const geminiIntentKeywords = useMemo(() => {
     const keywords = {};
     
-    // 각 워크플로우별로 핵심 키워드만 정의
+    // 각 워크플로우별로 고유하고 구체적인 키워드 정의 (통합된 딜러 정보)
     const workflows = [
       { 
         intent: "AUTOMOTIVE_DEALER_INFO_LOOKUP_0", 
-        keywords: ["딜러 정보", "딜러사 정보", "dealer information", "딜러 목록", "dealer list"] 
+        keywords: ["dealer information", "dealer company", "dealer organization", "딜러 정보", "딜러 회사", "딜러 조직", "company info", "회사 정보", "organization details", "조직 상세정보", "contact information", "contact person", "contact details", "contact management", "연락처 정보", "담당자 정보", "담당자 연락처", "연락처 관리", "담당자", "연락처", "contact info", "show me contact", "contact for", "dealer contact", "딜러 연락처"] 
       },
       { 
         intent: "AUTOMOTIVE_VEHICLE_SALES_STATUS_1", 
-        keywords: ["판매 실적", "판매 현황", "sales volume", "sales amount", "total sales", "매출", "판매 통계"] 
+        keywords: ["vehicle sales", "car sales", "차량 판매", "자동차 판매", "sales performance", "판매 실적", "sales volume", "판매 대수", "sales amount", "판매 금액", "매출"] 
       },
       { 
         intent: "AUTOMOTIVE_PRODUCTION_ALLOCATION_STATUS_2", 
-        keywords: ["생산 현황", "배정 계획", "production allocation", "배정 현황", "allocation status"] 
+        keywords: ["production status", "생산 현황", "production allocation", "생산 배정", "allocation plan", "배정 계획", "allocation status", "배정 현황"] 
       },
       { 
         intent: "AUTOMOTIVE_CUSTOMER_WAITLIST_MANAGEMENT_3", 
-        keywords: ["고객 대기", "대기 명단", "waitlist", "구매 대기", "customer waitlist"] 
+        keywords: ["customer waitlist", "고객 대기", "waiting list", "대기 명단", "purchase waitlist", "구매 대기", "waitlist management", "대기 관리"] 
       },
       { 
         intent: "AUTOMOTIVE_MONTHLY_SALES_ANALYSIS_4", 
-        keywords: ["월별 판매", "monthly sales", "7월 판매", "July sales", "총 판매 대수", "total sales volume"] 
+        keywords: ["monthly sales", "월별 판매", "monthly analysis", "월별 분석", "monthly report", "월별 보고서", "total sales volume", "총 판매 대수", "monthly total", "월별 총계"] 
       },
       { 
         intent: "AUTOMOTIVE_DEALER_SEGMENT_SALES_5", 
-        keywords: ["딜러별 세그먼트", "dealer segment", "효성더클래스", "Hyosung The Class", "세단", "sedan", "딜러별 판매"] 
+        keywords: ["dealer segment", "딜러별 세그먼트", "segment sales", "세그먼트 판매", "sedan sales", "세단 판매", "SUV sales", "SUV 판매", "segment analysis", "세그먼트 분석"] 
       },
       { 
         intent: "AUTOMOTIVE_DEALER_ALLOCATION_STATUS_6", 
-        keywords: ["딜러별 배정", "dealer allocation", "한성자동차", "Hansung Motors", "SUV 배정", "SUV allocation"] 
+        keywords: ["dealer allocation", "딜러별 배정", "allocation by dealer", "딜러 배정", "SUV allocation", "SUV 배정", "allocation status", "배정 현황", "allocation analysis", "배정 분석"] 
       },
       { 
         intent: "AUTOMOTIVE_EMAIL_SENDING_7", 
-        keywords: ["이메일 전송", "email sending", "이메일", "email", "초대 이메일", "invitation email"] 
+        keywords: ["email sending", "이메일 전송", "send email", "이메일 보내기", "email communication", "이메일 커뮤니케이션", "invitation email", "초대 이메일", "email notification", "이메일 알림"] 
       }
     ];
     
@@ -397,11 +397,14 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
         );
       } else {
         try {
-          const resource = urlPath.split('/').pop();
-          
-          if (method === 'GET') {
-            addApiCallLog('Data', `관련 Data (${resource}) 를 분석 중입니다.`);
-            let apiResponse;
+                      const resource = urlPath.split('/').pop();
+            console.log('API Resource:', resource);
+            console.log('API URL Path:', urlPath);
+            console.log('API Method:', method);
+            
+            if (method === 'GET') {
+              addApiCallLog('Data', `관련 Data (${resource}) 를 분석 중입니다.`);
+              let apiResponse;
             
             switch (resource) {
               case 'products': apiResponse = await mockApi.getProducts(); break;
@@ -430,6 +433,14 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
                 const allocationYear = extractedEntities?.year || 2025;
                 console.log('Allocation analysis API call with:', { allocationDealership, allocationMonth, allocationYear, extractedEntities });
                 apiResponse = await mockApi.getAllocationByDealership(allocationDealership, allocationMonth, allocationYear); 
+                break;
+              case 'dealer_info': 
+                // 딜러 정보 조회 - 추출된 엔티티와 질문 유형 사용
+                const dealerInfoDealership = extractedEntities?.dealer || 'Hansung Motors';
+                const userQuery = window.lastUserInput || '';
+                const queryType = userQuery.toLowerCase();
+                console.log('Dealer info API call with:', { dealerInfoDealership, queryType, extractedEntities });
+                apiResponse = await mockApi.getDealerInfo(dealerInfoDealership, queryType); 
                 break;
               case 'send_email': 
                 // 이메일 전송은 POST로 처리되므로 여기서는 처리하지 않음
@@ -575,8 +586,15 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
 
 
   useEffect(() => {
+    console.log('useEffect triggered with:', {
+      layoutDataLength: layoutData.length,
+      currentStepIndex,
+      isSendingInteraction
+    });
+    
     if (layoutData.length > 0 && currentStepIndex !== null && currentStepIndex < layoutData.length) {
         const stepToRender = layoutData[currentStepIndex];
+        console.log('Calling fetchAndRenderStep with step:', stepToRender);
         fetchAndRenderStep(stepToRender, currentExtractedEntities);
     } else if (layoutData.length === 0 && currentStepIndex === null && !isSendingInteraction) {
         setCurrentStepContent(null); 
@@ -585,8 +603,13 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
 
 
   const handleInteractionInputSend = async () => {
-    if (interactionInput.trim() === '' || isSendingInteraction || isLoadingStep) return;
+    console.log('handleInteractionInputSend called');
+    if (interactionInput.trim() === '' || isSendingInteraction || isLoadingStep) {
+      console.log('Early return due to empty input or loading state');
+      return;
+    }
 
+    console.log('Starting interaction processing');
     setInteractionChatHistory([]);
     setLlmExplanation("");
     onLlmExplanationChange(""); // NEW: 새 상호작용 시작 시 LLM 설명 초기화
@@ -598,6 +621,7 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
     setCurrentExtractedEntities({}); // 새로운 상호작용 시작 시 엔티티 초기화
     
     const userQuery = interactionInput.trim();
+    console.log('User query:', userQuery);
     setInteractionInput('');
     setIsSendingInteraction(true);
     setLastUserInput(userQuery); // <--- 입력 전송 시에만 lastUserInput 갱신
@@ -611,11 +635,16 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
         const { matched_intent: matchedIntentKey, extracted_entities: extractedEntities } = await getGeminiIntent(userQuery, geminiIntentKeywords, t);
         console.log("Matched Intent Key from Gemini:", matchedIntentKey);
         console.log("Extracted Entities from Gemini:", extractedEntities);
+        console.log("User Query:", userQuery);
+        console.log("Available Intents:", Object.keys(geminiIntentKeywords));
+        console.log("Intent Keywords:", geminiIntentKeywords);
+        console.log("Intent String sent to Gemini:", JSON.stringify(geminiIntentKeywords, null, 2));
         addApiCallLog('Gemma', `LLM 의도 분석 완료: ${matchedIntentKey}`); // 기존 Gemini 로그는 유지
 
         let llmResponseExplanation = "";
         let initialStep = null;
         let selectedLayoutData = null;
+        let stepIdFromIntent = null; // 변수를 상단에서 선언
 
         if (matchedIntentKey === "GENERAL_QUESTION") {
             // 일반 질문 처리
@@ -625,22 +654,31 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
             setLayoutData([]);
             setCurrentStepIndex(null);
         } else if (matchedIntentKey && matchedIntentKey !== "NONE" && matchedIntentKey !== "ERROR") {
+            console.log('Processing matched intent:', matchedIntentKey);
             const parts = matchedIntentKey.split('_');
-            const stepIdFromIntent = parseInt(parts[parts.length - 1]);
+            stepIdFromIntent = parseInt(parts[parts.length - 1]); // let으로 선언된 변수에 할당
+            console.log('Extracted step ID from intent:', stepIdFromIntent);
             
             // 자동차 업계 워크플로우 처리
             if (matchedIntentKey.startsWith("AUTOMOTIVE_")) {
+                console.log('Processing AUTOMOTIVE intent');
                 const dynamicLayoutData = getFixedLayoutData(t);
+                console.log('Dynamic layout data:', dynamicLayoutData);
                 selectedLayoutData = dynamicLayoutData;
                 initialStep = dynamicLayoutData.find(s => s.step_id === stepIdFromIntent);
+                console.log('Found initial step:', initialStep);
                 if (initialStep) {
                     llmResponseExplanation = initialStep.answer?.[0] || initialStep.description || t('workflowStart');
                 } else {
                     llmResponseExplanation = t('workflowNotFound');
                 }
+            } else {
+                console.log('Non-AUTOMOTIVE intent, setting sorry message');
+                llmResponseExplanation = t('sorryNotUnderstood');
             }
 
         } else {
+            console.log('No valid intent found, setting sorry message');
             llmResponseExplanation = t('sorryNotUnderstood');
         }
 
@@ -651,16 +689,27 @@ function InteractionPage({ addApiCallLog, clearSourceLogs, selectedLLM, onLlmExp
         onLlmExplanationChange(llmResponseExplanation); // NEW: LLM 설명 변경 시 상위 컴포넌트로 전달
 
         if (initialStep && selectedLayoutData) {
+            console.log('Setting layout data and step index:', {
+                initialStep,
+                selectedLayoutDataLength: selectedLayoutData.length,
+                stepIdFromIntent: stepIdFromIntent || 'N/A'
+            });
             setLayoutData(selectedLayoutData);
             setCurrentExtractedEntities(extractedEntities); // 추출된 엔티티 상태 저장
             const initialIdx = selectedLayoutData.findIndex(s => s.step_id === initialStep.step_id);
+            console.log('Found initial index:', initialIdx);
             if (initialIdx !== -1) {
+                console.log('Setting current step index to:', initialIdx);
                 setCurrentStepIndex(initialIdx); // useEffect가 이 변경을 감지하여 fetchAndRenderStep 호출
             } else {
                 setError(`시작 스텝 ID ${initialStep.step_id}를 layoutData에서 찾을 수 없습니다.`);
                 handleWorkflowComplete("LLM 응답 오류: 워크플로우를 시작할 수 없습니다.");
             }
         } else {
+            console.log('No initial step or layout data found:', {
+                initialStep,
+                selectedLayoutData
+            });
             setLayoutData([]);
             setCurrentStepIndex(null);
         }

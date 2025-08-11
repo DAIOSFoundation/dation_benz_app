@@ -8,16 +8,17 @@
         "columns": [
           {"column_name": "dealership_id", "type": "INTEGER", "is_primary_key": true, "description": "Dealership unique ID"},
           {"column_name": "dealership_name", "type": "VARCHAR", "description": "Dealership name"},
+          {"column_name": "dealership_name_kr", "type": "VARCHAR", "description": "Dealership name in Korean"},
           {"column_name": "location", "type": "VARCHAR", "description": "Dealership location"},
           {"column_name": "contact_person", "type": "VARCHAR", "description": "Dealership contact person name"},
           {"column_name": "contact_email", "type": "VARCHAR", "description": "Dealership contact person email"}
         ],
         "data": [
-          {"dealership_id": 1, "dealership_name": "Hansung Motors", "location": "Seoul, South Korea", "contact_person": "Kim Min-jun", "contact_email": "minjun.kim@hansung.co.kr"},
-          {"dealership_id": 2, "dealership_name": "Hyosung The Class", "location": "Seoul, South Korea", "contact_person": "Lee Seo-yeon", "contact_email": "seoyeon.lee@hyosungtheclass.co.kr"},
-          {"dealership_id": 3, "dealership_name": "KCC Auto", "location": "Seoul, South Korea", "contact_person": "Park Ji-hoon", "contact_email": "jihoon.park@kccauto.co.kr"},
-          {"dealership_id": 4, "dealership_name": "The Star Motors", "location": "Busan, South Korea", "contact_person": "Choi Eun-ji", "contact_email": "eunji.choi@thestarmotors.co.kr"},
-          {"dealership_id": 5, "dealership_name": "Shinsegae Motors", "location": "Daegu, South Korea", "contact_person": "Jung Woo-jin", "contact_email": "woojin.jung@shinsegaemotors.co.kr"}
+          {"dealership_id": 1, "dealership_name": "Hansung Motors", "dealership_name_kr": "한성자동차", "location": "Seoul, South Korea", "contact_person": "Kim Min-jun", "contact_email": "minjun.kim@hansung.co.kr"},
+          {"dealership_id": 2, "dealership_name": "Hyosung The Class", "dealership_name_kr": "효성더클래스", "location": "Seoul, South Korea", "contact_person": "Lee Seo-yeon", "contact_email": "seoyeon.lee@hyosungtheclass.co.kr"},
+          {"dealership_id": 3, "dealership_name": "KCC Auto", "dealership_name_kr": "KCC오토", "location": "Seoul, South Korea", "contact_person": "Park Ji-hoon", "contact_email": "jihoon.park@kccauto.co.kr"},
+          {"dealership_id": 4, "dealership_name": "The Star Motors", "dealership_name_kr": "더스타모터스", "location": "Busan, South Korea", "contact_person": "Choi Eun-ji", "contact_email": "eunji.choi@thestarmotors.co.kr"},
+          {"dealership_id": 5, "dealership_name": "Shinsegae Motors", "dealership_name_kr": "신세계모터스", "location": "Daegu, South Korea", "contact_person": "Jung Woo-jin", "contact_email": "woojin.jung@shinsegaemotors.co.kr"}
         ]
       },
       {

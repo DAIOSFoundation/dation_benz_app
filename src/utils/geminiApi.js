@@ -64,6 +64,12 @@ ${t('analysisGuidelines')}:
 4. ${t('analysisGuideline4')}
 5. ${t('analysisGuideline5')}
 
+**CRITICAL PRIORITY RULES**:
+1. ALL dealer-related questions (including contact information) should be classified as AUTOMOTIVE_DEALER_INFO_LOOKUP_0
+2. This includes: "dealer information", "contact information", "contact person", "dealer company", "연락처 정보", "담당자 정보", etc.
+3. DO NOT use old intent keys like AUTOMOTIVE_DEALER_CONTACT_MANAGEMENT_1 or AUTOMOTIVE_DEALER_ALLOCATION_STATUS_6.
+4. ONLY use the intent keys provided in the possibleIntents list above.
+
 ${t('jsonResponseFormat')}:
 {
   "matched_intent": "INTENT_KEY",

@@ -152,7 +152,67 @@
 
 ---
 
-### ✅ **Scenario 6: General Question Processing**
+### ✅ **Scenario 6: Dealer Information Lookup (Integrated)**
+
+**Test Questions**: 
+1. "Show me contact information for Hansung Motors"
+2. "한성자동차 딜러 정보를 보여줘"
+3. "효성더클래스 연락처 정보 알려줘"
+4. "KCC오토 담당자 정보 조회"
+5. "Show me dealer information for The Star Motors"
+
+**Expected Intent**: `AUTOMOTIVE_DEALER_INFO_LOOKUP_0`
+
+**Feature Verification**:
+- ✅ **Intent Classification**: Correctly identified as dealer information lookup
+- ✅ **API Integration**: `getDealerInfo()` API call working with query type detection
+- ✅ **Data Filtering**: Specific dealership information filtering
+- ✅ **Table Display**: Dealer information displayed in formatted table
+- ✅ **Multilingual Support**: Korean and English questions supported
+- ✅ **Entity Extraction**: Dealer name extraction working
+- ✅ **Bilingual Dealer Names**: Korean and English dealer name mapping supported
+- ✅ **Dynamic Query Type**: Contact info vs. full dealer info based on question type
+
+**Processing Flow**:
+1. **Input**: User asks for dealer information (contact info or full info)
+2. **Intent Analysis**: Classified as `AUTOMOTIVE_DEALER_INFO_LOOKUP_0`
+3. **Entity Extraction**: Dealer name extracted from question
+4. **Query Type Detection**: Determine if user wants contact info or full dealer info
+5. **API Call**: `getDealerInfo(dealershipName, queryType)` called
+6. **Data Processing**: Filter dealer information based on query type
+7. **Display**: Show dealer information table with contact details
+
+**Sample Response Structure**:
+```markdown
+# Dealer Information Lookup
+
+## Hansung Motors Contact Information
+
+| Name | Position | Department | Email | Phone | Address |
+|------|----------|------------|-------|-------|---------|
+| Lee Dong-woo | General Manager | Management | dw.lee@hansung.co.kr | +82-2-1234-5678 | Seoul, South Korea |
+| Choi So-ra | Head of Sales | Sales | sr.choi@hansung.co.kr | +82-2-1234-5679 | Seoul, South Korea |
+
+## Supported Dealer Names
+- **한성자동차** ↔ Hansung Motors
+- **효성더클래스** ↔ Hyosung The Class
+- **KCC오토** ↔ KCC Auto
+- **더스타모터스** ↔ The Star Motors
+- **신세계모터스** ↔ Shinsegae Motors
+```
+
+**Technical Implementation**:
+- ✅ **API Function**: `getDealerInfo()` implemented in mockApi.js with query type detection
+- ✅ **Data Source**: Uses dealer_info.json Contacts table and benz_CRM.json Dealerships table
+- ✅ **Filtering Logic**: Filters by dealership_id and query type (contact vs. full info)
+- ✅ **Table Rendering**: Dealer information displayed in formatted table
+- ✅ **Error Handling**: Graceful handling of missing data
+- ✅ **Bilingual Mapping**: Korean-English dealer name mapping in dealershipMap
+- ✅ **Database Schema**: Added dealership_name_kr field for Korean dealer names
+
+---
+
+### ✅ **Scenario 7: General Question Processing**
 
 **Test Questions**: 
 1. "Wie fülle ich das Kühlmittel in meinem Mercedes E350 nach?" (German: How do I fill the coolant in my Mercedes E350?)

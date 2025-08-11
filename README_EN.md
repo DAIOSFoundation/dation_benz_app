@@ -146,7 +146,34 @@ Businesses that can be called from the Interaction page are focused on **Automot
 
 ### 🎯 **Implemented Feature Call Scenarios**
 
-#### **1. Monthly Sales Analysis Feature**
+#### **1. Dealer Information Lookup Feature**
+**Question Example**: "Show me Hansung Motors dealer information"
+
+**System Operation**:
+1. User enters question in Interaction page
+2. Gemini AI analyzes the question and matches `AUTOMOTIVE_DEALER_INFO_LOOKUP_0` intent
+3. Display dealer information from dealer_info.json
+4. Show dealer contact details and organizational information
+
+**Supported Keywords**: "dealer information", "dealer company information", "Hansung Motors", "Hyosung The Class", "KCC Auto"
+
+---
+
+#### **2. Dealer Contact Management Feature**
+**Question Example**: "Show me dealer contact management for Hansung Motors"
+
+**System Operation**:
+1. User enters question in Interaction page
+2. Gemini AI analyzes the question and matches `AUTOMOTIVE_DEALER_CONTACT_MANAGEMENT_8` intent
+3. `getDealerContacts('Hansung Motors')` API call
+4. Filter contacts for specific dealership
+5. Display contact information table with names, positions, emails, phones
+
+**Supported Keywords**: "dealer contact", "contact management", "담당자 정보", "연락처 관리"
+
+---
+
+#### **3. Monthly Sales Analysis Feature**
 **Question Example**: "What were the total sales volume and sales amount in Korea for July?"
 
 **System Operation**:

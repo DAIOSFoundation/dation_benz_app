@@ -87,11 +87,15 @@ const getFixedLayoutData = (t) => [
   {
     "process_name": t('dealerInformationLookup'),
     "step_id": 0,
-    "step_name": "Dealer List Lookup",
+    "step_name": "Dealer Information Lookup",
     "description": t('dealerInformationLookupDesc'),
-    "question": ["딜러 정보", "딜러사 정보", "한성자동차", "효성더클래스", "KCC오토", "연락처", "담당자"],
+    "question": ["딜러 정보", "딜러 연락처", "담당자 정보", "contact information", "연락처 정보", "딜러 회사", "딜러 조직"],
     "recipients": ["김민준", "이서연", "박지훈", "최은지", "정우진"],
     "template": "딜러 정보 조회 요청",
+    "api": {
+      "url": "/api/dealer_info",
+      "method": "GET"
+    },
     "answer": [t('dealerInformationLookupDesc')]
   },
   {
@@ -296,6 +300,16 @@ const getDealershipNameFromId = (id) => {
   if (dealers) {
     const dealer = dealers.data.find(d => d.dealership_id === id);
     return dealer ? dealer.dealership_name : 'Unknown';
+  }
+  return 'Unknown';
+};
+
+// 한글 딜러명을 지원하는 함수
+const getDealershipNameKrFromId = (id) => {
+  const dealers = benzCrmData.database_schema.tables.find(table => table.table_name === 'Dealerships');
+  if (dealers) {
+    const dealer = dealers.data.find(d => d.dealership_id === id);
+    return dealer ? dealer.dealership_name_kr : 'Unknown';
   }
   return 'Unknown';
 };
@@ -750,6 +764,80 @@ const mockApi = {
       recipient.이메일.toLowerCase().includes(searchTerm.toLowerCase())
     );
     return { success: true, data: results };
+  },
+
+  getDealerInfo: async (dealershipName = 'Hansung Motors', queryType = 'all') => {
+    console.log('getDealerInfo called with dealershipName:', dealershipName, 'queryType:', queryType);
+    
+    // dealer_info.json에서 데이터 가져오기
+    const dealerInfo = await import('/public/data/dealer_info.json');
+    console.log('dealerInfo loaded:', dealerInfo.default);
+    
+    const contactsTable = dealerInfo.default.tables.find(table => table.table_name === 'Contacts');
+    console.log('contactsTable found:', contactsTable);
+    
+    if (!contactsTable || !contactsTable.data) {
+      console.log('No contacts table or data found');
+      return { success: false, message: 'Dealer information data not found.' };
+    }
+
+    // 딜러 ID 매핑 (영어명과 한글명 모두 지원)
+    const dealershipMap = {
+      'Hansung Motors': 1,
+      '한성자동차': 1,
+      'Hyosung The Class': 2,
+      '효성더클래스': 2,
+      'KCC Auto': 3,
+      'KCC오토': 3,
+      'The Star Motors': 4,
+      '더스타모터스': 4,
+      'Shinsegae Motors': 5,
+      '신세계모터스': 5
+    };
+    
+    const targetDealershipId = dealershipMap[dealershipName];
+    
+    // 질문 유형에 따라 다른 데이터 반환
+    if (queryType === 'contact' || queryType.includes('contact') || queryType.includes('연락처') || queryType.includes('담당자')) {
+      // 연락처 정보만 반환
+      let filteredContacts = contactsTable.data;
+      if (targetDealershipId) {
+        filteredContacts = contactsTable.data.filter(contact => 
+          contact.dealership_id === targetDealershipId
+        );
+      }
+      
+      const contactsWithDealership = filteredContacts.map(contact => ({
+        ...contact,
+        dealership_name: getDealershipNameFromId(contact.dealership_id),
+        dealership_name_kr: getDealershipNameKrFromId(contact.dealership_id)
+      }));
+
+      return {
+        success: true,
+        data: contactsWithDealership,
+        message: `Found ${contactsWithDealership.length} contacts for ${dealershipName}.`,
+        type: 'contact'
+      };
+    } else {
+      // 전체 딜러 정보 반환 (기본 정보 + 연락처)
+      const allContacts = contactsTable.data.map(contact => ({
+        ...contact,
+        dealership_name: getDealershipNameFromId(contact.dealership_id)
+      }));
+
+      return {
+        success: true,
+        data: allContacts,
+        message: `Found complete dealer information for ${dealershipName}.`,
+        type: 'complete'
+      };
+    }
+  },
+
+  getDealerContacts: async (dealershipName = 'Hansung Motors') => {
+    // 기존 함수는 호환성을 위해 유지
+    return await mockApi.getDealerInfo(dealershipName, 'contact');
   }
 };
 

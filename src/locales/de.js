@@ -164,13 +164,21 @@ export default {
   
   // Prompt Details
   dealerInfoLookupDetail: "Händlerkontakt- und Organisationsinformationssuche",
+  dealerInfoLookupExamples: "Beispiele:\n• Kontaktinformationen für Hansung Motors anzeigen\n• Händlerinformationen für Hyosung The Class abrufen\n• KCC Auto Kontaktdaten nachschlagen",
   dealerContactManagementDetail: "Händlerkontaktpersoneninformationsverwaltung",
+  dealerContactManagementExamples: "Beispiele:\n• Kontaktperson für Hansung Motors anzeigen\n• Kontaktinformationen für Hyosung The Class abrufen\n• KCC Auto Kontaktverwaltung nachschlagen",
   vehicleModelInfoDetail: "E-Klasse, C-Klasse, GLC, EQS, S-Klasse und andere Fahrzeugmodellinformationen",
+  vehicleModelInfoExamples: "Beispiele:\n• E-Klasse (W214) Spezifikationen anzeigen\n• Elektrofahrzeugmodellliste abrufen\n• SUV-Modellpreisinformationen nachschlagen",
   vinTrackingDetail: "Fahrzeughistorieverwaltung über Fahrgestellnummer",
+  vinTrackingExamples: "Beispiele:\n• Fahrzeuginformationen für VIN001HANSUNG finden\n• Fahrzeughistorie für VIN002HYOSUNG nachschlagen\n• Fahrzeug mit spezifischer VIN-Nummer verfolgen",
   monthlySalesAnalysisDetail: "Juli 2025 Gesamtverkaufsvolumen und Verkaufsbetrag-Analyse in Korea",
+  monthlySalesAnalysisExamples: "Beispiele:\n• Juli Gesamtverkaufsstatus in Korea anzeigen\n• Juli Verkaufsvolumen und Betrag analysieren\n• Monatliche Verkaufsstatistiken in Korea abrufen",
   dealerSegmentSalesDetail: "Hyosung The Class Juli Limousinenverkaufsanalyse",
+  dealerSegmentSalesExamples: "Beispiele:\n• Hyosung The Class Limousinenverkaufsleistung anzeigen\n• Juli Limousinenverkäufe analysieren\n• Händler-Segmentverkaufsstatistiken abrufen",
   dealerAllocationStatusDetail: "Hansung Motors August SUV-Zuweisungsstatus",
+  dealerAllocationStatusExamples: "Beispiele:\n• Hansung Motors SUV-Zuweisungsstatus anzeigen\n• August SUV-Zuweisungsmenge analysieren\n• Händler-Zuweisungsstatus nachschlagen",
   emailSendingDetail: "E-Mail-Versand mit Gemini-Übersetzungsfunktion",
+  emailSendingExamples: "Beispiele:\n• Einladungs-E-Mail an Hansung Motors Vertreter senden\n• Verkaufsbericht an Hyosung The Class senden\n• Zuweisungsstatus-Benachrichtigung an KCC Auto senden",
   
   // Analysis Results
   salesAnalysisResult: "Verkaufsanalyseergebnis",

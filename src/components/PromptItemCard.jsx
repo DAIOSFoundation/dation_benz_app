@@ -9,6 +9,12 @@ function PromptItemCard({ prompt, onSelect, isSelected, calendarIcon, personIcon
     >
       <h3>{prompt.title}</h3>
       <p>{prompt.promptDescription}</p> {/* 프롬프트 설명 표시 */}
+      {prompt.examples && (
+        <div className="makeprompts-prompt-examples">
+          <strong>Examples:</strong>
+          <pre>{prompt.examples}</pre>
+        </div>
+      )}
       <div className="makeprompts-prompt-card-meta">
         <img src={calendarIcon} alt="Date" />
         <span>{prompt.date}</span>
